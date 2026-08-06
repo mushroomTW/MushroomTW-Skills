@@ -48,7 +48,8 @@ locate `scripts/validate_bug_audit.py` relative to the `references/` file you ar
 rather than guessing a path.
 
 **Stay read-only.** Claude Code gives you `Edit` and `Write`, which the audit must not use on project
-files. Write exactly the two artifacts named in SKILL.md and nothing else. Restrict `Bash` and
+files. Write exactly the two artifacts named in SKILL.md and nothing else — both go into the
+repository's `.docs/` directory, created when it is missing. Restrict `Bash` and
 `PowerShell` to checks the repository already configures — a test, build, lint, type-check, or
 analyzer command that exists in its manifests or CI. Installing a tool, or writing a scratch
 reproduction script anywhere including the scratchpad, is out of scope for this skill.

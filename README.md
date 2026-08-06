@@ -40,6 +40,11 @@ Rapid answers "are there bugs I should know about, quickly?" Comprehensive answe
 this codebase, and what is the number?" Rapid never assigns a score — reporting one from partial
 coverage would misrepresent how much was actually examined.
 
+In Comprehensive mode the skill estimates read cost from the in-scope file count and execution
+budget; when the whole scope cannot be read within budget it must either partition across agents or
+narrow to core and highest-risk paths, mark the report provisional, and list the unread files in
+`limitations`.
+
 ## Execution modes
 
 - **Standard** — the primary agent performs the whole audit.
@@ -141,8 +146,10 @@ a short summary in chat. It does not paste the artifacts into the conversation.
 
 | Mode | Report | Evidence |
 | --- | --- | --- |
-| Rapid | `repository-bug-audit-rapid-report.md` | `repository-bug-audit-rapid-report.evidence.json` |
-| Comprehensive | `repository-bug-audit-report.md` | `repository-bug-audit-report.evidence.json` |
+| Rapid | `.docs/repository-bug-audit-rapid-report.md` | `.docs/repository-bug-audit-rapid-report.evidence.json` |
+| Comprehensive | `.docs/repository-bug-audit-report.md` | `.docs/repository-bug-audit-report.evidence.json` |
+
+Both artifacts are written to the audited repository's `.docs/` directory, which is created when it does not exist.
 
 If either default path already exists, both basenames get the same local timestamp — for example
 `repository-bug-audit-report-20260806-153000.md` and its matching `.evidence.json`. Existing files

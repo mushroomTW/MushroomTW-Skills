@@ -93,14 +93,14 @@ Read the [evidence protocol](references/evidence-and-reporting.md) completely be
 
 ## Artifact names
 
-Create exactly one paired report and evidence file:
+Create exactly one paired report and evidence file in the repository `.docs/` directory, creating the directory when it does not exist:
 
 | Mode | Report | Evidence |
 | --- | --- | --- |
-| Rapid | `repository-bug-audit-rapid-report.md` | `repository-bug-audit-rapid-report.evidence.json` |
-| Comprehensive | `repository-bug-audit-report.md` | `repository-bug-audit-report.evidence.json` |
+| Rapid | `.docs/repository-bug-audit-rapid-report.md` | `.docs/repository-bug-audit-rapid-report.evidence.json` |
+| Comprehensive | `.docs/repository-bug-audit-report.md` | `.docs/repository-bug-audit-report.evidence.json` |
 
-If either default path already exists, add the same local timestamp to both basenames, for example `repository-bug-audit-report-YYYYMMDD-HHMMSS.md` and `repository-bug-audit-report-YYYYMMDD-HHMMSS.evidence.json`. Never overwrite either existing file.
+If either default path already exists, add the same local timestamp to both basenames, for example `repository-bug-audit-report-YYYYMMDD-HHMMSS.md` and `repository-bug-audit-report-YYYYMMDD-HHMMSS.evidence.json`. Never overwrite either existing file. Creating `.docs/` is part of producing the two artifacts and does not relax the read-only rule.
 
 Do not put secrets, complete source files, or unnecessary raw command output in evidence. Keep Markdown concise and do not duplicate evidence JSON as an appendix.
 

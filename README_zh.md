@@ -37,6 +37,10 @@ Rapid 回答的是「快速看一下，有沒有我該知道的缺陷？」；Co
 健康程度如何，分數是多少？」。Rapid 永遠不評分 —— 用不完整的覆蓋率給出分數，會誤導別人以為
 檢查得比實際更徹底。
 
+Comprehensive 模式會依納入範圍的檔案數與執行預算估算閱讀成本；當整個範圍無法在預算內讀完時，
+它必須選擇以多代理分工，或縮小到核心與最高風險路徑、將報告標記為 Provisional，並在
+`limitations` 中列出未讀檔案。
+
 ## 執行模式
 
 - **Standard（單一代理）** —— 由主代理獨立完成整份稽核。
@@ -130,8 +134,10 @@ cp -r skills/repository-bug-audit ~/.claude/skills/repository-bug-audit
 
 | 模式 | 報告 | 佐證 |
 | --- | --- | --- |
-| Rapid | `repository-bug-audit-rapid-report.md` | `repository-bug-audit-rapid-report.evidence.json` |
-| Comprehensive | `repository-bug-audit-report.md` | `repository-bug-audit-report.evidence.json` |
+| Rapid | `.docs/repository-bug-audit-rapid-report.md` | `.docs/repository-bug-audit-rapid-report.evidence.json` |
+| Comprehensive | `.docs/repository-bug-audit-report.md` | `.docs/repository-bug-audit-report.evidence.json` |
+
+兩份產出都會寫入被稽核儲存庫的 `.docs/` 目錄；若該目錄不存在則會建立。
 
 若預設路徑已存在，兩個檔名會加上**相同**的本地時間戳記，例如
 `repository-bug-audit-report-20260806-153000.md` 與對應的 `.evidence.json`。既有檔案永遠不會被
