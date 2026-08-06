@@ -75,4 +75,4 @@ Use the shared findings format. All three finding types are allowed.
 List no more than five conclusion-changing gaps or unverified assumptions.
 ```
 
-Before submission, confirm every local Markdown link resolves from the report directory.
+Before submission, confirm every local Markdown link resolves from the report directory. Because the report lives in `.docs/`, link to repository-root files with a `../` prefix, for example `[src/main.py](../src/main.py:1)`.
