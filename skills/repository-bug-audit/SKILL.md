@@ -1,7 +1,7 @@
 ---
 name: repository-bug-audit
 description: Perform evidence-driven, repository-wide bug discovery and engineering risk audits in either unscored Rapid mode or Comprehensive mode with a risk-weighted 0-100 quality score. Use when the user explicitly requests a whole-repository bug hunt, repository-wide risk review, overall engineering quality score, or complete technical-debt assessment. Do not use for a single file or module, a PR or diff review, one known bug or vulnerability, a localized performance issue, general coding questions, or a review of this skill itself.
-allowed-tools: Read, Grep, Glob
+allowed-tools: Read, Grep, Glob, Bash, Write, Task
 ---
 
 # Repository Bug Audit
