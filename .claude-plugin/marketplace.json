@@ -1,0 +1,14 @@
+{
+  "name": "bug-audit-tools",
+  "owner": {
+    "name": "mushroomTW"
+  },
+  "description": "Repository-wide bug discovery and engineering quality auditing.",
+  "plugins": [
+    {
+      "name": "repository-bug-audit",
+      "source": "./",
+      "description": "Evidence-driven repository-wide bug discovery and engineering risk audit, in unscored Rapid mode or Comprehensive mode with a risk-weighted 0-100 quality score."
+    }
+  ]
+}

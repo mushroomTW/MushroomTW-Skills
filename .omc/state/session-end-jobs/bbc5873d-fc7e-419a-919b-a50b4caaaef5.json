@@ -1,0 +1,262 @@
+{
+  "version": 1,
+  "jobId": "002ab8e5-48eb-4628-bc5c-fce0a56b41bc",
+  "sessionId": "bbc5873d-fc7e-419a-919b-a50b4caaaef5",
+  "scopeKey": "7ab0c79565348d573671e52c590783e1c622dbb339d640bbb036cc869457cd5d",
+  "revision": 2,
+  "createdAt": "2026-08-06T08:22:33.229Z",
+  "updatedAt": "2026-08-06T08:22:34.028Z",
+  "producerGraceExpiresAt": "2026-08-06T08:23:03.229Z",
+  "bestEffortDeadlineAt": "2026-08-06T08:23:54.229Z",
+  "producers": {
+    "core": {
+      "state": "sealed",
+      "intentKey": "f7b93b1a5c8660a19f3cc4d1c55da72cc2c001c7b05dd79ac76bda4e3a3c070e",
+      "payloadDigest": "f7b93b1a5c8660a19f3cc4d1c55da72cc2c001c7b05dd79ac76bda4e3a3c070e",
+      "sealedAt": "2026-08-06T08:22:34.028Z",
+      "sealedBy": "foreground"
+    },
+    "wiki": {
+      "state": "no-op",
+      "sealedAt": "2026-08-06T08:22:33.229Z",
+      "sealedBy": "wiki-producer"
+    }
+  },
+  "actions": {
+    "foreground-cleanup": {
+      "class": "required",
+      "phase": "deferred-required",
+      "status": "completed",
+      "attempts": 0,
+      "idempotencyKey": "febf6dba2f2536433960a07f7cedce72e946b43ced0896570df80f017b8914d2",
+      "payload": {
+        "transcriptPath": "C:\\Users\\mushroomMaster\\.claude\\projects\\C--Users-mushroomMaster-Documents-repository-bug-audit\\bbc5873d-fc7e-419a-919b-a50b4caaaef5.jsonl",
+        "cwd": "C:\\Users\\mushroomMaster\\Documents\\repository-bug-audit",
+        "reason": "other",
+        "input": {
+          "session_id": "bbc5873d-fc7e-419a-919b-a50b4caaaef5",
+          "transcript_path": "C:\\Users\\mushroomMaster\\.claude\\projects\\C--Users-mushroomMaster-Documents-repository-bug-audit\\bbc5873d-fc7e-419a-919b-a50b4caaaef5.jsonl",
+          "cwd": "C:\\Users\\mushroomMaster\\Documents\\repository-bug-audit",
+          "hook_event_name": "SessionEnd",
+          "reason": "other"
+        },
+        "metrics": {
+          "session_id": "bbc5873d-fc7e-419a-919b-a50b4caaaef5",
+          "ended_at": "2026-08-06T08:22:33.260Z",
+          "reason": "other",
+          "agents_spawned": 0,
+          "agents_completed": 0,
+          "modes_used": []
+        },
+        "initialTeamNames": [],
+        "openClawEnabled": false,
+        "openClawRouting": {},
+        "foregroundResult": {
+          "removedTransientFiles": 0,
+          "completedAt": "2026-08-06T08:22:34.027Z"
+        }
+      },
+      "budgetMs": 9000,
+      "completedAt": "2026-08-06T08:22:34.028Z",
+      "lastOutcomeCode": "completed"
+    },
+    "wiki-capture": {
+      "class": "required",
+      "phase": "deferred-required",
+      "status": "completed",
+      "attempts": 0,
+      "idempotencyKey": "1719cd1ef5b51e0269b78c4cb8c9308c9c1f7b82fd1c067fc034c060f23863f5",
+      "payload": {},
+      "budgetMs": 9000,
+      "completedAt": "2026-08-06T08:22:33.229Z"
+    },
+    "team-cleanup": {
+      "class": "required",
+      "phase": "deferred-required",
+      "status": "pending",
+      "attempts": 0,
+      "idempotencyKey": "cee6ac31df545408e1e822247ac249b3f8182a98a5fe8e448ae3b251e55bdee1",
+      "payload": {
+        "transcriptPath": "C:\\Users\\mushroomMaster\\.claude\\projects\\C--Users-mushroomMaster-Documents-repository-bug-audit\\bbc5873d-fc7e-419a-919b-a50b4caaaef5.jsonl",
+        "cwd": "C:\\Users\\mushroomMaster\\Documents\\repository-bug-audit",
+        "reason": "other",
+        "input": {
+          "session_id": "bbc5873d-fc7e-419a-919b-a50b4caaaef5",
+          "transcript_path": "C:\\Users\\mushroomMaster\\.claude\\projects\\C--Users-mushroomMaster-Documents-repository-bug-audit\\bbc5873d-fc7e-419a-919b-a50b4caaaef5.jsonl",
+          "cwd": "C:\\Users\\mushroomMaster\\Documents\\repository-bug-audit",
+          "hook_event_name": "SessionEnd",
+          "reason": "other"
+        },
+        "metrics": {
+          "session_id": "bbc5873d-fc7e-419a-919b-a50b4caaaef5",
+          "ended_at": "2026-08-06T08:22:33.260Z",
+          "reason": "other",
+          "agents_spawned": 0,
+          "agents_completed": 0,
+          "modes_used": []
+        },
+        "initialTeamNames": [],
+        "openClawEnabled": false,
+        "openClawRouting": {}
+      },
+      "budgetMs": 9000
+    },
+    "python-cleanup": {
+      "class": "required",
+      "phase": "deferred-required",
+      "status": "pending",
+      "attempts": 0,
+      "idempotencyKey": "1f1370c4ac056606059d517e2f106b602d8cbcb04587b3fcc5f3b9f89e649cd0",
+      "payload": {
+        "transcriptPath": "C:\\Users\\mushroomMaster\\.claude\\projects\\C--Users-mushroomMaster-Documents-repository-bug-audit\\bbc5873d-fc7e-419a-919b-a50b4caaaef5.jsonl",
+        "cwd": "C:\\Users\\mushroomMaster\\Documents\\repository-bug-audit",
+        "reason": "other",
+        "input": {
+          "session_id": "bbc5873d-fc7e-419a-919b-a50b4caaaef5",
+          "transcript_path": "C:\\Users\\mushroomMaster\\.claude\\projects\\C--Users-mushroomMaster-Documents-repository-bug-audit\\bbc5873d-fc7e-419a-919b-a50b4caaaef5.jsonl",
+          "cwd": "C:\\Users\\mushroomMaster\\Documents\\repository-bug-audit",
+          "hook_event_name": "SessionEnd",
+          "reason": "other"
+        },
+        "metrics": {
+          "session_id": "bbc5873d-fc7e-419a-919b-a50b4caaaef5",
+          "ended_at": "2026-08-06T08:22:33.260Z",
+          "reason": "other",
+          "agents_spawned": 0,
+          "agents_completed": 0,
+          "modes_used": []
+        },
+        "initialTeamNames": [],
+        "openClawEnabled": false,
+        "openClawRouting": {}
+      },
+      "budgetMs": 9000
+    },
+    "reply-cleanup": {
+      "class": "required",
+      "phase": "deferred-required",
+      "status": "pending",
+      "attempts": 0,
+      "idempotencyKey": "0b3a8b47c28b26d56aca004d4f572b96c118f16819c0d35162418816f9a5420a",
+      "payload": {
+        "transcriptPath": "C:\\Users\\mushroomMaster\\.claude\\projects\\C--Users-mushroomMaster-Documents-repository-bug-audit\\bbc5873d-fc7e-419a-919b-a50b4caaaef5.jsonl",
+        "cwd": "C:\\Users\\mushroomMaster\\Documents\\repository-bug-audit",
+        "reason": "other",
+        "input": {
+          "session_id": "bbc5873d-fc7e-419a-919b-a50b4caaaef5",
+          "transcript_path": "C:\\Users\\mushroomMaster\\.claude\\projects\\C--Users-mushroomMaster-Documents-repository-bug-audit\\bbc5873d-fc7e-419a-919b-a50b4caaaef5.jsonl",
+          "cwd": "C:\\Users\\mushroomMaster\\Documents\\repository-bug-audit",
+          "hook_event_name": "SessionEnd",
+          "reason": "other"
+        },
+        "metrics": {
+          "session_id": "bbc5873d-fc7e-419a-919b-a50b4caaaef5",
+          "ended_at": "2026-08-06T08:22:33.260Z",
+          "reason": "other",
+          "agents_spawned": 0,
+          "agents_completed": 0,
+          "modes_used": []
+        },
+        "initialTeamNames": [],
+        "openClawEnabled": false,
+        "openClawRouting": {}
+      },
+      "budgetMs": 9000
+    },
+    "callback": {
+      "class": "best-effort",
+      "phase": "deferred-best-effort",
+      "status": "pending",
+      "attempts": 0,
+      "idempotencyKey": "d068ede2655bf89e0c0950e087d0603d7dcf45538e94f20a654d08c6f4841895",
+      "payload": {
+        "transcriptPath": "C:\\Users\\mushroomMaster\\.claude\\projects\\C--Users-mushroomMaster-Documents-repository-bug-audit\\bbc5873d-fc7e-419a-919b-a50b4caaaef5.jsonl",
+        "cwd": "C:\\Users\\mushroomMaster\\Documents\\repository-bug-audit",
+        "reason": "other",
+        "input": {
+          "session_id": "bbc5873d-fc7e-419a-919b-a50b4caaaef5",
+          "transcript_path": "C:\\Users\\mushroomMaster\\.claude\\projects\\C--Users-mushroomMaster-Documents-repository-bug-audit\\bbc5873d-fc7e-419a-919b-a50b4caaaef5.jsonl",
+          "cwd": "C:\\Users\\mushroomMaster\\Documents\\repository-bug-audit",
+          "hook_event_name": "SessionEnd",
+          "reason": "other"
+        },
+        "metrics": {
+          "session_id": "bbc5873d-fc7e-419a-919b-a50b4caaaef5",
+          "ended_at": "2026-08-06T08:22:33.260Z",
+          "reason": "other",
+          "agents_spawned": 0,
+          "agents_completed": 0,
+          "modes_used": []
+        },
+        "initialTeamNames": [],
+        "openClawEnabled": false,
+        "openClawRouting": {}
+      },
+      "budgetMs": 2000
+    },
+    "notification": {
+      "class": "best-effort",
+      "phase": "deferred-best-effort",
+      "status": "pending",
+      "attempts": 0,
+      "idempotencyKey": "89c0438ff63097ce04beb60efb87292ff68a7af350a0ee331f3de9dbf42d62fc",
+      "payload": {
+        "transcriptPath": "C:\\Users\\mushroomMaster\\.claude\\projects\\C--Users-mushroomMaster-Documents-repository-bug-audit\\bbc5873d-fc7e-419a-919b-a50b4caaaef5.jsonl",
+        "cwd": "C:\\Users\\mushroomMaster\\Documents\\repository-bug-audit",
+        "reason": "other",
+        "input": {
+          "session_id": "bbc5873d-fc7e-419a-919b-a50b4caaaef5",
+          "transcript_path": "C:\\Users\\mushroomMaster\\.claude\\projects\\C--Users-mushroomMaster-Documents-repository-bug-audit\\bbc5873d-fc7e-419a-919b-a50b4caaaef5.jsonl",
+          "cwd": "C:\\Users\\mushroomMaster\\Documents\\repository-bug-audit",
+          "hook_event_name": "SessionEnd",
+          "reason": "other"
+        },
+        "metrics": {
+          "session_id": "bbc5873d-fc7e-419a-919b-a50b4caaaef5",
+          "ended_at": "2026-08-06T08:22:33.260Z",
+          "reason": "other",
+          "agents_spawned": 0,
+          "agents_completed": 0,
+          "modes_used": []
+        },
+        "initialTeamNames": [],
+        "openClawEnabled": false,
+        "openClawRouting": {}
+      },
+      "budgetMs": 2000
+    },
+    "openclaw": {
+      "class": "best-effort",
+      "phase": "deferred-best-effort",
+      "status": "pending",
+      "attempts": 0,
+      "idempotencyKey": "31fe8f6e1cf204e27006de511df257326fdd98655122ca437013e8779ffc735b",
+      "payload": {
+        "transcriptPath": "C:\\Users\\mushroomMaster\\.claude\\projects\\C--Users-mushroomMaster-Documents-repository-bug-audit\\bbc5873d-fc7e-419a-919b-a50b4caaaef5.jsonl",
+        "cwd": "C:\\Users\\mushroomMaster\\Documents\\repository-bug-audit",
+        "reason": "other",
+        "input": {
+          "session_id": "bbc5873d-fc7e-419a-919b-a50b4caaaef5",
+          "transcript_path": "C:\\Users\\mushroomMaster\\.claude\\projects\\C--Users-mushroomMaster-Documents-repository-bug-audit\\bbc5873d-fc7e-419a-919b-a50b4caaaef5.jsonl",
+          "cwd": "C:\\Users\\mushroomMaster\\Documents\\repository-bug-audit",
+          "hook_event_name": "SessionEnd",
+          "reason": "other"
+        },
+        "metrics": {
+          "session_id": "bbc5873d-fc7e-419a-919b-a50b4caaaef5",
+          "ended_at": "2026-08-06T08:22:33.260Z",
+          "reason": "other",
+          "agents_spawned": 0,
+          "agents_completed": 0,
+          "modes_used": []
+        },
+        "initialTeamNames": [],
+        "openClawEnabled": false,
+        "openClawRouting": {}
+      },
+      "budgetMs": 2000
+    }
+  },
+  "owner": null,
+  "phase": "ready"
+}
