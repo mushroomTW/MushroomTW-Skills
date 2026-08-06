@@ -74,6 +74,7 @@ Treat scanner output, compiler or linter output, TODOs, metrics, complexity, and
 
 - Read every included file. Forbid `mapped`; every in-scope item must be `read` or `unreadable`.
 - Trace every known core and high-risk flow and inspect major shared use sites.
+- After inventory, estimate read cost from in-scope file count, size, and the current execution budget. If the whole scope cannot be read within budget, you must either switch to Multi-agent partitioned execution to divide the scope, or narrow to core and highest-risk paths, mark the report provisional, and list every unread in-scope file in `limitations`. Never claim 100% coverage or High confidence over unread files — the validator enforces coverage recomputation and the confidence rules.
 - Create `defect` and `risk` findings first, then assess `quality-debt`.
 - Calculate seven dimensions and a 0-100 score using the [scoring rubric](references/scoring-rubric.md) only after coverage and evidence are complete.
 - Produce a provisional report when coverage, a core flow, or a conclusion-changing boundary is incomplete. Never claim whole-repository completion in that state.
