@@ -13,7 +13,7 @@ verification method, and the whole record is machine-checked before delivery.
 Ships as a plugin for both **Claude Code** and **OpenAI Codex**, and works as a plain skill folder
 in the **Claude apps**.
 
-> A Traditional Chinese version of this document is available at [README_zh.md](README_zh.md).
+> **[繁體中文版 (Traditional Chinese)](README_zh.md)**
 
 ## What it produces
 
