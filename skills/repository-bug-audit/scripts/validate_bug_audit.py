@@ -66,6 +66,11 @@ def _resolve_ref(root_schema: dict[str, Any], reference: str) -> dict[str, Any]:
     return node
 
 
+# ponytail: 自製 JSON Schema 子集求值器，換取零第三方依賴（skill 的可移植承諾）。
+# 僅覆蓋 schema 實際使用的關鍵字（type/enum/const/required/properties/additionalProperties/
+# minItems/maxItems/items/minLength/pattern/minimum/maximum/$ref）。若
+# bug-audit-evidence.schema.json 引入新關鍵字（如 oneOf/anyOf/dependencies），
+# 需在此同步擴充，並在 tests 補對應用例。
 def validate_schema(
     value: Any,
     schema: dict[str, Any],
