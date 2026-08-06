@@ -308,8 +308,10 @@ class BugAuditValidatorTests(unittest.TestCase):
     def validate_pair(self, data: dict, report: str) -> list[str]:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            report_path = root / data["artifacts"]["report"]
-            evidence_path = root / data["artifacts"]["evidence"]
+            docs = root / ".docs"
+            docs.mkdir()
+            report_path = docs / data["artifacts"]["report"]
+            evidence_path = docs / data["artifacts"]["evidence"]
             report_path.write_text(report, encoding="utf-8")
             evidence_path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
             return validate_bug_audit.run_validation(evidence_path, report_path)
@@ -456,6 +458,19 @@ class BugAuditValidatorTests(unittest.TestCase):
 
     def test_windows_relative_path_utf8_and_empty_findings_are_valid(self) -> None:
         self.assertEqual([], self.validate_pair(rapid_evidence(), rapid_report()))
+
+    def test_artifacts_outside_docs_are_rejected(self) -> None:
+        data = rapid_evidence()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            report_path = root / data["artifacts"]["report"]
+            evidence_path = root / data["artifacts"]["evidence"]
+            report_path.write_text(rapid_report(data), encoding="utf-8")
+            evidence_path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+            errors = validate_bug_audit.run_validation(evidence_path, report_path)
+        self.assertTrue(
+            any("must live in the repository .docs directory" in error for error in errors)
+        )
 
     def test_absolute_or_parent_inventory_path_fails(self) -> None:
         for path in ("C:\\repo\\secret.py", "../outside.py"):

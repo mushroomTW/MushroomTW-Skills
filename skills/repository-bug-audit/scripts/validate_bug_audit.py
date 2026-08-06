@@ -205,6 +205,10 @@ def validate_evidence(data: dict[str, Any], evidence_path: Path, report_path: Pa
         errors.append("$.artifacts.report: does not match the validated report filename")
     if Path(data["artifacts"]["evidence"]).name != evidence_path.name:
         errors.append("$.artifacts.evidence: does not match the validated evidence filename")
+    if report_path.parent.name != ".docs":
+        errors.append("artifact: report must live in the repository .docs directory")
+    if evidence_path.parent.name != ".docs":
+        errors.append("artifact: evidence must live in the repository .docs directory")
 
     inventory = data["inventory"]
     normalized_paths: set[str] = set()
