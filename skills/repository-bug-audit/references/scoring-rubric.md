@@ -44,6 +44,21 @@ Mark a dimension N/A only when the project objectively has no relevant behavior 
 - Confidence 3-4 cannot reduce maturity. Confidence 5-6 affects maturity only when the control gap is proven.
 - Choose maturity anchors from evidence. Never choose the total first and reverse-engineer dimensions.
 
+## What the score is, and is not
+
+The total is a two-digit number produced from seven maturity levels that a reviewer chose by judgement. It communicates a band; it does not measure. Treat it accordingly:
+
+- **Expect run-to-run variance.** Two careful audits of the same repository can differ by roughly a band's width. A change of a few points between runs is noise, not improvement or regression.
+- **The caps make severity decisions expensive.** One confirmed High costs its dimension at least three levels — 18 points in `correctness`. That is deliberate, but it means severity calibration moves the headline number more than any other single judgement. Calibrate severity against impact, never against the total you expect.
+- **Never compare scores across repositories.** Weights are fixed but N/A renormalization, profile, and scope differ, so two projects' totals are not commensurable.
+- **Read the score with its confidence and coverage.** A total from Low confidence or partial core-path coverage states what was reviewed, not how healthy the repository is. The rating band and `assessment.confidence` belong together wherever the number appears.
+
+## One finding, one dimension
+
+Each finding deducts in exactly one dimension, chosen by its `category`, and the validator enforces that. A SQL injection is both a security and a correctness problem, but counting it twice would double-deduct one root cause.
+
+The cost of that rule is that `category` carries real weight: a mis-categorized finding silently moves points between dimensions without changing the total's plausibility. Choose the category matching the primary failure the finding causes, and state the secondary aspect in `impact` rather than splitting the finding.
+
 ## Dimension checks
 
 - **Correctness:** Contracts, boundaries, partial failures, timeouts, retries, cancellation, state transitions, transactions, consistency, concurrency, and resource release.
