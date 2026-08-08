@@ -213,6 +213,9 @@ def validate_evidence(data: dict[str, Any], evidence_path: Path, report_path: Pa
     inventory = data["inventory"]
     normalized_paths: set[str] = set()
     counts = {status: 0 for status in ("read", "mapped", "excluded", "unreadable")}
+    # In Comprehensive mode a mapped item is a file the audit owed a read and did not deliver,
+    # so it has to say why; in Rapid mode mapping is the declared review boundary.
+    reason_required = {"excluded", "unreadable"} | ({"mapped"} if mode == "comprehensive" else set())
     for index, item in enumerate(inventory):
         normalized = item["path"].replace("\\", "/").casefold()
         if normalized in normalized_paths:
@@ -221,7 +224,7 @@ def validate_evidence(data: dict[str, Any], evidence_path: Path, report_path: Pa
         if not _safe_inventory_path(item["path"]):
             errors.append(f"$.inventory[{index}].path: inventory paths must be repository-relative")
         counts[item["status"]] += 1
-        if item["status"] in {"excluded", "unreadable"} and not item.get("reason"):
+        if item["status"] in reason_required and not item.get("reason"):
             errors.append(f"$.inventory[{index}].reason: required for {item['status']} items")
 
     coverage = data["coverage"]
@@ -322,8 +325,10 @@ def validate_evidence(data: dict[str, Any], evidence_path: Path, report_path: Pa
         if confidence == "Medium" and not all_flows_traced:
             errors.append("$.assessment.confidence: Medium Rapid confidence requires traced selected flows")
     else:
-        if counts["mapped"]:
-            errors.append("$.inventory: mapped items are forbidden in Comprehensive mode")
+        if counts["mapped"] and not data["execution"]["provisional"]:
+            errors.append(
+                "$.inventory: a non-provisional Comprehensive audit cannot leave in-scope items mapped"
+            )
         if "dimensions" not in data or "total_score" not in data or "rating" not in data:
             errors.append("$: Comprehensive mode requires dimensions, total_score, and rating")
         else:

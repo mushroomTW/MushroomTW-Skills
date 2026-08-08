@@ -31,7 +31,7 @@ appendix, and the two are cross-validated against each other before delivery.
 | | Rapid | Comprehensive |
 | --- | --- | --- |
 | Coverage | Maps the whole repository, reads core and highest-risk paths | Reads every in-scope file |
-| Inventory states | `read`, `mapped`, `excluded`, `unreadable` | `mapped` forbidden |
+| Inventory states | `read`, `mapped`, `excluded`, `unreadable` | `mapped` only in a provisional report |
 | Finding types | `defect`, `risk` | `defect`, `risk`, `quality-debt` |
 | Quality score | None | Seven dimensions, 0–100, with a rating |
 | Max confidence | Medium | High |
@@ -42,8 +42,9 @@ coverage would misrepresent how much was actually examined.
 
 In Comprehensive mode the skill estimates read cost from the in-scope file count and execution
 budget; when the whole scope cannot be read within budget it must either partition across agents or
-narrow to core and highest-risk paths, mark the report provisional, and list the unread files in
-`limitations`.
+narrow to core and highest-risk paths, mark the report provisional, and record each unread file in
+the inventory as `mapped` with a reason. The inventory is the unread-file list, so coverage drops on
+its own and `limitations` explains the consequence instead of enumerating filenames.
 
 ## Execution modes
 

@@ -42,7 +42,7 @@ The validator proves schema and policy consistency only. It does not prove that 
 2. Identify languages, package managers, entry points, services, data layers, background jobs, external integrations, persistence, state boundaries, trust boundaries, tests, and deployment units.
 3. Inventory first-party runtime code, tests, build scripts, migrations, deployment code, programmatic CI, manifests, schemas, and behavior-affecting configuration.
 4. Mark generated artifacts, dependencies, vendored code, caches, binaries, build output, and large fixtures as `excluded` with a reason. Include ambiguous generated, example, snapshot, seed, or compatibility code whenever it enters a build, deployment, test, or public contract.
-5. Give every item one status: `read`, `mapped`, `excluded`, or `unreadable`. Allow `mapped` only in Rapid mode.
+5. Give every item one status: `read`, `mapped`, `excluded`, or `unreadable`. Rapid uses `mapped` for its declared review boundary. Comprehensive may use it only in a provisional report, where it records an in-scope file left unread and requires a reason.
 
 Use the entire current working tree as scope. Do not use `git diff`, history, or changed-file lists to narrow the audit. Prefer repository-provided code-navigation tools. A search result or tool summary does not count as reading a file.
 
@@ -71,9 +71,9 @@ Treat scanner output, compiler or linter output, TODOs, metrics, complexity, and
 
 ### Comprehensive
 
-- Read every included file. Forbid `mapped`; every in-scope item must be `read` or `unreadable`.
+- Read every included file. A complete Comprehensive audit contains no `mapped` items; every in-scope item is `read` or `unreadable`.
 - Trace every known core and high-risk flow and inspect major shared use sites.
-- After inventory, estimate read cost from in-scope file count, size, and the current execution budget. If the whole scope cannot be read within budget, you must either switch to Multi-agent partitioned execution to divide the scope, or narrow to core and highest-risk paths, mark the report provisional, and list every unread in-scope file in `limitations`. Never claim 100% coverage or High confidence over unread files — the validator enforces coverage recomputation and the confidence rules.
+- After inventory, estimate read cost from in-scope file count, size, and the current execution budget. If the whole scope cannot be read within budget, you must either switch to Multi-agent partitioned execution to divide the scope, or narrow to core and highest-risk paths and mark the report provisional. Record each unread in-scope file in `inventory` as `mapped` with a reason: the inventory is the unread-file list, so coverage falls automatically and `limitations` carries the consequence in prose rather than file names. Never claim 100% coverage or High confidence over unread files — the validator enforces coverage recomputation and the confidence rules.
 - Create `defect` and `risk` findings first, then assess `quality-debt`.
 - Calculate seven dimensions and a 0-100 score using the [scoring rubric](references/scoring-rubric.md) only after coverage and evidence are complete.
 - Produce a provisional report when coverage, a core flow, or a conclusion-changing boundary is incomplete. Never claim whole-repository completion in that state.

@@ -125,6 +125,39 @@ def comprehensive_evidence() -> dict:
     return data
 
 
+def narrowed_comprehensive_evidence() -> dict:
+    """A Comprehensive audit that exceeded its read budget, narrowed scope, and disclosed it.
+
+    The unread file lives in the inventory as a `mapped` item with a reason, so coverage
+    falls out of the inventory automatically and `limitations` carries the consequence in
+    prose rather than a file list.
+    """
+    data = comprehensive_evidence()
+    data["execution"]["provisional"] = True
+    data["assessment"]["confidence"] = "Low"
+    data["assessment"]["confidence_rationale"] = "One in-scope file was left unread within the budget."
+    data["inventory"].append(
+        {
+            "path": "src/legacy.py",
+            "status": "mapped",
+            "risk_tier": "low",
+            "reason": "Left unread after scope was narrowed to core paths within the execution budget.",
+        }
+    )
+    data["coverage"].update(
+        {
+            "discovered_files": 3,
+            "in_scope_files": 3,
+            "read_files": 2,
+            "mapped_files": 1,
+            "percentage": 66.67,
+            "boundary": "Core paths were read; one low-risk file was left mapped.",
+        }
+    )
+    data["limitations"] = ["One low-risk in-scope file was left unread; the inventory records which."]
+    return data
+
+
 def defect_finding(severity: str = "🟡 Medium") -> dict:
     return {
         "finding_id": "BUG-001",
@@ -489,6 +522,35 @@ class BugAuditValidatorTests(unittest.TestCase):
             )
             self.assertEqual("repository-bug-audit-report-20260805-123456.md", report.name)
             self.assertEqual("repository-bug-audit-report-20260805-123456.evidence.json", evidence.name)
+
+    def test_comprehensive_allows_mapped_only_in_a_provisional_report(self) -> None:
+        data = narrowed_comprehensive_evidence()
+        report = comprehensive_report(data).replace(
+            "# Repository Bug Audit\n",
+            "# Repository Bug Audit\n\n**Provisional report**\n",
+            1,
+        )
+        self.assertEqual([], self.validate_pair(data, report))
+
+        data["execution"]["provisional"] = False
+        errors = self.validate_pair(data, comprehensive_report(data))
+        self.assertTrue(
+            any("cannot leave in-scope items mapped" in error for error in errors)
+        )
+
+    def test_comprehensive_mapped_item_requires_a_reason(self) -> None:
+        data = narrowed_comprehensive_evidence()
+        del data["inventory"][2]["reason"]
+        report = comprehensive_report(data).replace(
+            "# Repository Bug Audit\n",
+            "# Repository Bug Audit\n\n**Provisional report**\n",
+            1,
+        )
+        errors = self.validate_pair(data, report)
+        self.assertTrue(any("required for mapped items" in error for error in errors))
+
+    def test_rapid_mapped_item_needs_no_reason(self) -> None:
+        self.assertEqual([], self.validate_pair(rapid_evidence(), rapid_report()))
 
     def test_unreadable_input_returns_exit_code_two(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

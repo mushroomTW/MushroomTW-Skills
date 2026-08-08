@@ -55,6 +55,6 @@ Shared gates:
 
 Rapid may contain `mapped` items, must not output scores, and cannot exceed Medium confidence. Mark it provisional when the repository map, selected high-risk flows, or minimum evidence record is incomplete.
 
-Comprehensive forbids `mapped`, requires every in-scope item to be `read` or `unreadable`, traces every known core or high-risk flow, and completes all seven dimensions and the total score. Mark it provisional when any conclusion-changing boundary is incomplete.
+Comprehensive requires every in-scope item to be `read` or `unreadable`, traces every known core or high-risk flow, and completes all seven dimensions and the total score. Mark it provisional when any conclusion-changing boundary is incomplete. Only a provisional Comprehensive audit may carry `mapped` items, and each one needs a reason.
 
-- Comprehensive estimates read cost after inventory; when scope exceeds the execution budget it must either partition via Multi-agent or narrow to core and highest-risk paths with a provisional report and an unread-file list in `limitations`.
+- Comprehensive estimates read cost after inventory; when scope exceeds the execution budget it must either partition via Multi-agent or narrow to core and highest-risk paths with a provisional report and every unread in-scope file recorded as a `mapped` inventory item with a reason. `limitations` states the consequence and stays within its five-entry budget; it is not where the file list goes.

@@ -28,7 +28,7 @@ skill 資料夾使用。
 | | Rapid（快速） | Comprehensive（完整） |
 | --- | --- | --- |
 | 覆蓋範圍 | 對整個儲存庫建立地圖，讀取核心與最高風險路徑 | 讀取每一個納入範圍的檔案 |
-| 清冊狀態 | `read`、`mapped`、`excluded`、`unreadable` | 禁止 `mapped` |
+| 清冊狀態 | `read`、`mapped`、`excluded`、`unreadable` | 僅 Provisional 報告可用 `mapped` |
 | 發現類型 | `defect`、`risk` | `defect`、`risk`、`quality-debt` |
 | 品質分數 | 不評分 | 七個構面、0–100 分並附評級 |
 | 信心度上限 | Medium | High |
@@ -38,8 +38,9 @@ Rapid 回答的是「快速看一下，有沒有我該知道的缺陷？」；Co
 檢查得比實際更徹底。
 
 Comprehensive 模式會依納入範圍的檔案數與執行預算估算閱讀成本；當整個範圍無法在預算內讀完時，
-它必須選擇以多代理分工，或縮小到核心與最高風險路徑、將報告標記為 Provisional，並在
-`limitations` 中列出未讀檔案。
+它必須選擇以多代理分工，或縮小到核心與最高風險路徑、將報告標記為 Provisional，並把每一個未讀
+檔案以 `mapped` 狀態連同原因記入清冊。清冊本身就是未讀檔案清單，覆蓋率會自動下降，
+`limitations` 則負責說明後果，而不是列出檔名。
 
 ## 執行模式
 
