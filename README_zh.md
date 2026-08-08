@@ -287,7 +287,7 @@ repository-bug-audit/
         │   ├── evidence-and-reporting.md     # 佐證協定與完成關卡
         │   ├── report-template.md            # 兩種模式的報告版型
         │   ├── scoring-rubric.md             # 風險校準與評分
-        │   └── bug-audit-evidence.schema.json # 權威佐證 schema（v2.0）
+        │   └── bug-audit-evidence.schema.json # 權威佐證 schema（v3.0）
         ├── scripts/
         │   └── validate_bug_audit.py         # 產出配對驗證器
         └── tests/

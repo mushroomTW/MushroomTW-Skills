@@ -1,6 +1,6 @@
 {
   "name": "repository-bug-audit",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Evidence-driven repository-wide bug discovery and engineering risk audit, in unscored Rapid mode or Comprehensive mode with a risk-weighted 0-100 quality score.",
   "author": {
     "name": "mushroomTW"

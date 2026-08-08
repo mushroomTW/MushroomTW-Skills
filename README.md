@@ -308,7 +308,7 @@ repository-bug-audit/
         │   ├── evidence-and-reporting.md     # Evidence protocol and completion gates
         │   ├── report-template.md            # Report structure for both modes
         │   ├── scoring-rubric.md             # Risk calibration and scoring
-        │   └── bug-audit-evidence.schema.json # Authoritative evidence schema (v2.0)
+        │   └── bug-audit-evidence.schema.json # Authoritative evidence schema (v3.0)
         ├── scripts/
         │   └── validate_bug_audit.py         # Artifact-pair validator
         └── tests/

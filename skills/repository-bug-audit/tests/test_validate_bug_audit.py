@@ -18,7 +18,7 @@ SPEC.loader.exec_module(validate_bug_audit)
 
 def rapid_evidence() -> dict:
     return {
-        "schema_version": "2.0",
+        "schema_version": "3.0",
         "audit_mode": "rapid",
         "generated_at": "2026-08-05T12:00:00+08:00",
         "project": {"name": "Example Project", "root": ".", "profile": "library-sdk"},
@@ -389,7 +389,7 @@ class BugAuditValidatorTests(unittest.TestCase):
         data = rapid_evidence()
         data["schema_version"] = "1.0"
         errors = self.validate_pair(data, rapid_report(data))
-        self.assertTrue(any("expected constant '2.0'" in error for error in errors))
+        self.assertTrue(any("expected constant '3.0'" in error for error in errors))
 
     def test_rapid_forbids_scores_and_high_confidence(self) -> None:
         data = rapid_evidence()

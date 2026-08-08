@@ -20,7 +20,7 @@
     "limitations"
   ],
   "properties": {
-    "schema_version": { "const": "2.0" },
+    "schema_version": { "const": "3.0" },
     "audit_mode": { "enum": ["rapid", "comprehensive"] },
     "generated_at": { "type": "string", "format": "date-time" },
     "project": { "$ref": "#/$defs/project" },
