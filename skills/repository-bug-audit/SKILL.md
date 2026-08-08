@@ -1,12 +1,11 @@
 ---
 name: repository-bug-audit
 description: Perform evidence-driven, repository-wide bug discovery and engineering risk audits in either unscored Rapid mode or Comprehensive mode with a risk-weighted 0-100 quality score. Use when the user explicitly requests a whole-repository bug hunt, repository-wide risk review, overall engineering quality score, or complete technical-debt assessment. Do not use for a single file or module, a PR or diff review, one known bug or vulnerability, a localized performance issue, general coding questions, or a review of this skill itself.
-allowed-tools: Read, Grep, Glob, Bash, Write, Task
 ---
 
 # Repository Bug Audit
 
-Audit the current working tree by finding material bugs first, then assess broader engineering quality in Comprehensive mode. Produce one concise Markdown report paired with one machine-readable evidence JSON file. Remain read-only except for those two artifacts. Do not modify code, configuration, tests, or external systems unless the user separately requests it.
+Audit the current working tree by finding material bugs first, then assess broader engineering quality in Comprehensive mode. Produce one concise Markdown report paired with one machine-readable evidence JSON file. Remain read-only except for those two artifacts. Do not modify code, configuration, tests, or external systems unless the user separately requests it. This holds regardless of which editing, shell, or automation capabilities the host exposes: availability is not permission.
 
 ## Required startup choices
 
@@ -112,9 +111,9 @@ Use UTF-8 mode on every platform, because the evidence JSON carries emoji severi
 python -X utf8 <skill-directory>/scripts/validate_bug_audit.py --evidence <evidence.json> --report <report.md>
 ```
 
-Resolve `<skill-directory>` from the [platform adapters](references/platform-adapters.md) — it is
-`${CLAUDE_PLUGIN_ROOT}` for a Claude Code plugin install and a fixed skills path otherwise. Quote the
-path; installed plugin directories contain version segments and, on Windows, spaces.
+Resolve `<skill-directory>` from the [platform adapters](references/platform-adapters.md), which maps
+the installation layouts of each host. Quote the path; installed skill directories can carry version
+segments and, on some platforms, spaces.
 
 Exit code `0` means the artifact pair satisfies structural and policy checks. Exit code `1` means content violations must be corrected. Exit code `2` means arguments or files could not be read. Do not deliver unvalidated artifacts. When missing evidence prevents correction, mark the affected conclusion provisional and keep evidence internally consistent.
 

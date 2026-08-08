@@ -20,7 +20,7 @@ running in; ignore the others.
 | Startup choice interface | `AskUserQuestion` | Numbered prose question | Numbered prose question |
 | Independent reviewers | Subagent tool | Unavailable | Parallel agent runs where supported |
 | Reading the working tree | `Read`, `Grep`, `Glob` | Uploaded project files | Native file tools |
-| Repository-configured checks | `Bash` / `PowerShell` | Sandbox shell | Native shell |
+| Repository-configured checks | Shell tool | Sandbox shell | Native shell |
 | Writing the two artifacts | `Write` | Sandbox filesystem | Native file write |
 | Skill directory | See below | Uploaded skill folder | Installed skill folder |
 
@@ -47,12 +47,12 @@ plugin paths contain a version segment and, on Windows, spaces. When the variabl
 locate `scripts/validate_bug_audit.py` relative to the `references/` file you are already reading
 rather than guessing a path.
 
-**Stay read-only.** Claude Code gives you `Edit` and `Write`, which the audit must not use on project
+**Stay read-only.** Claude Code gives you file-editing tools, which the audit must not use on project
 files. Write exactly the two artifacts named in SKILL.md and nothing else — both go into the
-repository's `.docs/` directory, created when it is missing. Restrict `Bash` and
-`PowerShell` to checks the repository already configures — a test, build, lint, type-check, or
-analyzer command that exists in its manifests or CI. Installing a tool, or writing a scratch
-reproduction script anywhere including the scratchpad, is out of scope for this skill.
+repository's `.docs/` directory, created when it is missing. Restrict shell execution to checks the
+repository already configures — a test, build, lint, type-check, or analyzer command that exists in
+its manifests or CI. Installing a tool, or writing a scratch reproduction script anywhere including
+the scratchpad, is out of scope for this skill.
 
 **Multi-agent partitioned execution** uses the subagent tool: one subagent per scope partition, each
 returning inventory states, traced flows, structured candidate findings, and limitations. Give each
@@ -66,9 +66,9 @@ when the workspace provides one — over text search for tracing callers and cal
 strings; the audit needs call relationships, and a search miss only ever supports "not found within
 the reviewed scope."
 
-**On Windows**, invoke the validator through the `Bash` tool with forward slashes, or through
-`PowerShell`. If `python` is not on `PATH`, try the launcher: `py -3 -X utf8`. Keep `-X utf8` on every
-platform so the emoji severity values in the evidence JSON round-trip correctly.
+**On Windows**, write the validator path with forward slashes. If `python` is not on `PATH`, try the
+launcher: `py -3 -X utf8`. Keep `-X utf8` on every platform so the emoji severity values in the
+evidence JSON round-trip correctly.
 
 **Model choice**: Comprehensive mode reads every in-scope file and holds cross-file state while
 reasoning about contracts and concurrency. Opus-class models handle that materially better. Rapid mode
