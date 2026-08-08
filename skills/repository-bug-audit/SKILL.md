@@ -43,6 +43,7 @@ The validator proves schema and policy consistency, and that recorded paths name
 3. Inventory first-party runtime code, tests, build scripts, migrations, deployment code, programmatic CI, manifests, schemas, and behavior-affecting configuration.
 4. Mark generated artifacts, dependencies, vendored code, caches, binaries, build output, and large fixtures as `excluded` with a reason. Include ambiguous generated, example, snapshot, seed, or compatibility code whenever it enters a build, deployment, test, or public contract.
 5. Give every item one status: `read`, `mapped`, `excluded`, or `unreadable`. Rapid uses `mapped` for its declared review boundary. Comprehensive may use it only in a provisional report, where it records an in-scope file left unread and requires a reason.
+6. Give every item one `risk_tier`: `core`, `high`, `standard`, or `low`. At least one in-scope item must be `core` or `high` — a repository with a core flow has files that carry it. Coverage of those two tiers is recomputed separately and gates assessment confidence, so tiering is a load-bearing judgement, not a label. Reading many trivial files never compensates for an unread core file.
 
 Use the entire current working tree as scope. Do not use `git diff`, history, or changed-file lists to narrow the audit. Prefer repository-provided code-navigation tools. A search result or tool summary does not count as reading a file.
 

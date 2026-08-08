@@ -35,6 +35,7 @@ CATEGORY_DIMENSION = {
 }
 TYPE_RANK = {"defect": 0, "risk": 1, "quality-debt": 2}
 SEVERITY_RANK = {"🔴 High": 3, "🟡 Medium": 2, "🟢 Low": 1}
+CRITICAL_TIERS = {"core", "high"}
 RUNTIME_FINDING_TYPES = {"defect", "risk"}
 
 
@@ -293,6 +294,17 @@ def validate_evidence(
     coverage = data["coverage"]
     calculated_in_scope = counts["read"] + counts["mapped"] + counts["unreadable"]
     calculated_percentage = round((counts["read"] / calculated_in_scope) * 100, 2) if calculated_in_scope else 0.0
+    # A file-count percentage can be inflated by reading many trivial files, so coverage of the
+    # core and high tiers is recomputed separately: that is the number a conclusion rests on.
+    critical_in_scope = [
+        item
+        for item in inventory
+        if item["risk_tier"] in CRITICAL_TIERS and item["status"] != "excluded"
+    ]
+    critical_read = [item for item in critical_in_scope if item["status"] == "read"]
+    calculated_critical_percentage = (
+        round((len(critical_read) / len(critical_in_scope)) * 100, 2) if critical_in_scope else 0.0
+    )
     expected_counts = {
         "discovered_files": len(inventory),
         "in_scope_files": calculated_in_scope,
@@ -300,12 +312,25 @@ def validate_evidence(
         "mapped_files": counts["mapped"],
         "unreadable_files": counts["unreadable"],
         "excluded_files": counts["excluded"],
+        "critical_in_scope_files": len(critical_in_scope),
+        "critical_read_files": len(critical_read),
     }
     for key, expected in expected_counts.items():
         if coverage[key] != expected:
             errors.append(f"$.coverage.{key}: expected {expected} from inventory, got {coverage[key]}")
     if abs(float(coverage["percentage"]) - calculated_percentage) > 0.01:
         errors.append(f"$.coverage.percentage: expected {calculated_percentage:.2f} from inventory")
+    if abs(float(coverage["critical_percentage"]) - calculated_critical_percentage) > 0.01:
+        errors.append(
+            f"$.coverage.critical_percentage: expected {calculated_critical_percentage:.2f} from inventory"
+        )
+    # Every audit records at least one core or high-risk flow, so some file must carry it.
+    # Without this, tiering everything as standard would empty the critical set and turn the
+    # core-path confidence gate into a no-op.
+    if not critical_in_scope:
+        errors.append(
+            "$.inventory: at least one in-scope item must carry the core or high risk tier"
+        )
 
     ids: set[str] = set()
     fingerprints: set[str] = set()
@@ -387,6 +412,10 @@ def validate_evidence(
             errors.append("$.assessment.confidence: a provisional Rapid audit must have Low confidence")
         if confidence == "Medium" and not all_flows_traced:
             errors.append("$.assessment.confidence: Medium Rapid confidence requires traced selected flows")
+        if confidence == "Medium" and calculated_critical_percentage < 100:
+            errors.append(
+                "$.assessment.confidence: Medium Rapid confidence requires every core/high-risk file to be read"
+            )
     else:
         if counts["mapped"] and not data["execution"]["provisional"]:
             errors.append(
@@ -402,6 +431,10 @@ def validate_evidence(
                 errors.append("$.assessment.confidence: High requires 100% coverage, traced flows, non-provisional status, and a passed verification")
         if confidence == "Medium" and (coverage["percentage"] < 90 or not all_flows_traced):
             errors.append("$.assessment.confidence: Medium requires at least 90% coverage and traced flows")
+        if confidence in {"High", "Medium"} and calculated_critical_percentage < 100:
+            errors.append(
+                "$.assessment.confidence: High or Medium requires every core/high-risk file to be read"
+            )
     return errors
 
 
@@ -530,6 +563,8 @@ def validate_report(text: str, data: dict[str, Any], report_path: Path) -> list[
         errors.append("report: Rapid report must not include Total score")
     if mode == "comprehensive" and "| Total score |" not in text:
         errors.append("report: Comprehensive executive summary must include Total score")
+    if "| Core-path coverage |" not in text:
+        errors.append("report: the executive summary must state core-path coverage")
 
     public_findings = sorted(
         [finding for finding in data["findings"] if finding["confidence"] >= 5],

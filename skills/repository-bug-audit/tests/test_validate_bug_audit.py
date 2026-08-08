@@ -41,6 +41,9 @@ def rapid_evidence() -> dict:
             "unreadable_files": 0,
             "excluded_files": 0,
             "percentage": 50.0,
+            "critical_in_scope_files": 1,
+            "critical_read_files": 1,
+            "critical_percentage": 100.0,
             "boundary": "Read the public entry point; mapped the low-risk helper.",
         },
         "inventory": [
@@ -92,6 +95,9 @@ def comprehensive_evidence() -> dict:
                 "unreadable_files": 0,
                 "excluded_files": 0,
                 "percentage": 100.0,
+                "critical_in_scope_files": 1,
+                "critical_read_files": 1,
+                "critical_percentage": 100.0,
                 "boundary": "All first-party files were read.",
             },
             "inventory": [
@@ -287,6 +293,7 @@ def rapid_report(data: dict | None = None) -> str:
 | Risk signal | {data['assessment']['risk']} |
 | Assessment confidence | {data['assessment']['confidence']} |
 | Review coverage | 1 / 2, 50% |
+| Core-path coverage | 1 / 1, 100% |
 | Verification summary | Tests not run |
 
 This Rapid audit does not assign a quality score.
@@ -317,6 +324,7 @@ def comprehensive_report(data: dict | None = None) -> str:
 | Overall risk | {data['assessment']['risk']} |
 | Assessment confidence | {data['assessment']['confidence']} |
 | File coverage | 2 / 2, 100% |
+| Core-path coverage | 1 / 1, 100% |
 | Verification summary | Unit tests passed |
 
 The project is generally sound within the reviewed scope.
@@ -621,6 +629,35 @@ class BugAuditValidatorTests(unittest.TestCase):
 
     def test_rapid_mapped_item_needs_no_reason(self) -> None:
         self.assertEqual([], self.validate_pair(rapid_evidence(), rapid_report()))
+
+    def test_critical_coverage_is_recomputed_from_inventory(self) -> None:
+        data = comprehensive_evidence()
+        data["coverage"]["critical_read_files"] = 0
+        errors = self.validate_pair(data, comprehensive_report(data))
+        self.assertTrue(any("coverage.critical_read_files" in error for error in errors))
+
+    def test_unread_core_file_forbids_medium_confidence(self) -> None:
+        data = rapid_evidence()
+        data["inventory"][0]["status"] = "mapped"
+        data["inventory"][1]["status"] = "read"
+        data["coverage"].update({"critical_read_files": 0, "critical_percentage": 0.0})
+        errors = self.validate_pair(data, rapid_report(data))
+        self.assertTrue(any("every core/high-risk file to be read" in error for error in errors))
+
+    def test_inventory_without_a_core_or_high_tier_is_rejected(self) -> None:
+        data = comprehensive_evidence()
+        data["inventory"][0]["risk_tier"] = "standard"
+        data["coverage"].update(
+            {"critical_in_scope_files": 0, "critical_read_files": 0, "critical_percentage": 0.0}
+        )
+        errors = self.validate_pair(data, comprehensive_report(data))
+        self.assertTrue(any("core or high risk tier" in error for error in errors))
+
+    def test_report_must_state_core_path_coverage(self) -> None:
+        data = comprehensive_evidence()
+        report = comprehensive_report(data).replace("| Core-path coverage | 1 / 1, 100% |\n", "")
+        errors = self.validate_pair(data, report)
+        self.assertTrue(any("must state core-path coverage" in error for error in errors))
 
     def test_unreadable_input_returns_exit_code_two(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

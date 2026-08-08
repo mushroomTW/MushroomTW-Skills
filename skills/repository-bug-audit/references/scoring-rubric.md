@@ -7,8 +7,8 @@ Rapid does not assign a total score, rating, dimension level, or dimension score
 - **High:** At least one confirmed High `defect` or `risk` exists, or multiple confirmed Medium runtime findings form a proven systemic major risk.
 - **Medium:** No confirmed High exists, but at least one public High or Medium `defect` or `risk` exists, or a major unknown requires uncertainty-driven escalation.
 - **Low:** No public High or Medium `defect` or `risk` exists, selected core and high-risk flows are traced, and no known major unknown requires escalation.
-- **Medium confidence:** The repository map identifies core areas, selected flows are traced, and unknowns do not invalidate the limited conclusion.
-- **Low confidence:** The map is incomplete, a critical flow is untraced, or an unknown could materially change the conclusion.
+- **Medium confidence:** The repository map identifies core areas, every `core` and `high` risk-tier file is read, selected flows are traced, and unknowns do not invalidate the limited conclusion.
+- **Low confidence:** The map is incomplete, a core or high-risk file is unread, a critical flow is untraced, or an unknown could materially change the conclusion.
 
 Rapid confidence is never High.
 
@@ -58,6 +58,7 @@ Mark a dimension N/A only when the project objectively has no relevant behavior 
 
 - High confidence requires 100% coverage, every core and high-risk flow traced, at least one primary configured check passed, non-provisional status, and no conclusion-changing invisible boundary.
 - Medium confidence requires at least 90% coverage with every known core flow traced, or 100% coverage with unavailable runtime or external verification that does not invalidate the conclusion.
+- High and Medium both additionally require 100% core-path coverage: every `core` and `high` risk-tier file read. An unread core file caps the audit at Low confidence no matter how many trivial files were read.
 - All other cases have Low confidence.
 
 | Score | Rating |

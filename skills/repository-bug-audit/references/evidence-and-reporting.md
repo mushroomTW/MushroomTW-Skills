@@ -45,8 +45,10 @@ In Multi-agent mode, the primary agent reads the relevant source and tests to re
 
 Shared gates:
 
-- inventory paths are unique, repository-relative, backed by files that exist, and coverage can be recalculated from inventory;
+- inventory paths are unique, repository-relative, backed by files that exist, and both overall and core-path coverage can be recalculated from inventory;
 - every finding `location` names a file that exists in the audited tree;
+- at least one in-scope item carries the `core` or `high` risk tier, matching the core flows recorded;
+- confidence above Low is backed by 100% core-path coverage — every `core` and `high` risk-tier file read;
 - every known core or high-risk flow has a trace state;
 - findings satisfy type, confidence, deduplication, and ordering rules;
 - public Markdown findings exactly match evidence;

@@ -261,6 +261,10 @@ inventory, finding-type and confidence rules, deduplication, canonical ordering,
 score and rating arithmetic, mode-specific prohibitions, exact-match between the public Markdown
 findings and the evidence, and local link resolution.
 
+Coverage is recomputed twice: once over all in-scope files, and once over the `core` and `high`
+risk tiers alone. Confidence above Low requires the second number to be 100% — reading many trivial
+files never compensates for an unread core file, and the executive summary has to state it.
+
 It also resolves the audited tree as the report's parent directory — the parent of `.docs/` — and
 rejects any `inventory` path or finding `location` that no file backs, which is the one kind of
 fabrication a structural validator can catch outright. Add `--repo-root <path>` when the artifacts

@@ -4,6 +4,8 @@
 
 Use exactly four level-two headings for the selected mode. When `execution.provisional` is true, place `**Provisional report**` directly below the title. Do not include per-file inventory, fingerprints, complete evidence records, raw command output, or appendices.
 
+Every executive summary carries a `Core-path coverage` row reporting `critical_read_files / critical_in_scope_files` and `critical_percentage`. Overall file coverage can be inflated by reading many trivial files, so this is the number a conclusion actually rests on — and the confidence rules are enforced against it.
+
 Start section 3 with one findings table:
 
 ```markdown
@@ -27,6 +29,7 @@ If no public findings exist, write: `No reportable findings were identified with
 | Risk signal | High / Medium / Low |
 | Assessment confidence | Medium / Low with a short rationale |
 | Review coverage | Files read / non-excluded files, percentage, and boundary |
+| Core-path coverage | Core and high-risk files read / in scope, and percentage |
 | Verification summary | Main passed, failed, not-run, or unavailable checks |
 
 State explicitly that Rapid does not assign a quality score.
@@ -57,6 +60,7 @@ List no more than five conclusion-changing gaps or unverified assumptions.
 | Overall risk | High / Medium / Low |
 | Assessment confidence | High / Medium / Low with a short rationale |
 | File coverage | Files read / files in scope and percentage |
+| Core-path coverage | Core and high-risk files read / in scope, and percentage |
 | Verification summary | Main passed, failed, not-run, or unavailable checks |
 
 ## 2. Risk-Weighted Quality Scores
