@@ -164,7 +164,7 @@ def narrowed_comprehensive_evidence() -> dict:
     return data
 
 
-def defect_finding(severity: str = "🟡 Medium") -> dict:
+def defect_finding(severity: str = "Medium") -> dict:
     return {
         "finding_id": "BUG-001",
         "fingerprint": "correctness|incorrect-result|main",
@@ -189,7 +189,7 @@ def defect_finding(severity: str = "🟡 Medium") -> dict:
     }
 
 
-def risk_finding(severity: str = "🟡 Medium") -> dict:
+def risk_finding(severity: str = "Medium") -> dict:
     return {
         "finding_id": "RISK-001",
         "fingerprint": "security|missing-boundary-check|load",
@@ -211,7 +211,7 @@ def risk_finding(severity: str = "🟡 Medium") -> dict:
     }
 
 
-def quality_debt_finding(severity: str = "🟡 Medium") -> dict:
+def quality_debt_finding(severity: str = "Medium") -> dict:
     return {
         "finding_id": "DEBT-001",
         "fingerprint": "architecture|shared-global-state|cache",
@@ -235,7 +235,7 @@ def quality_debt_finding(severity: str = "🟡 Medium") -> dict:
 
 def _finding_sort_key(finding: dict) -> tuple[int, int, int, str]:
     type_rank = {"defect": 0, "risk": 1, "quality-debt": 2}
-    severity_rank = {"🔴 High": 3, "🟡 Medium": 2, "🟢 Low": 1}
+    severity_rank = {"High": 3, "Medium": 2, "Low": 1}
     return (
         type_rank[finding["finding_type"]],
         -severity_rank[finding["severity"]],
@@ -255,11 +255,12 @@ def findings_section(findings: list[dict]) -> str:
     for item in public:
         lines.append(
             f"| {item['finding_id']} | {item['finding_type']} | "
-            f"{item['severity']} / {item['confidence']} | {item['location']} | "
+            f"{validate_bug_audit.SEVERITY_LABELS[item['severity']]} / {item['confidence']} | "
+            f"{item['location']} | "
             f"{item['summary']} {item['impact']} | {item['recommendation']} |"
         )
     for item in public:
-        if item["severity"] == "🟢 Low":
+        if item["severity"] == "Low":
             continue
         lines.extend(
             [
@@ -416,7 +417,7 @@ class BugAuditValidatorTests(unittest.TestCase):
 
     def test_risk_requires_non_empty_preconditions(self) -> None:
         data = rapid_evidence()
-        finding = risk_finding("🟢 Low")
+        finding = risk_finding("Low")
         finding["preconditions"] = ""
         data["findings"] = [finding]
         errors = self.validate_pair(data, rapid_report(data))
@@ -424,7 +425,7 @@ class BugAuditValidatorTests(unittest.TestCase):
 
     def test_rapid_forbids_quality_debt(self) -> None:
         data = rapid_evidence()
-        data["findings"] = [quality_debt_finding("🟢 Low")]
+        data["findings"] = [quality_debt_finding("Low")]
         errors = self.validate_pair(data, rapid_report(data))
         self.assertTrue(any("quality-debt is forbidden in Rapid mode" in error for error in errors))
 
@@ -440,7 +441,7 @@ class BugAuditValidatorTests(unittest.TestCase):
 
     def test_findings_table_requires_canonical_type_order(self) -> None:
         data = comprehensive_evidence()
-        findings = [quality_debt_finding("🟢 Low"), risk_finding("🟢 Low"), defect_finding("🟢 Low")]
+        findings = [quality_debt_finding("Low"), risk_finding("Low"), defect_finding("Low")]
         data["findings"] = findings
         for finding in findings:
             dimension_id = validate_bug_audit.CATEGORY_DIMENSION[finding["category"]]
@@ -488,7 +489,7 @@ class BugAuditValidatorTests(unittest.TestCase):
 
     def test_duplicate_fingerprint_and_missing_verification_fail(self) -> None:
         data = rapid_evidence()
-        first = defect_finding("🟢 Low")
+        first = defect_finding("Low")
         second = copy.deepcopy(first)
         second["finding_id"] = "BUG-002"
         del second["verification"]
@@ -564,7 +565,7 @@ class BugAuditValidatorTests(unittest.TestCase):
 
     def test_unbacked_finding_location_is_rejected(self) -> None:
         data = comprehensive_evidence()
-        finding = defect_finding("🟢 Low")
+        finding = defect_finding("Low")
         finding["location"] = "src/ghost.py:12"
         data["findings"] = [finding]
         data["dimensions"][0]["finding_ids"] = ["BUG-001"]
@@ -658,6 +659,23 @@ class BugAuditValidatorTests(unittest.TestCase):
         report = comprehensive_report(data).replace("| Core-path coverage | 1 / 1, 100% |\n", "")
         errors = self.validate_pair(data, report)
         self.assertTrue(any("must state core-path coverage" in error for error in errors))
+
+    def test_findings_table_requires_the_emoji_severity_label(self) -> None:
+        data = comprehensive_evidence()
+        data["findings"] = [defect_finding("Low")]
+        data["dimensions"][0]["finding_ids"] = ["BUG-001"]
+        report = comprehensive_report(data).replace("🟢 Low /", "Low /")
+        errors = self.validate_pair(data, report)
+        self.assertTrue(any("emoji severity label" in error for error in errors))
+
+    def test_emoji_severity_in_evidence_is_rejected(self) -> None:
+        data = comprehensive_evidence()
+        report = comprehensive_report(data)  # rendered before the evidence is corrupted
+        finding = defect_finding()
+        finding["severity"] = "🟡 Medium"
+        data["findings"] = [finding]
+        errors = self.validate_pair(data, report)
+        self.assertTrue(any("is not in the allowed enum" in error for error in errors))
 
     def test_unreadable_input_returns_exit_code_two(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

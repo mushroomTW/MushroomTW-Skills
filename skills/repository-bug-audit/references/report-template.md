@@ -4,6 +4,8 @@
 
 Use exactly four level-two headings for the selected mode. When `execution.provisional` is true, place `**Provisional report**` directly below the title. Do not include per-file inventory, fingerprints, complete evidence records, raw command output, or appendices.
 
+Evidence stores severity as the plain values `High`, `Medium`, and `Low`. The report renders them as `🔴 High`, `🟡 Medium`, and `🟢 Low`; the validator checks that the rendered label matches the recorded severity.
+
 Every executive summary carries a `Core-path coverage` row reporting `critical_read_files / critical_in_scope_files` and `critical_percentage`. Overall file coverage can be inflated by reading many trivial files, so this is the number a conclusion actually rests on — and the confidence rules are enforced against it.
 
 Start section 3 with one findings table:

@@ -227,8 +227,8 @@ Comprehensive 則把第二節換成「風險加權品質分數」。High 與 Med
 
 ## 驗證
 
-隨附的驗證器會在交付前檢查這組成對產出。所有平台都請保留 `-X utf8` —— 佐證 JSON 使用了 emoji
-作為嚴重度值。
+隨附的驗證器會在交付前檢查這組成對產出。它讀寫檔案時都明確指定 UTF-8；`-X utf8` 只是讓主控台
+輸出中的非 ASCII 文字顯示正常。
 
 ```bash
 python -X utf8 skills/repository-bug-audit/scripts/validate_bug_audit.py --evidence <evidence.json> --report <report.md>

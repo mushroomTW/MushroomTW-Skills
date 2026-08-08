@@ -243,8 +243,8 @@ Full rubric: [`scoring-rubric.md`](skills/repository-bug-audit/references/scorin
 
 ## Validation
 
-The bundled validator checks the artifact pair before delivery. Keep `-X utf8` on every platform —
-the evidence JSON uses emoji severity values.
+The bundled validator checks the artifact pair before delivery. It reads and writes UTF-8 explicitly;
+`-X utf8` simply keeps non-ASCII text in its console output readable.
 
 ```bash
 python -X utf8 skills/repository-bug-audit/scripts/validate_bug_audit.py --evidence <evidence.json> --report <report.md>

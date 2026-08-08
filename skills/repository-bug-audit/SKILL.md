@@ -85,6 +85,7 @@ Treat scanner output, compiler or linter output, TODOs, metrics, complexity, and
 - A `risk` must prove a control gap or concrete failure condition and include non-empty preconditions and verification. Use `needs-verification` when a material alternative explanation remains.
 - A `quality-debt` finding describes an engineering problem not proven to cause incorrect runtime behavior and is allowed only in Comprehensive mode.
 - Every finding requires a concrete location, direct evidence, impact, confidence, remediation direction, and verification method.
+- Record severity in evidence as `High`, `Medium`, or `Low`, and render it in the report as `🔴 High`, `🟡 Medium`, or `🟢 Low`.
 - Deduplicate by root cause and remediation. Do not deduct the same root cause more than once without distinct, proven impacts.
 - Keep confidence 3-4 candidates in evidence only. Do not publish or score them. Discard confidence 1-2 speculation.
 - Before claiming behavior is absent, handled, tested, secure, or unused, inspect likely implementations, registrations, callers, configuration, and tests. A search miss supports only "Not found within the reviewed scope."
@@ -106,7 +107,7 @@ Do not put secrets, complete source files, or unnecessary raw command output in 
 
 ## Validate and deliver
 
-Use UTF-8 mode on every platform, because the evidence JSON carries emoji severity values:
+Keep UTF-8 mode on so non-ASCII text in findings prints readably on every platform:
 
 ```text
 python -X utf8 <skill-directory>/scripts/validate_bug_audit.py --evidence <evidence.json> --report <report.md>

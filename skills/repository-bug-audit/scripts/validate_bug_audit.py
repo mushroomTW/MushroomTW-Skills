@@ -34,7 +34,10 @@ CATEGORY_DIMENSION = {
     "operability": "performance_operability",
 }
 TYPE_RANK = {"defect": 0, "risk": 1, "quality-debt": 2}
-SEVERITY_RANK = {"🔴 High": 3, "🟡 Medium": 2, "🟢 Low": 1}
+SEVERITY_RANK = {"High": 3, "Medium": 2, "Low": 1}
+# Evidence stores severity as a plain enum so the JSON stays ASCII-safe on every host; the
+# emoji belong to the Markdown report, which is what a human reads.
+SEVERITY_LABELS = {"High": "🔴 High", "Medium": "🟡 Medium", "Low": "🟢 Low"}
 CRITICAL_TIERS = {"core", "high"}
 RUNTIME_FINDING_TYPES = {"defect", "risk"}
 
@@ -351,7 +354,7 @@ def validate_evidence(
             errors.append(f"{prefix}.confidence: confidence 1–2 candidates must be discarded")
         if confidence <= 6 and finding["status"] != "needs-verification":
             errors.append(f"{prefix}.status: confidence below 7 requires needs-verification")
-        if finding["severity"] == "🔴 High" and confidence < 7 and finding["status"] != "needs-verification":
+        if finding["severity"] == "High" and confidence < 7 and finding["status"] != "needs-verification":
             errors.append(f"{prefix}.status: unconfirmed potential High must need verification")
 
         finding_type = finding["finding_type"]
@@ -378,14 +381,14 @@ def validate_evidence(
     finding_id_set = {finding["finding_id"] for finding in findings}
     confirmed = [finding for finding in findings if _is_confirmed(finding)]
     confirmed_runtime = [finding for finding in confirmed if _is_runtime_finding(finding)]
-    confirmed_high = [finding for finding in confirmed_runtime if finding["severity"] == "🔴 High"]
-    confirmed_medium = [finding for finding in confirmed_runtime if finding["severity"] == "🟡 Medium"]
+    confirmed_high = [finding for finding in confirmed_runtime if finding["severity"] == "High"]
+    confirmed_medium = [finding for finding in confirmed_runtime if finding["severity"] == "Medium"]
     public_material_runtime = [
         finding
         for finding in findings
         if _is_runtime_finding(finding)
         and finding["confidence"] >= 5
-        and finding["severity"] in {"🔴 High", "🟡 Medium"}
+        and finding["severity"] in {"High", "Medium"}
     ]
     risk = data["assessment"]["risk"]
     confidence = data["assessment"]["confidence"]
@@ -475,12 +478,12 @@ def _validate_dimensions(
         highs = [
             finding
             for finding in confirmed_findings
-            if finding["severity"] == "🔴 High" and CATEGORY_DIMENSION[finding["category"]] == dimension_id
+            if finding["severity"] == "High" and CATEGORY_DIMENSION[finding["category"]] == dimension_id
         ]
         mediums = [
             finding
             for finding in confirmed_findings
-            if finding["severity"] == "🟡 Medium" and CATEGORY_DIMENSION[finding["category"]] == dimension_id
+            if finding["severity"] == "Medium" and CATEGORY_DIMENSION[finding["category"]] == dimension_id
         ]
         if len(highs) >= 2 and dimension["level"] > 1:
             errors.append(f"$.dimensions.{dimension_id}.level: multiple confirmed High findings cap level at 1")
@@ -578,12 +581,16 @@ def validate_report(text: str, data: dict[str, Any], report_path: Path) -> list[
     )
     findings_section = findings_section_match.group(1) if findings_section_match else ""
     table_pairs = re.findall(
-        r"^\|\s*([A-Z][A-Z0-9_-]*-[0-9]{3})\s*\|\s*(defect|risk|quality-debt)\s*\|",
+        r"^\|\s*([A-Z][A-Z0-9_-]*-[0-9]{3})\s*\|\s*(defect|risk|quality-debt)\s*"
+        r"\|\s*(\S+ (?:High|Medium|Low))\s*/",
         findings_section,
         flags=re.MULTILINE,
     )
     detail_ids = set(re.findall(r"^### ([A-Z][A-Z0-9_-]*-[0-9]{3}):", text, flags=re.MULTILINE))
-    expected_pairs = [(finding["finding_id"], finding["finding_type"]) for finding in public_findings]
+    expected_pairs = [
+        (finding["finding_id"], finding["finding_type"], SEVERITY_LABELS[finding["severity"]])
+        for finding in public_findings
+    ]
     empty_message = "No reportable findings were identified within the reviewed scope."
 
     if public_findings:
@@ -591,7 +598,10 @@ def validate_report(text: str, data: dict[str, Any], report_path: Path) -> list[
         if canonical_header not in findings_section:
             errors.append("report: public findings require the canonical findings table")
         if table_pairs != expected_pairs:
-            errors.append("report: findings table rows must exactly match public evidence findings in canonical order")
+            errors.append(
+                "report: findings table rows must exactly match public evidence findings, "
+                "in canonical order and with the emoji severity label"
+            )
         if empty_message in findings_section:
             errors.append("report: non-empty findings must not use the empty-findings message")
     elif empty_message not in findings_section:
@@ -600,7 +610,7 @@ def validate_report(text: str, data: dict[str, Any], report_path: Path) -> list[
     expected_public_ids = {finding["finding_id"] for finding in public_findings}
     for finding in public_findings:
         finding_id = finding["finding_id"]
-        needs_detail = SEVERITY_RANK[finding["severity"]] >= SEVERITY_RANK["🟡 Medium"]
+        needs_detail = SEVERITY_RANK[finding["severity"]] >= SEVERITY_RANK["Medium"]
         if needs_detail and finding_id not in detail_ids:
             errors.append(f"report: High/Medium finding {finding_id} requires a detail heading")
         if needs_detail and finding_id in detail_ids:

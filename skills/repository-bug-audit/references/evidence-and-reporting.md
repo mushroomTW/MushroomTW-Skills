@@ -24,7 +24,7 @@ Rapid must not create `quality-debt`. Treat scanner hits, TODOs, complexity, sea
 
 ## Evidence and confidence
 
-Severity expresses impact; confidence expresses evidentiary certainty. Never substitute one for the other.
+Severity expresses impact; confidence expresses evidentiary certainty. Never substitute one for the other. Record severity as the plain values `High`, `Medium`, or `Low`; the emoji labels belong to the Markdown report, so the evidence JSON stays ASCII-safe on every host.
 
 - `observed` means directly confirmed from code and data flow in the current working tree.
 - `reproduced` means confirmed by a repository-configured test, build, linter, or analyzer that was actually executed.

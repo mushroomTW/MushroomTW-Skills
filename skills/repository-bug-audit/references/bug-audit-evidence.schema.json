@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://openai.local/repository-bug-audit/bug-audit-evidence.schema.json",
+  "$id": "urn:repository-bug-audit:bug-audit-evidence:3.0",
   "title": "Repository Bug Audit Evidence",
   "type": "object",
   "additionalProperties": false,
@@ -208,7 +208,7 @@
         "finding_id": { "type": "string", "pattern": "^[A-Z][A-Z0-9_-]*-[0-9]{3}$" },
         "fingerprint": { "type": "string", "pattern": "^[a-z0-9_-]+\\|[a-z0-9_-]+\\|[a-z0-9_.:-]+$" },
         "finding_type": { "enum": ["defect", "risk", "quality-debt"] },
-        "severity": { "enum": ["🔴 High", "🟡 Medium", "🟢 Low"] },
+        "severity": { "enum": ["High", "Medium", "Low"] },
         "confidence": { "type": "integer", "minimum": 1, "maximum": 10 },
         "category": {
           "enum": [

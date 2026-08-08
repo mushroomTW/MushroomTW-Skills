@@ -67,8 +67,9 @@ strings; the audit needs call relationships, and a search miss only ever support
 the reviewed scope."
 
 **On Windows**, write the validator path with forward slashes. If `python` is not on `PATH`, try the
-launcher: `py -3 -X utf8`. Keep `-X utf8` on every platform so the emoji severity values in the
-evidence JSON round-trip correctly.
+launcher: `py -3 -X utf8`. The validator reads and writes UTF-8 explicitly, so `-X utf8` is only
+needed to keep non-ASCII text in its console output readable — worth keeping, not a correctness
+requirement.
 
 **Model choice**: Comprehensive mode reads every in-scope file and holds cross-file state while
 reasoning about contracts and concurrency. Opus-class models handle that materially better. Rapid mode
