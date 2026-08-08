@@ -261,6 +261,11 @@ inventory, finding-type and confidence rules, deduplication, canonical ordering,
 score and rating arithmetic, mode-specific prohibitions, exact-match between the public Markdown
 findings and the evidence, and local link resolution.
 
+It also resolves the audited tree as the report's parent directory — the parent of `.docs/` — and
+rejects any `inventory` path or finding `location` that no file backs, which is the one kind of
+fabrication a structural validator can catch outright. Add `--repo-root <path>` when the artifacts
+are validated somewhere other than the tree they describe.
+
 What it does **not** do is prove a finding is true. It proves the record is internally consistent.
 Ruling out alternative explanations still requires reading the code.
 

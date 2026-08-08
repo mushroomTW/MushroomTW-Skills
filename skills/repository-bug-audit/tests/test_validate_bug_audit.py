@@ -6,7 +6,7 @@ import json
 import tempfile
 import unittest
 from datetime import datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "validate_bug_audit.py"
@@ -213,7 +213,7 @@ def quality_debt_finding(severity: str = "🟡 Medium") -> dict:
         "severity": severity,
         "confidence": 8,
         "category": "architecture",
-        "location": "src/cache.py:1",
+        "location": "src/tool.py:1",
         "summary": "Shared mutable state couples otherwise independent callers.",
         "evidence_kind": "observed",
         "evidence": ["Multiple public paths mutate the same module-level object."],
@@ -338,16 +338,39 @@ None.
 
 
 class BugAuditValidatorTests(unittest.TestCase):
-    def validate_pair(self, data: dict, report: str) -> list[str]:
+    def validate_pair(
+        self,
+        data: dict,
+        report: str,
+        materialize: bool = True,
+        missing: tuple[str, ...] = (),
+    ) -> list[str]:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             docs = root / ".docs"
             docs.mkdir()
+            if materialize:
+                self.materialize_inventory(root, data, missing)
             report_path = docs / data["artifacts"]["report"]
             evidence_path = docs / data["artifacts"]["evidence"]
             report_path.write_text(report, encoding="utf-8")
             evidence_path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
             return validate_bug_audit.run_validation(evidence_path, report_path)
+
+    @staticmethod
+    def materialize_inventory(root: Path, data: dict, missing: tuple[str, ...] = ()) -> None:
+        """Create the audited tree the evidence claims, so path checks have something to resolve.
+
+        Unsafe paths are skipped on purpose: a test that feeds an absolute or parent path is
+        asserting that the validator rejects it, not asking for a file outside the temp root.
+        Paths named in `missing` are left uncreated so a test can model a fabricated path.
+        """
+        for item in data["inventory"]:
+            if item["path"] in missing or not validate_bug_audit._safe_inventory_path(item["path"]):
+                continue
+            target = root / PurePosixPath(item["path"].replace("\\", "/"))
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.touch()
 
     def test_valid_rapid_and_comprehensive_v2_pairs(self) -> None:
         self.assertEqual([], self.validate_pair(rapid_evidence(), rapid_report()))
@@ -522,6 +545,53 @@ class BugAuditValidatorTests(unittest.TestCase):
             )
             self.assertEqual("repository-bug-audit-report-20260805-123456.md", report.name)
             self.assertEqual("repository-bug-audit-report-20260805-123456.evidence.json", evidence.name)
+
+    def test_unbacked_inventory_path_is_rejected(self) -> None:
+        data = comprehensive_evidence()
+        data["inventory"][1]["path"] = "src/ghost.py"
+        errors = self.validate_pair(data, comprehensive_report(data), missing=("src/ghost.py",))
+        self.assertTrue(
+            any("'src/ghost.py' does not exist in the audited tree" in error for error in errors)
+        )
+
+    def test_unbacked_finding_location_is_rejected(self) -> None:
+        data = comprehensive_evidence()
+        finding = defect_finding("🟢 Low")
+        finding["location"] = "src/ghost.py:12"
+        data["findings"] = [finding]
+        data["dimensions"][0]["finding_ids"] = ["BUG-001"]
+        errors = self.validate_pair(data, comprehensive_report(data))
+        self.assertTrue(
+            any("'src/ghost.py:12' does not exist in the audited tree" in error for error in errors)
+        )
+
+    def test_backed_finding_location_with_line_number_is_accepted(self) -> None:
+        self.assertEqual([], self.validate_pair(comprehensive_evidence(), comprehensive_report()))
+
+    def test_detached_tree_reports_a_repo_root_hint(self) -> None:
+        errors = self.validate_pair(comprehensive_evidence(), comprehensive_report(), materialize=False)
+        self.assertTrue(any("pass --repo-root" in error for error in errors))
+
+    def test_repo_root_override_resolves_paths(self) -> None:
+        data = comprehensive_evidence()
+        with tempfile.TemporaryDirectory() as artifacts, tempfile.TemporaryDirectory() as tree:
+            docs = Path(artifacts) / ".docs"
+            docs.mkdir()
+            self.materialize_inventory(Path(tree), data)
+            report_path = docs / data["artifacts"]["report"]
+            evidence_path = docs / data["artifacts"]["evidence"]
+            report_path.write_text(comprehensive_report(data), encoding="utf-8")
+            evidence_path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+            self.assertTrue(
+                any(
+                    "pass --repo-root" in error
+                    for error in validate_bug_audit.run_validation(evidence_path, report_path)
+                )
+            )
+            self.assertEqual(
+                [],
+                validate_bug_audit.run_validation(evidence_path, report_path, Path(tree)),
+            )
 
     def test_comprehensive_allows_mapped_only_in_a_provisional_report(self) -> None:
         data = narrowed_comprehensive_evidence()

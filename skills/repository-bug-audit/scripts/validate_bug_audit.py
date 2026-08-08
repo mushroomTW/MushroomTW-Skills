@@ -185,7 +185,68 @@ def _safe_inventory_path(raw_path: str) -> bool:
     )
 
 
-def validate_evidence(data: dict[str, Any], evidence_path: Path, report_path: Path) -> list[str]:
+def _resolve_repo_path(repo_root: Path, raw_path: str) -> Path:
+    """Resolve a repository-relative evidence path, accepting either slash style."""
+    return repo_root / PurePosixPath(raw_path.replace("\\", "/"))
+
+
+def _location_candidates(raw_location: str) -> list[str]:
+    """Return the file paths a finding location may name, or nothing when it names none.
+
+    Locations are normally `path` or `path:line`, but `path:symbol` and `path:line-line`
+    also appear. Trying the string both with and without its trailing `:segment` keeps the
+    check lenient: a free-form location simply yields no candidate and is not checked.
+    """
+    candidate = raw_location.strip()
+    if not candidate or any(character.isspace() for character in candidate):
+        return []
+    candidates = [candidate]
+    if ":" in candidate:
+        candidates.append(candidate.rsplit(":", 1)[0])
+    return [item for item in candidates if item and ("/" in item or "\\" in item or "." in item)]
+
+
+def _validate_paths_exist(data: dict[str, Any], repo_root: Path) -> list[str]:
+    """Check that recorded paths name files that actually exist in the audited tree.
+
+    The validator proves structure, not truth, but a path that no file backs is one
+    fabrication it can catch outright. When the tree is not co-located with the report —
+    a sandbox that only received the artifacts — nothing resolves and there is no basis
+    for the check, so it reports that once instead of failing every path.
+    """
+    if not repo_root.is_dir():
+        return []
+    inventory = data["inventory"]
+    missing_inventory = [
+        (index, item)
+        for index, item in enumerate(inventory)
+        if not _resolve_repo_path(repo_root, item["path"]).exists()
+    ]
+    if inventory and len(missing_inventory) == len(inventory):
+        return [
+            f"artifact: no inventory path resolves under {repo_root}; either the paths are "
+            "unbacked or the audited tree is elsewhere, in which case pass --repo-root"
+        ]
+
+    errors = [
+        f"$.inventory[{index}].path: {item['path']!r} does not exist in the audited tree"
+        for index, item in missing_inventory
+    ]
+    for index, finding in enumerate(data["findings"]):
+        candidates = _location_candidates(finding["location"])
+        if candidates and not any(_resolve_repo_path(repo_root, item).exists() for item in candidates):
+            errors.append(
+                f"$.findings[{index}].location: {finding['location']!r} does not exist in the audited tree"
+            )
+    return errors
+
+
+def validate_evidence(
+    data: dict[str, Any],
+    evidence_path: Path,
+    report_path: Path,
+    repo_root: Path | None = None,
+) -> list[str]:
     errors: list[str] = []
     mode = data["audit_mode"]
 
@@ -226,6 +287,8 @@ def validate_evidence(data: dict[str, Any], evidence_path: Path, report_path: Pa
         counts[item["status"]] += 1
         if item["status"] in reason_required and not item.get("reason"):
             errors.append(f"$.inventory[{index}].reason: required for {item['status']} items")
+
+    errors.extend(_validate_paths_exist(data, repo_root or report_path.resolve().parent.parent))
 
     coverage = data["coverage"]
     calculated_in_scope = counts["read"] + counts["mapped"] + counts["unreadable"]
@@ -530,23 +593,31 @@ def validate_report(text: str, data: dict[str, Any], report_path: Path) -> list[
     return errors
 
 
-def run_validation(evidence_path: Path, report_path: Path) -> list[str]:
+def run_validation(evidence_path: Path, report_path: Path, repo_root: Path | None = None) -> list[str]:
     schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
     data = json.loads(evidence_path.read_text(encoding="utf-8"))
     report = report_path.read_text(encoding="utf-8")
     schema_errors = validate_schema(data, schema)
     if schema_errors:
         return schema_errors
-    return validate_evidence(data, evidence_path, report_path) + validate_report(report, data, report_path)
+    return validate_evidence(data, evidence_path, report_path, repo_root) + validate_report(
+        report, data, report_path
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate a repository-bug-audit artifact pair.")
     parser.add_argument("--evidence", required=True, type=Path)
     parser.add_argument("--report", required=True, type=Path)
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=None,
+        help="Root of the audited tree; defaults to the report's parent directory (the .docs parent).",
+    )
     args = parser.parse_args(argv)
     try:
-        errors = run_validation(args.evidence, args.report)
+        errors = run_validation(args.evidence, args.report, args.repo_root)
     except (OSError, UnicodeError, json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
         print(f"Unable to validate bug-audit artifacts: {exc}", file=sys.stderr)
         return 2

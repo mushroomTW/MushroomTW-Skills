@@ -84,7 +84,9 @@ Ask the startup choices as one short numbered prose question. Scope is whatever 
 supplied — record anything you could not access as `unreadable` with a reason, and let the coverage
 percentage fall honestly rather than excluding what you simply could not open.
 
-Run the validator with the bundled Python script in the analysis sandbox. Repository-configured checks
+Run the validator with the bundled Python script in the analysis sandbox. If the uploaded project
+does not sit above the `.docs/` directory you wrote the artifacts into, point the validator at it with
+`--repo-root`, so the inventory and finding paths can be resolved instead of reported as unbacked. Repository-configured checks
 are usually unavailable, which is a legitimate `unavailable` verification state, not a failure — but it
 caps Comprehensive confidence below High, because High requires at least one passed configured check.
 

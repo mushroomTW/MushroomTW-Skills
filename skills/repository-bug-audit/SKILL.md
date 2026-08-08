@@ -34,7 +34,7 @@ Follow these phases in order:
 
 Never install an analyzer, dependency, or other tool. Never write a reproduction program or test probe in either the repository or a temporary directory. Only results from checks already configured by the repository may use `reproduced` evidence.
 
-The validator proves schema and policy consistency only. It does not prove that a finding is true. Eliminate reasonable alternative explanations by reading code, callers, configuration, and tests.
+The validator proves schema and policy consistency, and that recorded paths name real files. It does not prove that a finding is true. Eliminate reasonable alternative explanations by reading code, callers, configuration, and tests.
 
 ## Build the repository map
 
@@ -114,6 +114,8 @@ python -X utf8 <skill-directory>/scripts/validate_bug_audit.py --evidence <evide
 Resolve `<skill-directory>` from the [platform adapters](references/platform-adapters.md), which maps
 the installation layouts of each host. Quote the path; installed skill directories can carry version
 segments and, on some platforms, spaces.
+
+The validator resolves the audited tree as the report's parent directory — the parent of `.docs/` — and checks that every `inventory` path and every finding `location` names a file that actually exists. Pass `--repo-root <path>` when the artifacts are validated somewhere other than the tree they describe.
 
 Exit code `0` means the artifact pair satisfies structural and policy checks. Exit code `1` means content violations must be corrected. Exit code `2` means arguments or files could not be read. Do not deliver unvalidated artifacts. When missing evidence prevents correction, mark the affected conclusion provisional and keep evidence internally consistent.
 
