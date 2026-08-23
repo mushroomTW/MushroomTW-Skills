@@ -93,6 +93,8 @@ python C:/Users/<user>/.codex/skills/.system/plugin-creator/scripts/validate_plu
 
 ```text
 excellent-readme/
+├── SKILL.md                             # Codex standalone skill 探索入口
+├── agents/openai.yaml                  # Codex standalone 介面中介資料
 ├── .claude-plugin/
 │   └── marketplace.json                 # Claude Code marketplace catalog
 ├── .agents/plugins/
@@ -108,6 +110,8 @@ excellent-readme/
 ├── README.md                            # 英文文件
 └── README_ZH.md                         # 繁體中文文件
 ```
+
+根目錄的 `SKILL.md` 是輕量的探索入口，會導向套件內的 canonical skill。因此 Codex 本機探索與兩種市集安裝都會使用同一份工作流程指示。
 
 ## 限制
 

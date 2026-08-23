@@ -93,6 +93,8 @@ python C:/Users/<user>/.codex/skills/.system/plugin-creator/scripts/validate_plu
 
 ```text
 excellent-readme/
+├── SKILL.md                             # Standalone Codex discovery entry
+├── agents/openai.yaml                  # Standalone Codex UI metadata
 ├── .claude-plugin/
 │   └── marketplace.json                 # Claude Code marketplace catalog
 ├── .agents/plugins/
@@ -108,6 +110,8 @@ excellent-readme/
 ├── README.md                            # English documentation
 └── README_ZH.md                         # Traditional Chinese documentation
 ```
+
+The root `SKILL.md` is a lightweight discovery entry that delegates to the canonical packaged skill. Local Codex discovery and both marketplace installations therefore use the same workflow instructions.
 
 ## Limitations
 
