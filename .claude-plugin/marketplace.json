@@ -1,0 +1,22 @@
+{
+  "name": "mushroomtw-skills",
+  "owner": {
+    "name": "mushroomTW",
+    "url": "https://github.com/mushroomTW"
+  },
+  "description": "Reusable skills maintained by mushroomTW.",
+  "plugins": [
+    {
+      "name": "excellent-readme",
+      "displayName": "Excellent README",
+      "source": "./.agents/plugins/plugins/excellent-readme",
+      "description": "Create, improve, audit, and synchronize evidence-based README files.",
+      "category": "Documentation",
+      "tags": [
+        "readme",
+        "documentation",
+        "audit"
+      ]
+    }
+  ]
+}
