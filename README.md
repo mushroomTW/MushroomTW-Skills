@@ -68,22 +68,6 @@ The only skill entry point is [`SKILL.md`](.agents/plugins/plugins/excellent-rea
 
 Do not copy this skill to the repository root. Both marketplaces install the plugin containing this directory, so there is one maintained source of instructions.
 
-### Use a Local Clone
-
-After cloning this repository, run these commands from the repository root to install the local marketplace without requiring a published GitHub repository:
-
-```powershell
-codex plugin marketplace add .
-codex plugin add excellent-readme@mushroomtw-skills
-```
-
-For Claude Code:
-
-```powershell
-claude plugin marketplace add .
-claude plugin install excellent-readme@mushroomtw-skills
-```
-
 ## How It Works
 
 1. Identify the README language, audience, purpose, and output path.

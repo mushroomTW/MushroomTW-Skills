@@ -68,22 +68,6 @@ Codex 與 Claude Code 會從各自的 catalog 安裝同一份 plugin 內容，�
 
 請勿把 skill 複製到 repository 根目錄。兩個 marketplace 都會安裝包含此目錄的 plugin，因此所有指示只有一個維護來源。
 
-### 從本機 clone 使用
-
-clone 此 repository 後，請在 repository 根目錄執行以下命令，即可加入本機 marketplace；不必等待 GitHub repository 發布：
-
-```powershell
-codex plugin marketplace add .
-codex plugin add excellent-readme@mushroomtw-skills
-```
-
-Claude Code 則執行：
-
-```powershell
-claude plugin marketplace add .
-claude plugin install excellent-readme@mushroomtw-skills
-```
-
 ## 工作方式
 
 1. 確認 README 的語言、讀者、目的與輸出位置。
