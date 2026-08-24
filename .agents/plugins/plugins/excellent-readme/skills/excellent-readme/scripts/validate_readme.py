@@ -10,8 +10,15 @@ from urllib.parse import unquote, urlparse
 
 REQUIRED_HINTS = {
     "purpose / introduction": [r"^#\s+", r"^#{1,6}\s+"],
-    "installation or getting started": [r"install", r"getting started", r"quick start"],
-    "usage or example": [r"usage", r"example", r"quick start"],
+    "installation or getting started": [
+        r"install",
+        r"getting started",
+        r"quick start",
+        r"安裝",
+        r"開始使用",
+        r"快速使用",
+    ],
+    "usage or example": [r"usage", r"example", r"quick start", r"使用", r"範例"],
 }
 
 
