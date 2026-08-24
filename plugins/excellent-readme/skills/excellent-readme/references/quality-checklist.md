@@ -29,10 +29,12 @@
 ## Adoption risk
 
 - [ ] Limitations, compatibility, known issues, and security notes are disclosed early.
-- [ ] The license type matches the LICENSE file.
+- [ ] A dormant or archived project discloses its maintenance status near the top.
+- [ ] The license type matches the LICENSE file and is written as an SPDX identifier.
 - [ ] Badges and screenshots have actual value and do not carry the only copy of important information.
 - [ ] Badges use a dynamic source where one exists; any hard-coded value records where it came from.
 - [ ] Author details, contact information, contribution instructions, and roadmap items are confirmed.
+- [ ] The README states where readers can ask questions and whether PRs are accepted.
 
 ## Writing quality
 

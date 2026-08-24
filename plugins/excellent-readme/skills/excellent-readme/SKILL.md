@@ -5,7 +5,7 @@ description: Create, improve, audit, or synchronize a software project's README.
 
 # Excellent README
 
-A README is a project's entry point, not its complete manual. Help the right reader quickly answer: “What is this, is it relevant to me, how do I start, and what should I know before adopting it?” The reader should be able to reach a first successful result without reading the source code.
+A README is a project's entry point, not its complete manual. Help the right reader quickly answer: “What is this, is it relevant to me, how do I start, and what should I know before adopting it?” The reader should be able to reach a first successful result without reading the source code. Order information by how quickly it lets the wrong reader bail out: a reader who discovers early that the project does not fit their needs has been served, not lost.
 
 ## Work modes
 
@@ -14,11 +14,11 @@ First identify the requested outcome:
 - **Create**: no README exists; build a first draft from repository facts.
 - **Improve**: preserve correct content while fixing structure, clarity, gaps, and stale information.
 - **Audit**: do not edit first; report evidence, problems, risks, and priority-ordered recommendations.
-- **Synchronize**: update README content affected by code or configuration changes.
+- **Synchronize**: update README content affected by code or configuration changes. An outdated README misleads more actively than a missing one, so treat drift as damage rather than cosmetics.
 
 If the user does not specify a mode, default to “improve and verify.” Unless explicitly requested, do not turn the README into a complete documentation website.
 
-When the repository keeps translated variants of the README (`README_ZH.md`, `README.fr.md`, files under `docs/` or `translations/`), treat them as one document in several languages: apply content changes to every variant you can write well, and report any variant left out of sync instead of letting it drift silently.
+When the repository keeps translated variants of the README (`README_ZH.md`, `README.fr.md`, files under `docs/` or `translations/`), treat them as one document in several languages: apply content changes to every variant you can write well, and report any variant left out of sync instead of letting it drift silently. Name a new translation with a BCP 47 language tag (`README.zh-TW.md`, `README.de.md`) and keep `README.md` for English when several languages coexist; when the repository already uses another naming scheme, follow it.
 
 ## Invariants
 

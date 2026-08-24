@@ -12,7 +12,7 @@ Order information around the reader's adoption decision:
 4. **Integrate**: API or CLI reference, tech stack, architecture, and project structure.
 5. **Participate**: security, contribution, roadmap, acknowledgements, and author information.
 
-Content near the top should be short, concrete, and easy to evaluate. Put deeper background and maintenance information lower down. If a section does not help the target reader make a decision or complete a task, move it to a separate document, link to it, or omit it.
+Order the top of the page by how quickly each element lets a non-fit reader short-circuit and leave; a fast, honest “not for me” serves that reader as well as an adoption does. Content near the top should be short, concrete, and easy to evaluate. Put deeper background and maintenance information lower down. If a section does not help the target reader make a decision or complete a task, move it to a separate document, link to it, or omit it.
 
 ## Fifteen candidate sections
 
@@ -29,9 +29,9 @@ Content near the top should be short, concrete, and easy to evaluate. Put deeper
 | Configuration | There are environment variables, config files, or external services | Name, purpose, requiredness, default, and secret-handling rules |
 | Security | There are credentials, user data, networks, or deployment risks | Security boundaries, prohibited practices, and reporting path |
 | API or CLI | It is a library, SDK, or CLI | Copyable calls or commands and their output |
-| How to Contribute | External contributions are welcome | Development, testing, submission, and conduct entry points |
+| How to Contribute | External contributions are welcome | Where to ask questions, whether PRs are accepted, and the development, testing, submission, and conduct entry points |
 | What's Next | There is a confirmed public roadmap | Short-term direction without invented commitments |
-| License | The repository contains license information | License type and link to the license file |
+| License | The repository contains license information | License type as an [SPDX identifier](https://spdx.org/licenses/) (`MIT`, `Apache-2.0`) and a link to the license file |
 | Acknowledgements / Author | It helps readers use or trust the project | Confirmed credits and contact information |
 
 These are candidate sections, not a completeness score. A short, accurate README is better than a long README full of filler.
@@ -94,11 +94,16 @@ Add `logo=` with a [simple-icons](https://simpleicons.org/) slug, plus `logoColo
 [![Runtime: Tokio](https://img.shields.io/badge/runtime-Tokio-4c8eda.svg?style=for-the-badge&logo=rust&logoColor=white)](https://tokio.rs/)
 ```
 
+## Maintenance status
+
+When the evidence shows the project is dormant, archived, or in maintenance mode — a long-quiet commit history, an archive flag, or the user saying so — state it near the top of the README instead of leaving readers to infer it. A short note about what still works, what will not be fixed, and whether new maintainers are welcome protects the adoption decision better than silence. Never conclude a project is unmaintained from age alone: activity can live in branches, forks, or another repository of a monorepo, so treat dormancy as a fact to verify like any other.
+
 ## Anti-patterns
 
 - A slogan with no use case.
 - Architecture and technology details before installation and examples.
 - Commands, environment variables, paths, or deployment steps that do not exist.
+- Installation steps that assume the reader already lives in the project's ecosystem: `make install` with no word about prerequisites, build tools, or supported platforms.
 - A large badge wall used as a substitute for limitations, maintenance status, or evidence.
 - Every API, design decision, and tutorial forced into the README until it loses focus.
 - A copied list that can drift from the manifest or configuration without a verification mechanism.
@@ -107,3 +112,5 @@ Add `logo=` with a [simple-icons](https://simpleicons.org/) slug, plus `logoColo
 
 - [15 Essential Sections Every README Needs](https://codelove.tw/@tony/post/am2Gjq)
 - [The Art of README — Traditional Chinese](https://github.com/hackergrrl/art-of-readme/blob/master/README-zh-TW.md)
+- [standard-readme](https://github.com/RichardLitt/standard-readme) — contributing answers and i18n file naming
+- [Make a README](https://www.makeareadme.com/) — maintenance-status disclosure
