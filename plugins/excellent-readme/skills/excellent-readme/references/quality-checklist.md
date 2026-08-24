@@ -15,7 +15,8 @@
 - [ ] There is at least one minimal usage example.
 - [ ] The example includes input, execution, and expected output or result.
 - [ ] Required environment variables, external services, and database setup are documented.
-- [ ] Unverified steps are marked with `TODO:` or reported as gaps.
+- [ ] The README ships no `TODO:` or placeholder text; unverified steps and open questions live in the delivery report.
+- [ ] User-decidable gaps (license, contacts, roadmap) were raised as questions when the user could answer; otherwise the section is omitted and the gap reported.
 
 ## Technical accuracy
 

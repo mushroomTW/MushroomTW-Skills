@@ -30,7 +30,7 @@ $excellent-readme 請根據這個 repository 的實際內容改善 README，並�
 - 驗證安裝、啟動、測試、範例、目錄與本機連結。
 - 依 CLI、函式庫、服務、前端或研究工具調整 README 結構。
 - 同步維護多語言 README 版本，無法同步時回報差異。
-- 缺少證據時保留明確待辦或回報缺口，不虛構功能與相容性資訊。
+- 缺少證據時先詢問使用者或在交付報告回報缺口，不在 README 留下待辦佔位，也不虛構功能與相容性資訊。
 
 ## 從 Marketplace 安裝
 
@@ -82,7 +82,7 @@ plugins/excellent-readme/skills/excellent-readme/
 
 ## 驗證
 
-README 靜態檢查器僅依賴 Python 標準函式庫，可檢查未完成標記、空連結目標與本機連結，並略過程式碼區塊與行內程式碼。章節是否齊備、內容是否有用交由品質檢核表判斷，不以關鍵字比對代替：
+README 靜態檢查器僅依賴 Python 標準函式庫，可檢查未完成標記、空連結目標、本機連結，以及指向不存在授權檔的敘述，並略過程式碼區塊與行內程式碼。章節是否齊備、內容是否有用交由品質檢核表判斷，不以關鍵字比對代替：
 
 ```powershell
 python plugins/excellent-readme/skills/excellent-readme/scripts/validate_readme.py README_ZH.md --project .
@@ -104,6 +104,15 @@ python C:/Users/<user>/.codex/skills/.system/plugin-creator/scripts/validate_plu
 > [!NOTE]
 > README 腳本只做靜態檢查，不能取代命令實際執行、外部連結存取或人工閱讀複核。Codex 驗證器的實際路徑取決於本機 Codex 安裝位置。
 
+## 有效嗎？一場八份 README 的實驗
+
+我們把同一個測試專案——一個沒有 README、沒有 LICENSE、設定藏著陷阱（硬編碼的佔位 API 金鑰，長得像應該是環境變數）的 FastAPI + WebSocket 狼人殺遊戲——交給四個 Claude 模型（Haiku 4.5、Sonnet 5、Opus 5、Fable 5）各寫兩次：一次遵循本 skill，一次明確禁止使用。八份逐字輸出與完整比較收錄在 [docs/experiment/](docs/experiment/README.md)。
+
+- 對小模型，skill 修正的是硬錯誤：裝不齊依賴的安裝指令、把目錄名當專案標題、快速開始被壓在十個章節之後。
+- 對前沿模型，事實本來就對；skill 改變的是交付紀律——漏斗排序、以 `TODO:` 標記的誠實缺口、防漂移的 badge、守住文件範圍。
+- 八次運行中最穩定的訊號：所有 skill 版都主動執行了驗證檢查；所有對照組一個檢查都沒跑。
+- 誠實的警語：章節框架誘使小模型虛構了一句授權參照。evidence-first 能減少虛構，但在那個量級無法根除。
+
 ## 專案結構
 
 ```text
@@ -112,6 +121,7 @@ excellent-readme/
 │   └── marketplace.json                 # Claude Code marketplace catalog
 ├── .agents/plugins/
 │   └── marketplace.json                 # Codex marketplace catalog
+├── docs/experiment/                     # 八份 README 模型實驗：展品與報告
 ├── plugins/excellent-readme/
 │   ├── .claude-plugin/plugin.json       # Claude Code plugin manifest
 │   ├── .codex-plugin/plugin.json        # Codex plugin manifest

@@ -30,7 +30,7 @@ Both products may also load the skill automatically when a request matches its d
 - Verifies installation, startup, test, example, path, and local-link claims.
 - Adapts the README structure to CLIs, libraries, services, frontends, and research tools.
 - Keeps translated README variants aligned, or reports the divergence when it cannot.
-- Reports evidence gaps explicitly instead of inventing features or compatibility claims.
+- Asks the user or reports evidence gaps in the delivery summary instead of shipping `TODO:` placeholders or inventing claims.
 
 ## Install from the Marketplace
 
@@ -82,7 +82,7 @@ The complete workflow is in [`SKILL.md`](plugins/excellent-readme/skills/excelle
 
 ## Validation
 
-The included static checker uses only the Python standard library. It checks for unfinished markers, empty link targets, and broken local links, ignoring code blocks and inline code. Judging whether a section is present and useful stays with the quality checklist, not with keyword matching:
+The included static checker uses only the Python standard library. It checks for unfinished markers, empty link targets, broken local links, and prose that points readers at a nonexistent license file, ignoring code blocks and inline code. Judging whether a section is present and useful stays with the quality checklist, not with keyword matching:
 
 ```powershell
 python plugins/excellent-readme/skills/excellent-readme/scripts/validate_readme.py README.md --project .
@@ -104,6 +104,15 @@ python C:/Users/<user>/.codex/skills/.system/plugin-creator/scripts/validate_plu
 > [!NOTE]
 > The README checker performs static checks only. It does not replace executing documented commands, testing external links, or reviewing the document as a reader. The Codex validator path depends on the local Codex installation.
 
+## Does It Work? An Eight-README Experiment
+
+One test project — a FastAPI + WebSocket Werewolf game with no README, no LICENSE, and a booby-trapped configuration (a hardcoded placeholder API key that looks like it should be an environment variable) — was given to four Claude models (Haiku 4.5, Sonnet 5, Opus 5, Fable 5) twice each: once following this skill, once with the skill explicitly forbidden. All eight verbatim outputs and the full comparison live in [docs/experiment/](docs/experiment/README.md) (report in Traditional Chinese).
+
+- For the small model, the skill fixed hard errors: a dependency-incomplete install command, the directory name used as the project title, and quick start buried behind ten other sections.
+- For the frontier models, the facts were already right; the skill changed delivery discipline — funnel ordering, `TODO:`-marked honest gaps, drift-resistant badges, and staying in documentation scope.
+- The most stable signal across all eight runs: every skill run proactively executed verification checks; every baseline ran none.
+- One honest caveat: the section framework tempted the small model into inventing a license reference. Evidence-first instructions reduce fabrication; they do not eliminate it at that tier.
+
 ## Project Structure
 
 ```text
@@ -112,6 +121,7 @@ excellent-readme/
 │   └── marketplace.json                 # Claude Code marketplace catalog
 ├── .agents/plugins/
 │   └── marketplace.json                 # Codex marketplace catalog
+├── docs/experiment/                     # Eight-README model experiment: exhibits and report
 ├── plugins/excellent-readme/
 │   ├── .claude-plugin/plugin.json       # Claude Code plugin manifest
 │   ├── .codex-plugin/plugin.json        # Codex plugin manifest

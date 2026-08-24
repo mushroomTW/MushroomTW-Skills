@@ -103,9 +103,11 @@ When the evidence shows the project is dormant, archived, or in maintenance mode
 - A slogan with no use case.
 - Architecture and technology details before installation and examples.
 - Commands, environment variables, paths, or deployment steps that do not exist.
+- A sentence written only so its section can exist — a license paragraph pointing at a missing LICENSE file, a contribution section with no real channel behind it.
 - Installation steps that assume the reader already lives in the project's ecosystem: `make install` with no word about prerequisites, build tools, or supported platforms.
 - A large badge wall used as a substitute for limitations, maintenance status, or evidence.
 - Every API, design decision, and tutorial forced into the README until it loses focus.
+- Internal protocol tables, data-structure dumps, or module walkthroughs in a README whose identified reader is an end user rather than a contributor.
 - A copied list that can drift from the manifest or configuration without a verification mechanism.
 
 ## Sources

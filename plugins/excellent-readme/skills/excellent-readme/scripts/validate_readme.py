@@ -27,6 +27,16 @@ INLINE_CODE = re.compile(r"`+[^`\n]+`+")
 EMPTY_LINK = re.compile(r"\[[^\]]*\]\(\s*\)")
 LINK = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
 
+# A prose reference to a license file (uppercase filename convention only, so
+# ordinary words like "license" stay out of scope). Lines that negate or
+# discuss the absence ("no LICENSE file", 「未包含 LICENSE」) are legitimate
+# disclosures and must not be flagged.
+LICENSE_FILE_WORD = re.compile(r"\b(?:LICENSE|LICENCE|COPYING)\b")
+LICENSE_ABSENCE_TALK = re.compile(
+    r"(?i)\bno\b|\bnot\b|missing|without|lacks|to be added|\badd(?:ed|ing)?\b"
+    r"|invent|fabricat|未|沒有|没有|尚未|缺|補上|无|無|不|虛構|虚构"
+)
+
 
 def strip_code(text: str) -> str:
     """Remove fenced blocks and inline code spans.
@@ -82,13 +92,29 @@ def main() -> int:
     markers = sorted({match.group(0).strip() for match in UNFINISHED_MARKERS.finditer(prose)})
     if markers:
         warnings.append(
-            "Contains unfinished markers ({}): complete them or report them as gaps".format(
-                ", ".join(markers)
-            )
+            "Contains unfinished markers ({}): resolve them -- ask the user or report the gap"
+            " in the delivery summary; a README ships no placeholders".format(", ".join(markers))
         )
 
     if EMPTY_LINK.search(prose):
         warnings.append("Contains a link with an empty target")
+
+    has_license_file = (
+        any(project.glob("LICENSE*"))
+        or any(project.glob("LICENCE*"))
+        or any(project.glob("COPYING*"))
+    )
+    if not has_license_file:
+        for line in prose.splitlines():
+            if (
+                LICENSE_FILE_WORD.search(line)
+                and not LICENSE_ABSENCE_TALK.search(line)
+                and "TODO" not in line
+            ):
+                warnings.append(
+                    f"References a license file that does not exist: {line.strip()[:80]}"
+                    " -- disclose the gap instead of pointing readers at a missing file"
+                )
 
     for target in local_targets(prose):
         candidate = (readme.parent / target).resolve()

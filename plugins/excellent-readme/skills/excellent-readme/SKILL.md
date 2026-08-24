@@ -28,7 +28,7 @@ When the repository keeps translated variants of the README (`README_ZH.md`, `RE
 4. **Runnable**: README installation, startup, test, and usage examples must correspond to files, scripts, CLI help, or tests that exist in the repository. Run safe examples when practical.
 5. **Single source of truth**: do not copy information that readers can directly inspect in the environment and that is likely to drift. Use the README for background, rationale, limitations, and workflows that the files do not reveal.
 6. **Right-sized**: the 15 sections from the reference article are candidates, not mandatory headings. Keep small projects short; add architecture, project structure, security, API, contribution, and roadmap sections only when they help.
-7. **Honest gaps**: when required information cannot be found, keep an explicit `TODO:` or report the gap. Never fill missing facts with plausible guesses.
+7. **Honest gaps**: information only the user can decide — license choice, contribution channels, contact points, roadmap — is asked, not written around. When nobody can answer, omit the section and list the open question in the delivery report; the README never ships `TODO:` placeholders. When an absence itself affects adoption (no license file, no support channel), state the absence as a plain fact in the appropriate section — a fact, not a placeholder. Never fill missing facts with plausible guesses, and never write a sentence just so a candidate section can exist — omitting a section is always better than inventing its content.
 
 ## Workflow
 
@@ -62,7 +62,7 @@ Adapt the structure to the project type:
 - **Frontend / full-stack product**: demo or screenshots, features, stack, architecture, local development, deployment.
 - **Tool / research project**: problem context, method, reproduction steps, inputs and outputs, limitations, citations.
 
-Do not add empty sections just to fill a template. Omit sections without useful evidence or mark the gap explicitly.
+Do not add empty sections just to fill a template. Omit sections without useful evidence and report the gap in the delivery summary.
 
 ### 4. Draft the README
 
@@ -74,8 +74,8 @@ Usually use this order, adapting it to the project:
 4. Minimal runnable example: show real input, output, or screen state.
 5. Installation and Getting Started: provide the complete path from clone or installation to the first successful run.
 6. Features: describe user-visible capabilities without unnecessary implementation detail.
-7. Tech Stack, Architecture, and Project Structure: include them when they help understanding, integration, or contribution.
-8. Configuration: document required settings, defaults, formats, and handling of sensitive information.
+7. Tech Stack, Architecture, and Project Structure: include them when they help understanding, integration, or contribution. Keep implementation internals — wire protocols, internal data structures, module walkthroughs — out of a README whose reader is an end user; keep an internal fact only when it carries a consequence the reader acts on (a port to change in two places, a file that must not be committed), phrased as that consequence, and link to code or separate docs for the rest.
+8. Configuration: document required settings, defaults, formats, and handling of sensitive information. Describe how settings are actually loaded — never imply a `.env` file or an environment variable takes effect when no code reads it.
 9. API or CLI Reference: document important parameters, types, optionality, defaults, return values, and examples.
 10. Security, limitations, compatibility, and common issues: disclose adoption risks early.
 11. Contribution, roadmap, license, acknowledgements, and author: include only confirmed, useful information.
@@ -102,7 +102,7 @@ Run checks proportional to the task and available authorization:
 
 Run `python <skill-dir>/scripts/validate_readme.py <readme-path> --project <repository-root>` for static checks when useful. It ignores code blocks, and its warnings are heuristic leads: read each flagged line and judge it before editing.
 
-Completion criterion: every retained command and link passes a traceability check, and every unverified item is explicitly marked.
+Completion criterion: every retained command and link passes a traceability check, and every unverified item is either qualified in plain wording or listed in the delivery report — never left as a placeholder.
 
 ### 6. Perform a final reader review
 
