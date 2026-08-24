@@ -6,7 +6,7 @@
 
 它把 README 視為專案入口：先幫助讀者判斷專案是否適合自己，再提供可複製、可驗證的最小成功路徑。所有功能、命令、版本、設定與連結都必須能追溯至 repository 證據；無法確認的資訊會明確標記，而不是合理猜測。
 
-## 快速使用（Usage）
+## 快速使用
 
 在 Codex 中明確指定 skill：
 
@@ -56,10 +56,10 @@ Codex 與 Claude Code 會從各自的 catalog 安裝同一份 plugin 內容，�
 
 ## Canonical Skill 位置
 
-唯一的 skill 入口是 [`SKILL.md`](.agents/plugins/plugins/excellent-readme/skills/excellent-readme/SKILL.md)，其輔助檔案位於同一個目錄：
+唯一的 skill 入口是 [`SKILL.md`](plugins/excellent-readme/skills/excellent-readme/SKILL.md)，其輔助檔案位於同一個目錄：
 
 ```text
-.agents/plugins/plugins/excellent-readme/skills/excellent-readme/
+plugins/excellent-readme/skills/excellent-readme/
 ├── SKILL.md
 ├── agents/openai.yaml
 ├── references/
@@ -77,14 +77,14 @@ Codex 與 Claude Code 會從各自的 catalog 安裝同一份 plugin 內容，�
 5. 檢查命令、連結、標題、資產與範例是否可追溯且可執行。
 6. 從首次閱讀者角度進行最後複核，回報驗證結果與資訊缺口。
 
-詳細規則位於 [`SKILL.md`](.agents/plugins/plugins/excellent-readme/skills/excellent-readme/SKILL.md)。README 的設計原則、品質檢核表與風格範例位於同一個 skill 的 [`references/`](.agents/plugins/plugins/excellent-readme/skills/excellent-readme/references/) 目錄。
+詳細規則位於 [`SKILL.md`](plugins/excellent-readme/skills/excellent-readme/SKILL.md)。README 的設計原則、品質檢核表與風格範例位於同一個 skill 的 [`references/`](plugins/excellent-readme/skills/excellent-readme/references/) 目錄。
 
 ## 驗證
 
 README 靜態檢查器僅依賴 Python 標準函式庫，可檢查必要內容提示、未完成標記與本機連結：
 
 ```powershell
-python .agents/plugins/plugins/excellent-readme/skills/excellent-readme/scripts/validate_readme.py README_ZH.md --project .
+python plugins/excellent-readme/skills/excellent-readme/scripts/validate_readme.py README_ZH.md --project .
 ```
 
 成功時會輸出：
@@ -97,7 +97,7 @@ README static checks passed.
 
 ```powershell
 claude plugin validate .
-python C:/Users/<user>/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py .agents/plugins/plugins/excellent-readme
+python C:/Users/<user>/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/excellent-readme
 ```
 
 > [!NOTE]
@@ -110,15 +110,15 @@ excellent-readme/
 ├── .claude-plugin/
 │   └── marketplace.json                 # Claude Code marketplace catalog
 ├── .agents/plugins/
-│   ├── marketplace.json                 # Codex marketplace catalog
-│   └── plugins/excellent-readme/
-│       ├── .claude-plugin/plugin.json   # Claude Code plugin manifest
-│       ├── .codex-plugin/plugin.json    # Codex plugin manifest
-│       └── skills/excellent-readme/
-│           ├── SKILL.md                 # 核心指示與觸發範圍
-│           ├── agents/openai.yaml       # Codex 顯示資料與預設提示
-│           ├── references/              # 設計框架、檢核表與範例
-│           └── scripts/                 # README 靜態檢查器
+│   └── marketplace.json                 # Codex marketplace catalog
+├── plugins/excellent-readme/
+│   ├── .claude-plugin/plugin.json       # Claude Code plugin manifest
+│   ├── .codex-plugin/plugin.json        # Codex plugin manifest
+│   └── skills/excellent-readme/
+│       ├── SKILL.md                     # 核心指示與觸發範圍
+│       ├── agents/openai.yaml           # Codex 顯示資料與預設提示
+│       ├── references/                  # 設計框架、檢核表與範例
+│       └── scripts/                     # README 靜態檢查器
 ├── README.md                            # 英文文件
 └── README_ZH.md                         # 繁體中文文件
 ```

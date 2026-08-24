@@ -9,7 +9,7 @@
     {
       "name": "excellent-readme",
       "displayName": "Excellent README",
-      "source": "./.agents/plugins/plugins/excellent-readme",
+      "source": "./plugins/excellent-readme",
       "description": "Create, improve, audit, and synchronize evidence-based README files.",
       "category": "Documentation",
       "tags": [

@@ -56,10 +56,10 @@ Both catalogs install the same plugin directory, so the skill instructions, refe
 
 ## Canonical Skill Location
 
-The only skill entry point is [`SKILL.md`](.agents/plugins/plugins/excellent-readme/skills/excellent-readme/SKILL.md). Its supporting files stay beside it in the same directory:
+The only skill entry point is [`SKILL.md`](plugins/excellent-readme/skills/excellent-readme/SKILL.md). Its supporting files stay beside it in the same directory:
 
 ```text
-.agents/plugins/plugins/excellent-readme/skills/excellent-readme/
+plugins/excellent-readme/skills/excellent-readme/
 ├── SKILL.md
 ├── agents/openai.yaml
 ├── references/
@@ -77,14 +77,14 @@ Do not copy this skill to the repository root. Both marketplaces install the plu
 5. Check that commands, links, headings, assets, and examples are traceable and runnable.
 6. Review the result as a first-time reader and report validation results and information gaps.
 
-The complete workflow is in [`SKILL.md`](.agents/plugins/plugins/excellent-readme/skills/excellent-readme/SKILL.md). Its README framework, delivery checklist, and style exemplars are in the skill's [`references/`](.agents/plugins/plugins/excellent-readme/skills/excellent-readme/references/) directory.
+The complete workflow is in [`SKILL.md`](plugins/excellent-readme/skills/excellent-readme/SKILL.md). Its README framework, delivery checklist, and style exemplars are in the skill's [`references/`](plugins/excellent-readme/skills/excellent-readme/references/) directory.
 
 ## Validation
 
 The included static checker uses only the Python standard library. It checks for essential content hints, unfinished markers, and broken local links:
 
 ```powershell
-python .agents/plugins/plugins/excellent-readme/skills/excellent-readme/scripts/validate_readme.py README.md --project .
+python plugins/excellent-readme/skills/excellent-readme/scripts/validate_readme.py README.md --project .
 ```
 
 A successful run prints:
@@ -97,7 +97,7 @@ Validate both plugin manifests and marketplace catalogs with:
 
 ```powershell
 claude plugin validate .
-python C:/Users/<user>/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py .agents/plugins/plugins/excellent-readme
+python C:/Users/<user>/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/excellent-readme
 ```
 
 > [!NOTE]
@@ -110,15 +110,15 @@ excellent-readme/
 ├── .claude-plugin/
 │   └── marketplace.json                 # Claude Code marketplace catalog
 ├── .agents/plugins/
-│   ├── marketplace.json                 # Codex marketplace catalog
-│   └── plugins/excellent-readme/
-│       ├── .claude-plugin/plugin.json   # Claude Code plugin manifest
-│       ├── .codex-plugin/plugin.json    # Codex plugin manifest
-│       └── skills/excellent-readme/
-│           ├── SKILL.md                 # Core instructions and trigger scope
-│           ├── agents/openai.yaml       # Codex UI metadata and default prompt
-│           ├── references/              # Framework, checklist, and exemplars
-│           └── scripts/                 # README static checker
+│   └── marketplace.json                 # Codex marketplace catalog
+├── plugins/excellent-readme/
+│   ├── .claude-plugin/plugin.json       # Claude Code plugin manifest
+│   ├── .codex-plugin/plugin.json        # Codex plugin manifest
+│   └── skills/excellent-readme/
+│       ├── SKILL.md                     # Core instructions and trigger scope
+│       ├── agents/openai.yaml           # Codex UI metadata and default prompt
+│       ├── references/                  # Framework, checklist, and exemplars
+│       └── scripts/                     # README static checker
 ├── README.md                            # English documentation
 └── README_ZH.md                         # Traditional Chinese documentation
 ```
