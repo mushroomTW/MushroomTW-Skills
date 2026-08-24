@@ -44,6 +44,56 @@ These are candidate sections, not a completeness score. A short, accurate README
 - If an example needs extra files, keep an executable example in the repository and link to it.
 - Do not make critical information available only through a screenshot, animation, badge, or external video.
 
+## Badge rules
+
+A badge is a compact status line, not decoration. Add one only when it answers a question the reader would otherwise have to open another file to answer.
+
+Choose the badge type in this order:
+
+1. **Dynamic**: the value is fetched when the page renders, so it cannot drift. Prefer this for package versions, build or coverage status, and the latest release.
+2. **Static with a recorded source**: use only when no dynamic endpoint exists. Record the origin beside the badge so a later synchronize pass can verify the value.
+3. **Static without a note**: acceptable only for values that cannot drift, such as a stack label that names a dependency rather than its version.
+
+A static value and its recorded source look like this:
+
+```markdown
+<!-- badge source: rust-toolchain.toml (channel) -->
+[![Rust 1.97.1](https://img.shields.io/badge/Rust-1.97.1-000000.svg)](https://www.rust-lang.org/)
+```
+
+Apply these rules to every badge:
+
+- Link it to something the reader can verify: the license file, the registry page, the CI run, or the project's own documentation.
+- Write alt text that carries the same fact as the image, because the image may fail to load. `[![License: MIT]` works; `[![badge]` does not.
+- Add a license badge only when a LICENSE file exists and its type matches.
+- Keep the set small enough to read at a glance; each extra badge lowers the value of the others.
+
+### Choosing a style
+
+Shields.io accepts `flat` (the default), `flat-square`, `plastic`, `for-the-badge`, and `social`. Pick one and apply it to every badge in the file; a mixed set reads as a collage rather than a status line.
+
+| Style | Renders as | Reach for it when |
+| --- | --- | --- |
+| `flat` | Small, rounded, muted | The default. Several badges that should stay secondary to the title. |
+| `flat-square` | Small, sharp corners | Same density as `flat`, matching a squared-off visual identity. |
+| `for-the-badge` | Large, uppercase, wide | Two to four badges used as a deliberate header block. |
+| `plastic` | Small with a gradient | The project's existing assets already use that older style. |
+| `social` | GitHub-button styling | Star, fork, follow, or watch counts specifically. |
+
+The same badge in three styles, so the difference is visible before choosing:
+
+```markdown
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+```
+
+Add `logo=` with a [simple-icons](https://simpleicons.org/) slug, plus `logoColor=`, when the icon speeds recognition rather than merely decorating:
+
+```markdown
+[![Runtime: Tokio](https://img.shields.io/badge/runtime-Tokio-4c8eda.svg?style=for-the-badge&logo=rust&logoColor=white)](https://tokio.rs/)
+```
+
 ## Anti-patterns
 
 - A slogan with no use case.

@@ -30,6 +30,7 @@
 - [ ] Limitations, compatibility, known issues, and security notes are disclosed early.
 - [ ] The license type matches the LICENSE file.
 - [ ] Badges and screenshots have actual value and do not carry the only copy of important information.
+- [ ] Badges use a dynamic source where one exists; any hard-coded value records where it came from.
 - [ ] Author details, contact information, contribution instructions, and roadmap items are confirmed.
 
 ## Writing quality
@@ -37,6 +38,7 @@
 - [ ] The prose uses concrete nouns and verbs instead of vague marketing language.
 - [ ] User-facing information appears before implementation detail.
 - [ ] Markdown headings, code blocks, tables, and lists are consistent.
+- [ ] All badges share one shields.io style and read as a single row.
 - [ ] The same fact is not duplicated in multiple places where it can drift.
 - [ ] Important content is not hidden in images or network-only badges.
 - [ ] Emoji are sparse and never carry meaning on their own.

@@ -66,7 +66,7 @@ Do not add empty sections just to fill a template. Omit sections without useful 
 
 Usually use this order, adapting it to the project:
 
-1. Title and one-line description; add meaningful badges, a demo, or a screenshot only when useful. If the repository already contains a logo or icon asset, use it in the header; do not source or generate one.
+1. Title and one-line description; add meaningful badges, a demo, or a screenshot only when useful. Follow the badge rules in `references/readme-framework.md`. If the repository already contains a logo or icon asset, use it in the header; do not source or generate one.
 2. Table of contents; include it only when the README is long enough to benefit from navigation.
 3. About, context, and use cases: explain the problem, scope, and non-goals.
 4. Minimal runnable example: show real input, output, or screen state.
