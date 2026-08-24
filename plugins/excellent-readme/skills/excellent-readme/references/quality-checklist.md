@@ -24,6 +24,7 @@
 - [ ] Architecture diagrams or descriptions match the current code.
 - [ ] Local links, images, GIFs, videos, and example files exist.
 - [ ] The table of contents and heading anchors work.
+- [ ] Translated README variants carry the same content, or the divergence is reported.
 
 ## Adoption risk
 

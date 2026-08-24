@@ -1,6 +1,6 @@
 ---
 name: excellent-readme
-description: Create, improve, or audit a software project's README.md. Use when the user asks to write a README, organize project documentation, improve a GitHub project homepage, add installation and usage instructions, or check whether a README is accurate, runnable, and easy to understand; do not use for a complete API manual or a general article unrelated to a repository.
+description: Create, improve, audit, or synchronize a software project's README.md. Use when the user asks to write a README, organize project documentation, improve a GitHub project homepage, add installation and usage instructions, update a README after code or configuration changes, or check whether a README is accurate, runnable, and easy to understand; do not use for a complete API manual or a general article unrelated to a repository.
 ---
 
 # Excellent README
@@ -17,6 +17,8 @@ First identify the requested outcome:
 - **Synchronize**: update README content affected by code or configuration changes.
 
 If the user does not specify a mode, default to “improve and verify.” Unless explicitly requested, do not turn the README into a complete documentation website.
+
+When the repository keeps translated variants of the README (`README_ZH.md`, `README.fr.md`, files under `docs/` or `translations/`), treat them as one document in several languages: apply content changes to every variant you can write well, and report any variant left out of sync instead of letting it drift silently.
 
 ## Invariants
 
@@ -38,7 +40,7 @@ Completion criterion: state in one sentence who the README helps and what decisi
 
 ### 2. Build an evidence inventory
 
-Prefer the available codebase knowledge graph: use `search_graph` for symbols and entry points, `trace_path` for important flows, and `get_code_snippet` for necessary implementations. If the graph is unavailable or insufficient, inspect:
+Inspect the repository directly:
 
 - `package.json`, `pyproject.toml`, `Cargo.toml`, `*.csproj`, `go.mod`, and other manifests
 - `Makefile`, Taskfile, CI workflows, Dockerfiles, compose files, and deployment configuration
@@ -98,7 +100,7 @@ Run checks proportional to the task and available authorization:
 - When safe, run the minimal installation, startup, or usage example. Obtain necessary authorization before actions involving networks, credentials, paid services, or data changes.
 - Re-evaluate the section set against the current repository; do not add filler merely to satisfy a checklist.
 
-Use `scripts/validate_readme.py` for static checks when useful; read its output before making corrections.
+Run `python <skill-dir>/scripts/validate_readme.py <readme-path> --project <repository-root>` for static checks when useful. It ignores code blocks, and its warnings are heuristic leads: read each flagged line and judge it before editing.
 
 Completion criterion: every retained command and link passes a traceability check, and every unverified item is explicitly marked.
 

@@ -29,6 +29,7 @@ Both products may also load the skill automatically when a request matches its d
 - Organizes content around the reader's adoption decisions instead of the implementation order.
 - Verifies installation, startup, test, example, path, and local-link claims.
 - Adapts the README structure to CLIs, libraries, services, frontends, and research tools.
+- Keeps translated README variants aligned, or reports the divergence when it cannot.
 - Reports evidence gaps explicitly instead of inventing features or compatibility claims.
 
 ## Install from the Marketplace
@@ -71,7 +72,7 @@ Do not copy this skill to the repository root. Both marketplaces install the plu
 ## How It Works
 
 1. Identify the README language, audience, purpose, and output path.
-2. Build an evidence inventory from the knowledge graph, source code, manifests, tests, configuration, examples, and existing documentation.
+2. Build an evidence inventory from source code, manifests, tests, configuration, examples, and existing documentation.
 3. Select only the sections that help readers understand or adopt this type of project.
 4. Draft from purpose and a minimal example toward installation, configuration, limitations, and maintenance details.
 5. Check that commands, links, headings, assets, and examples are traceable and runnable.
@@ -81,7 +82,7 @@ The complete workflow is in [`SKILL.md`](plugins/excellent-readme/skills/excelle
 
 ## Validation
 
-The included static checker uses only the Python standard library. It checks for unfinished markers and broken local links. Judging whether a section is present and useful stays with the quality checklist, not with keyword matching:
+The included static checker uses only the Python standard library. It checks for unfinished markers, empty link targets, and broken local links, ignoring code blocks and inline code. Judging whether a section is present and useful stays with the quality checklist, not with keyword matching:
 
 ```powershell
 python plugins/excellent-readme/skills/excellent-readme/scripts/validate_readme.py README.md --project .

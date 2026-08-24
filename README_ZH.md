@@ -29,6 +29,7 @@ $excellent-readme 請根據這個 repository 的實際內容改善 README，並�
 - 依讀者採用專案的決策順序組織內容，不照實作順序堆疊章節。
 - 驗證安裝、啟動、測試、範例、目錄與本機連結。
 - 依 CLI、函式庫、服務、前端或研究工具調整 README 結構。
+- 同步維護多語言 README 版本，無法同步時回報差異。
 - 缺少證據時保留明確待辦或回報缺口，不虛構功能與相容性資訊。
 
 ## 從 Marketplace 安裝
@@ -71,7 +72,7 @@ plugins/excellent-readme/skills/excellent-readme/
 ## 工作方式
 
 1. 確認 README 的語言、讀者、目的與輸出位置。
-2. 從 knowledge graph、原始碼、manifest、測試、設定、範例及現有文件建立證據清單。
+2. 從原始碼、manifest、測試、設定、範例及現有文件建立證據清單。
 3. 依專案類型選擇必要章節，不套用固定的完整模板。
 4. 由用途與最小範例開始，逐步補上安裝、設定、限制與維護資訊。
 5. 檢查命令、連結、標題、資產與範例是否可追溯且可執行。
@@ -81,7 +82,7 @@ plugins/excellent-readme/skills/excellent-readme/
 
 ## 驗證
 
-README 靜態檢查器僅依賴 Python 標準函式庫，可檢查未完成標記與本機連結。章節是否齊備、內容是否有用交由品質檢核表判斷，不以關鍵字比對代替：
+README 靜態檢查器僅依賴 Python 標準函式庫，可檢查未完成標記、空連結目標與本機連結，並略過程式碼區塊與行內程式碼。章節是否齊備、內容是否有用交由品質檢核表判斷，不以關鍵字比對代替：
 
 ```powershell
 python plugins/excellent-readme/skills/excellent-readme/scripts/validate_readme.py README_ZH.md --project .
