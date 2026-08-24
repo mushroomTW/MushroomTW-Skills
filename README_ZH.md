@@ -81,7 +81,7 @@ plugins/excellent-readme/skills/excellent-readme/
 
 ## 驗證
 
-README 靜態檢查器僅依賴 Python 標準函式庫，可檢查必要內容提示、未完成標記與本機連結：
+README 靜態檢查器僅依賴 Python 標準函式庫，可檢查未完成標記與本機連結。章節是否齊備、內容是否有用交由品質檢核表判斷，不以關鍵字比對代替：
 
 ```powershell
 python plugins/excellent-readme/skills/excellent-readme/scripts/validate_readme.py README_ZH.md --project .

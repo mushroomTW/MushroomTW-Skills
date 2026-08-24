@@ -1,4 +1,9 @@
-"""Perform low-dependency checks for common README issues."""
+"""Perform low-dependency checks for common README issues.
+
+Scope is deliberately narrow: only checks whose result is a verifiable fact.
+Judging whether a section is present and useful belongs to
+`references/quality-checklist.md`, not to keyword matching.
+"""
 
 from __future__ import annotations
 
@@ -6,20 +11,6 @@ import argparse
 import re
 from pathlib import Path
 from urllib.parse import unquote, urlparse
-
-
-REQUIRED_HINTS = {
-    "purpose / introduction": [r"^#\s+", r"^#{1,6}\s+"],
-    "installation or getting started": [
-        r"install",
-        r"getting started",
-        r"quick start",
-        r"安裝",
-        r"開始使用",
-        r"快速使用",
-    ],
-    "usage or example": [r"usage", r"example", r"quick start", r"使用", r"範例"],
-}
 
 
 def local_targets(text: str) -> list[str]:
@@ -33,7 +24,7 @@ def local_targets(text: str) -> list[str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Check README headings, TODOs, and local links")
+    parser = argparse.ArgumentParser(description="Check README unfinished markers and local links")
     parser.add_argument("readme", type=Path)
     parser.add_argument("--project", type=Path, default=None)
     args = parser.parse_args()
@@ -42,10 +33,6 @@ def main() -> int:
     project = (args.project or readme.parent).resolve()
     text = readme.read_text(encoding="utf-8")
     warnings: list[str] = []
-
-    for label, patterns in REQUIRED_HINTS.items():
-        if not any(re.search(pattern, text, re.IGNORECASE | re.MULTILINE) for pattern in patterns):
-            warnings.append(f"Missing or unrecognized: {label}")
 
     if re.search(r"TODO|placeholder|to be confirmed", text, re.IGNORECASE):
         warnings.append("Contains unfinished markers: complete them or report them as gaps")

@@ -81,7 +81,7 @@ The complete workflow is in [`SKILL.md`](plugins/excellent-readme/skills/excelle
 
 ## Validation
 
-The included static checker uses only the Python standard library. It checks for essential content hints, unfinished markers, and broken local links:
+The included static checker uses only the Python standard library. It checks for unfinished markers and broken local links. Judging whether a section is present and useful stays with the quality checklist, not with keyword matching:
 
 ```powershell
 python plugins/excellent-readme/skills/excellent-readme/scripts/validate_readme.py README.md --project .
