@@ -113,7 +113,7 @@ One test project — a FastAPI + WebSocket Werewolf game with no README, no LICE
 - The most stable signal across all eight runs: every skill run proactively executed verification checks; every baseline ran none.
 - Verified by hand across all four skill runs: zero `TODO:` placeholders, zero decorative badges, honest license disclosure, and stated audience assumptions.
 - One honest caveat, since fixed: an earlier version's section framework tempted the small model into inventing a license reference. The placeholder rule that invited it was removed in v1.5.0, and the re-run confirms the fabrication is gone — but a section framework can invite the very filler it is meant to prevent.
-- The exhibits correspond to skill v1.7.0. The two sections added in v1.8.0 are not covered by this experiment.
+- A second experiment runs the same design against [a trap project committed to this repository](docs/experiment/fixture/), so anyone can reproduce it. Nine deliberate traps; trap scores are machine-checked rather than self-reported. It found that the skill blocked *invented* claims but not *inherited* ones — an unbacked `MIT` line survived from the original README — which is what v1.8.1 fixes.
 
 ## Project Structure
 
@@ -123,7 +123,7 @@ excellent-readme/
 │   └── marketplace.json                 # Claude Code marketplace catalog
 ├── .agents/plugins/
 │   └── marketplace.json                 # Codex marketplace catalog
-├── docs/experiment/                     # Eight-README model experiment: exhibits and report
+├── docs/experiment/                     # Model experiments: exhibits, report, reproducible fixture
 ├── plugins/excellent-readme/
 │   ├── .claude-plugin/plugin.json       # Claude Code plugin manifest
 │   ├── .codex-plugin/plugin.json        # Codex plugin manifest

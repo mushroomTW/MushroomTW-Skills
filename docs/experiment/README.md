@@ -1,9 +1,9 @@
 # 實驗：excellent-readme 在四個模型上的效果
 
-同一個受測專案、同一句提示，讓 Claude 的四個模型各寫兩份 README——一份遵循本 skill、一份明確禁止讀取任何 skill 內容——輸出原封不動收錄在本目錄。
+本目錄收錄兩場實驗。兩場的設計相同——同一個受測專案、同一句提示，讓模型各寫兩份 README，一份遵循本 skill、一份明確禁止讀取任何 skill 內容——差別在受測專案：第一場用的是不公開的專案，第二場改用收錄在本 repo 內、任何人都能重跑的陷阱專案。
 
 > [!IMPORTANT]
-> **展品對應的 skill 版本是 1.7.0，目前 skill 為 1.8.0。** 1.8.0 新增的 `Failure recovery` 與 `Never do these` 兩章尚未經過本實驗重測，其效果目前只有配對盲測（`results.tsv`）為證，沒有 README 產出層級的證據。
+> 第一場實驗（狼人殺專案）的展品對應 skill 1.7.0，未涵蓋其後新增的章節。1.8.0 新增的 `Failure recovery` 與 `Never do these` 由第二場實驗（陷阱專案）涵蓋。
 
 ## 受測專案
 
@@ -62,6 +62,58 @@
 
 殘餘觀察：Sonnet 在未事先取得授權下執行了需要網路的 `pip install`。這個越界後來成為 1.7.1 的修補依據（明定裝依賴＝網路動作、無人可授權＝視為未授權）。
 
+## 追加實驗：可復現的陷阱專案（1.8.0）
+
+前兩次實驗的最大限制是受測專案不公開。這次改用一個**收錄在本 repo 內**的最小專案 [`fixture/`](fixture/)：一個 48 行的 CSV 欄位計數 CLI，純標準函式庫、無需安裝、無需網路即可執行。
+
+`fixture/README.seed.md` 是**故意寫錯的**起始 README，埋了九個陷阱。復現時先把它複製成 `README.md`：
+
+```bash
+cd docs/experiment/fixture && cp README.seed.md README.md
+```
+
+再讓代理處理「請改善這個專案的 README」，兩組條件與前次相同（skill 組讀 SKILL.md；對照組明確禁止讀取任何 skill 內容）。
+
+### 九個陷阱
+
+| # | 陷阱 | 程式碼中的正解 |
+| --- | --- | --- |
+| 1 | 「blazing-fast, powerful and seamless」 | 換成可觀察的後果 |
+| 2 | Features 列出 Excel 匯出／watch mode／平行處理 | `ROADMAP.md` 明寫「Nothing here is implemented yet」 |
+| 3 | 範例輸出寫成 `red: 3` | 實際輸出是右對齊的 `     3  red` |
+| 4 | 「Why "tallyhoe"?」這種特異章節 | 保留，不得靜默刪除 |
+| 5 | `npm install tallyhoe` | 錯生態系；且套件未發佈，只能從原始碼安裝 |
+| 6 | 「As of 2024, requires Python 3.9 or newer」 | `pyproject.toml` 寫 `>=3.11` |
+| 7 | 連向 `tallyhoe.example.invalid/docs` | RFC 2606 保留 TLD，永不解析 |
+| 8 | 用了不存在的 `--csv`，卻沒寫存在的 `--top` | 對照 `--help` |
+| 9 | `## License` 下寫著 `MIT` | repo 內沒有 LICENSE 檔 |
+
+### 結果
+
+輸出收錄在 [`fixture-run/`](fixture-run/)。陷阱通過數由主持者以腳本逐項機檢：
+
+| 條件 | 通過 | 未通過的陷阱 |
+| --- | --- | --- |
+| Haiku 4.5 對照組 | 10/13 | 行銷形容詞、`pip install tallyhoe`（未發佈）、假 MIT |
+| Haiku 4.5 skill | 12/13 | 假 MIT |
+| Sonnet 5 對照組 | 13/13 | — |
+| Sonnet 5 skill | 13/13 | — |
+
+兩個發現：
+
+1. **對小模型，skill 修正硬錯誤**（+2）：換掉行銷形容詞、把安裝指令從未發佈的 `pip install tallyhoe` 改成可行的來源安裝。與前兩次實驗一致。
+2. **對前沿模型，陷阱層面打平**。Sonnet 兩臂都是 13/13。差異全在交付：skill 臂產出結構化交付報告，把「`pip install -e .` 未執行，因為需要網路且無人可授權」列進 **Unrun checks**、把授權選擇列進 **Open questions**；對照組只給散文摘要。
+
+### 由本次實驗直接導致的修正（1.8.1）
+
+**skill 擋得住「虛構」，擋不住「繼承」。** Haiku 的 skill 臂原封不動留下了既有 README 的 `## License` / `MIT`——它沒有虛構，它只是沒有重新查證已經在那裡的東西。當時的 `validate_readme.py` 也放行：既有的授權檢查只在 README **連結**到 LICENSE 檔時才觸發，對裸寫一個授權名稱無效。
+
+兩處修正：`Never do these` 增加一列「Keep a claim because the previous README already made it」，偵測 tell 是「該事實進了草稿卻從未進過證據清單」；validator 增加 SPDX 識別碼檢查，範圍限縮在 README 自己的 License 標題之下。
+
+以修好的 skill 重跑同一臂（[`fixture-run/haiku-skill-retest.md`](fixture-run/haiku-skill-retest.md)）：**10/11 → 11/11**，假 MIT 消失，其餘陷阱零回歸。
+
+殘餘觀察：重測是把授權章節**整段刪除**，而 invariant 7 要求的是「缺席影響採用時，在適當章節平述缺席」——Sonnet 兩臂做對了（「no license terms are granted」），Haiku 選了刪除並把授權列為 Open question。虛構已根除，處理方式仍是次佳。
+
 ## 沿革：第一次實驗（1.2.0，展品已移除）
 
 第一批 skill 組輸出測的是 1.2.0 時代的 skill。三位獨立評審對它的共同批評是版本偏移，1.7.0 重測即是回應。這批展品在 1.8.0 清理時移除，原因是它們示範了現行 skill **明文禁止**的行為——輸出中含 `TODO:` 佔位（Sonnet 1 處、Opus 2 處）與 shields.io badge（Opus 3 個、Fable 3 個）——留著會讓讀者誤以為那是本 skill 的產出。
@@ -70,11 +122,12 @@
 
 - **成本**：skill 組平均多花約四到九成時間、約兩成 tokens（1.2.0 時代實測，n=1）。
 - **章節框架會誘發虛構**：Haiku 的 1.2.0 版對授權**虛構**了「授權條款請參考 LICENSE 檔案」，而它的對照組只是沉默——虛構來自「補完章節」的衝動，不是來自無知。這個發現直接導致 1.5.0 的「永不留佔位、能問就問、不能問就省略並回報」規則，1.7.0 重測確認虛構消失。
-- **檢查器盲區**：Haiku 那句純文字的「請參考 LICENSE 檔案」不是連結，`validate_readme.py` 的本機連結檢查抓不到。1.3.0 為此新增了「指向不存在授權檔」檢查。
+- **檢查器盲區**：Haiku 那句純文字的「請參考 LICENSE 檔案」不是連結，`validate_readme.py` 的本機連結檢查抓不到。1.3.0 為此新增了「指向不存在授權檔」檢查——但只補了一半，裸寫授權名稱的情況要到 1.8.1 才補上，見上一節。
 
 ## 限制
 
-- 每格 n=1，無統計效力；模型輸出存在取樣波動。
-- 受測專案不公開，讀者無法完整復現；能檢視的是輸出原件與本報告的核對紀錄。
-- 「檢查行為」欄位以代理自述為主，主持者僅實測核對了關鍵事實與 validator 結果。
-- 展品測的是 1.7.0，不是目前的 1.8.0。
+- 每格 n=1，無統計效力；模型輸出存在取樣波動。兩場實驗都是如此。
+- 第一場的受測專案不公開，讀者無法完整復現；能檢視的只有輸出原件與本報告的核對紀錄。第二場的 [`fixture/`](fixture/) 可完整復現。
+- 第一場的「檢查行為」欄位以代理自述為主；第二場的陷阱通過數全部由腳本機檢，不採信代理自述。
+- 第二場只跑了 Haiku 與 Sonnet 兩個模型，未涵蓋 Opus 與 Fable。
+- 陷阱是刻意設計的，命中率不能外推到真實專案的自然錯誤分布。

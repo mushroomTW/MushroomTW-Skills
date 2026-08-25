@@ -113,7 +113,7 @@ python C:/Users/<user>/.codex/skills/.system/plugin-creator/scripts/validate_plu
 - 八次運行中最穩定的訊號：所有 skill 版都主動執行了驗證檢查；所有對照組一個檢查都沒跑。
 - 四份 skill 組輸出經主持者實檔核對：零 `TODO:` 佔位、零裝飾性 badge、授權誠實揭露、受眾假設明確聲明。
 - 一句已修正的警語：早期版本的章節框架曾誘使小模型虛構一句授權參照。誘發它的佔位規則已於 1.5.0 移除，重測確認虛構消失——但章節框架本身確實會誘發它原本要防的填充。
-- 展品對應的 skill 版本是 1.7.0；1.8.0 新增的兩個章節不在本實驗涵蓋範圍內。
+- 第二場實驗改用[收錄在本 repo 內的陷阱專案](docs/experiment/fixture/)，任何人都能重跑。九個刻意設計的陷阱，通過數由腳本機檢、不採信代理自述。它發現 skill 擋得住「虛構」卻擋不住「繼承」——既有 README 那行沒有 LICENSE 檔背書的 `MIT` 活了下來——這正是 1.8.1 修掉的問題。
 
 ## 專案結構
 
@@ -123,7 +123,7 @@ excellent-readme/
 │   └── marketplace.json                 # Claude Code marketplace catalog
 ├── .agents/plugins/
 │   └── marketplace.json                 # Codex marketplace catalog
-├── docs/experiment/                     # 八份 README 模型實驗：展品與報告
+├── docs/experiment/                     # 模型實驗：展品、報告與可復現的陷阱專案
 ├── plugins/excellent-readme/
 │   ├── .claude-plugin/plugin.json       # Claude Code plugin manifest
 │   ├── .codex-plugin/plugin.json        # Codex plugin manifest
