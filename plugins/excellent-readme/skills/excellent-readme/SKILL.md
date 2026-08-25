@@ -106,7 +106,7 @@ Completion criterion: every retained command and link passes a traceability chec
 
 ### 6. Perform a final reader review
 
-Read the result once from the reader's perspective:
+Read the result once from the reader's perspective, then check the draft against [Never do these](#never-do-these):
 
 - Does the first screen clearly explain what the project is and who it is for?
 - Can a reader quickly find installation and the smallest example?
@@ -129,6 +129,19 @@ Checks fail routinely; none of these failures is a reason to stall or to ship a 
 | The repository has no manifest, CI, or tests to read from | Derive facts from entry-point source files, directory layout, and recent commits | Ship only the verifiable minimum — purpose, what exists, known limitations — and list every gap as an open question |
 | Translated variants cannot all be updated well | Update the variants you can write correctly | Name each untouched variant and the specific divergence in the delivery report |
 | The README and the code contradict each other and neither is clearly right | Use git history to establish which changed last | Leave both readings in the report as an open question; do not silently pick one |
+
+## Never do these
+
+These are the failure patterns a README writer falls into by habit, not by ignoring the rules above. Each one produces text that looks finished and reads as confident, which is exactly why it survives review. Run this list against the draft before the checks in step 5.
+
+| Never do this | How to catch yourself | Do this instead |
+|---|---|---|
+| Describe a capability with an adjective | The sentence survives if you paste it into an unrelated project's README — "fast", "powerful", "seamless", "modern", "robust" | Name the capability and its observable consequence: what it does, to what, with what limit |
+| Write a planned feature in the present tense | The claim traces to a roadmap entry, an open issue, a TODO comment, or a branch — not to shipped code | Describe only what the current default branch does; put the rest under a roadmap heading marked as planned, or leave it out |
+| Fabricate an "expected output" block | You wrote the output block without having run the command | Paste real output, or label the block as illustrative and say so in the surrounding sentence |
+| Drop content you did not understand while improving | A section present before your edit is absent after it, and you cannot say what replaced it | Keep it and flag it for the user in the delivery report; unexplained content is a question, not garbage |
+| Borrow a command, section, or structure from another project | The command references a file, script, or tool that this repository does not contain | Re-derive every command from this repository's own manifests, scripts, and CLI help |
+| Write prose that starts aging on delivery | The sentence contains a date, a release year, "currently", "recently", "the latest", or a pinned version that also lives in a manifest | State the durable fact, or point at the file that carries the version so the two cannot disagree |
 
 ## References
 
