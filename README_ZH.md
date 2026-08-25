@@ -104,17 +104,6 @@ python C:/Users/<user>/.codex/skills/.system/plugin-creator/scripts/validate_plu
 > [!NOTE]
 > README 腳本只做靜態檢查，不能取代命令實際執行、外部連結存取或人工閱讀複核。Codex 驗證器的實際路徑取決於本機 Codex 安裝位置。
 
-## 有效嗎？一場八份 README 的實驗
-
-我們把同一個測試專案——一個沒有 README、沒有 LICENSE、設定藏著陷阱（硬編碼的佔位 API 金鑰，長得像應該是環境變數）的 FastAPI + WebSocket 狼人殺遊戲——交給四個 Claude 模型（Haiku 4.5、Sonnet 5、Opus 5、Fable 5）各寫兩次：一次遵循本 skill，一次明確禁止使用。八份逐字輸出與完整比較收錄在 [docs/experiment/](docs/experiment/README.md)。
-
-- 對小模型，skill 修正的是硬錯誤：裝不齊依賴的安裝指令、把目錄名當專案標題、快速開始被壓在十個章節之後。
-- 對前沿模型，事實本來就對；skill 改變的是交付紀律——漏斗排序、缺口平述而非粉飾、badge 只在真能回答問題時才放、守住文件範圍。
-- 八次運行中最穩定的訊號：所有 skill 版都主動執行了驗證檢查；所有對照組一個檢查都沒跑。
-- 四份 skill 組輸出經主持者實檔核對：零 `TODO:` 佔位、零裝飾性 badge、授權誠實揭露、受眾假設明確聲明。
-- 一句已修正的警語：早期版本的章節框架曾誘使小模型虛構一句授權參照。誘發它的佔位規則已於 1.5.0 移除，重測確認虛構消失——但章節框架本身確實會誘發它原本要防的填充。
-- 第二場實驗改用[收錄在本 repo 內的陷阱專案](docs/experiment/fixture/)，任何人都能重跑。九個刻意設計的陷阱，通過數由腳本機檢、不採信代理自述。它發現 skill 擋得住「虛構」卻擋不住「繼承」——既有 README 那行沒有 LICENSE 檔背書的 `MIT` 活了下來——這正是 1.8.1 修掉的問題。
-
 ## 專案結構
 
 ```text
@@ -123,7 +112,6 @@ excellent-readme/
 │   └── marketplace.json                 # Claude Code marketplace catalog
 ├── .agents/plugins/
 │   └── marketplace.json                 # Codex marketplace catalog
-├── docs/experiment/                     # 模型實驗：展品、報告與可復現的陷阱專案
 ├── plugins/excellent-readme/
 │   ├── .claude-plugin/plugin.json       # Claude Code plugin manifest
 │   ├── .codex-plugin/plugin.json        # Codex plugin manifest

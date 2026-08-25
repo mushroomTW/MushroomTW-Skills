@@ -104,17 +104,6 @@ python C:/Users/<user>/.codex/skills/.system/plugin-creator/scripts/validate_plu
 > [!NOTE]
 > The README checker performs static checks only. It does not replace executing documented commands, testing external links, or reviewing the document as a reader. The Codex validator path depends on the local Codex installation.
 
-## Does It Work? An Eight-README Experiment
-
-One test project — a FastAPI + WebSocket Werewolf game with no README, no LICENSE, and a booby-trapped configuration (a hardcoded placeholder API key that looks like it should be an environment variable) — was given to four Claude models (Haiku 4.5, Sonnet 5, Opus 5, Fable 5) twice each: once following this skill, once with the skill explicitly forbidden. All eight verbatim outputs and the full comparison live in [docs/experiment/](docs/experiment/README.md) (report in Traditional Chinese).
-
-- For the small model, the skill fixed hard errors: a dependency-incomplete install command, the directory name used as the project title, and quick start buried behind ten other sections.
-- For the frontier models, the facts were already right; the skill changed delivery discipline — funnel ordering, gaps disclosed as plain facts instead of papered over, badges only where one answers a real question, and staying in documentation scope.
-- The most stable signal across all eight runs: every skill run proactively executed verification checks; every baseline ran none.
-- Verified by hand across all four skill runs: zero `TODO:` placeholders, zero decorative badges, honest license disclosure, and stated audience assumptions.
-- One honest caveat, since fixed: an earlier version's section framework tempted the small model into inventing a license reference. The placeholder rule that invited it was removed in v1.5.0, and the re-run confirms the fabrication is gone — but a section framework can invite the very filler it is meant to prevent.
-- A second experiment runs the same design against [a trap project committed to this repository](docs/experiment/fixture/), so anyone can reproduce it. Nine deliberate traps; trap scores are machine-checked rather than self-reported. It found that the skill blocked *invented* claims but not *inherited* ones — an unbacked `MIT` line survived from the original README — which is what v1.8.1 fixes.
-
 ## Project Structure
 
 ```text
@@ -123,7 +112,6 @@ excellent-readme/
 │   └── marketplace.json                 # Claude Code marketplace catalog
 ├── .agents/plugins/
 │   └── marketplace.json                 # Codex marketplace catalog
-├── docs/experiment/                     # Model experiments: exhibits, report, reproducible fixture
 ├── plugins/excellent-readme/
 │   ├── .claude-plugin/plugin.json       # Claude Code plugin manifest
 │   ├── .codex-plugin/plugin.json        # Codex plugin manifest
