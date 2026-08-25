@@ -102,7 +102,7 @@ Run checks proportional to the task and available authorization:
 - Run the minimal installation, startup, and usage examples. 🔴 **STOP** at any of them that needs a network, credentials, a paid service, or a data change: invariant 4 governs that case and it applies at every step, not only this one. A command you were not authorized to run is an unrun check, not a verified one — name it in the delivery report rather than letting it pass as confirmed.
 - Re-evaluate the section set against the current repository; do not add filler merely to satisfy a checklist.
 
-Run `python <skill-dir>/scripts/validate_readme.py <readme-path> --project <repository-root>` before delivering any create, improve, or synchronize result. It ignores code blocks, and its warnings are heuristic leads: read each flagged line and judge it before editing. If a check cannot run, do not stall — follow the matching row in [Failure recovery](#failure-recovery) and continue.
+Run the checker that ships with this skill before delivering any create, improve, or synchronize result. It lives at `scripts/validate_readme.py` in the same directory as this SKILL.md file, so resolve the path from wherever you read this file: `python <that directory>/scripts/validate_readme.py <readme-path> --project <repository-root>`. It ignores code blocks, and its warnings are heuristic leads: read each flagged line and judge it before editing. If a check cannot run, do not stall — follow the matching row in [Failure recovery](#failure-recovery) and continue.
 
 Completion criterion: every retained command and link passes a traceability check, and every unverified item is either qualified in plain wording or listed in the delivery report — never left as a placeholder.
 
@@ -149,7 +149,7 @@ Checks fail routinely; none of these failures is a reason to stall or to ship a 
 
 | Trigger | First-line fix | Fallback if that also fails |
 |---|---|---|
-| The validator errors or no Python interpreter is available | Retry with `python3`; if the script itself raises, check headings, anchors, and local link targets by hand against the repository | Record the static check as unrun in the delivery report and deliver the rest |
+| The validator cannot be located, errors, or no Python interpreter is available | Look for `scripts/validate_readme.py` beside this SKILL.md; retry with `python3`; if the script itself raises, check headings, anchors, and local link targets by hand against the repository | Record the static check as unrun in the delivery report and deliver the rest — never treat a skipped check as a passed one |
 | A documented command fails when run | Correct it against the manifest, `Makefile`, CI workflow, or `--help` output, then rerun once | Downgrade the command to unverified: keep it only if evidence in a file supports it, and list it under unrun checks |
 | An external link is unreachable | Retry once, then try the project's canonical domain or its repository page | Drop the link and keep the plain-text name; report the removal |
 | The repository has no manifest, CI, or tests to read from | Derive facts from entry-point source files, directory layout, and recent commits | Ship only the verifiable minimum — purpose, what exists, known limitations — and list every gap as an open question |
