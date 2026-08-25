@@ -62,7 +62,9 @@ Adapt the structure to the project type:
 - **Frontend / full-stack product**: demo or screenshots, features, stack, architecture, local development, deployment.
 - **Tool / research project**: problem context, method, reproduction steps, inputs and outputs, limitations, citations.
 
-Do not add empty sections just to fill a template. Omit sections without useful evidence and report the gap in the delivery summary.
+Do not add empty sections just to fill a template. Omit sections without useful evidence and report the gap in the delivery report.
+
+Completion criterion: the section list is written down before drafting, and every section on it names the evidence that justifies its presence.
 
 ### 4. Draft the README
 
@@ -115,7 +117,31 @@ Read the result once from the reader's perspective, then check the draft against
 - Is the README too long, repetitive, or trying to become a complete manual?
 - Does any sentence sound certain despite having no repository evidence?
 
-For an audit or delivery, report the change summary, verified items, missing information, unrun checks, and recommended locations for follow-up documentation.
+For an audit or a delivery, write the report in this shape:
+
+```markdown
+**Mode**: create | improve | audit | synchronize
+**Audience**: <who this README helps, and what decision it supports> — confirmed by the user | assumed from <evidence>
+
+**Changed**
+- <section> — <what changed, and the evidence behind it>
+
+**Verified**
+- <command, link, or path> — <how: ran it / matched `package.json` / compared against `--help`>
+
+**Unrun checks**
+- <check> — <why it could not run, and what would unblock it>
+
+**Open questions**
+- <question only the user can answer> — <the section it would unlock>
+
+**Deliberately omitted**
+- <fact left out> — <where it lives instead>
+```
+
+Drop any heading with no entries, with two exceptions: **Unrun checks** and **Open questions** always appear, and read `none` when they are empty — their emptiness is the reader's only evidence that nothing was quietly skipped. In audit mode, order entries under each heading by how much they affect an adoption decision, not by where they sit in the file.
+
+Completion criterion: the report exists in the shape above, and every line in it names a file, a command that was actually run, or a question that was actually asked.
 
 ## Failure recovery
 
