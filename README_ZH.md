@@ -112,6 +112,7 @@ python C:/Users/<user>/.codex/skills/.system/plugin-creator/scripts/validate_plu
 - 對前沿模型，事實本來就對；skill 改變的是交付紀律——漏斗排序、以 `TODO:` 標記的誠實缺口、防漂移的 badge、守住文件範圍。
 - 八次運行中最穩定的訊號：所有 skill 版都主動執行了驗證檢查；所有對照組一個檢查都沒跑。
 - 誠實的警語：章節框架誘使小模型虛構了一句授權參照。evidence-first 能減少虛構，但在那個量級無法根除。
+- 以 1.7.0 追加重測（展品 `*-skill-v2.md`）確認後續規則確實生效：四個模型零佔位、授權全數誠實揭露、受眾假設明確聲明。
 
 ## 專案結構
 

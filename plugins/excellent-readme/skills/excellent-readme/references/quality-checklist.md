@@ -3,6 +3,7 @@
 ## Reader and content
 
 - [ ] The opening sentence explains the project's purpose and target reader.
+- [ ] The target audience was confirmed with the user when the evidence left it ambiguous.
 - [ ] A reader can quickly decide whether the project fits their needs.
 - [ ] Important context, terminology, and external dependencies have reliable links.
 - [ ] The content is an entry point, not an unstructured complete manual.

@@ -112,6 +112,7 @@ One test project — a FastAPI + WebSocket Werewolf game with no README, no LICE
 - For the frontier models, the facts were already right; the skill changed delivery discipline — funnel ordering, `TODO:`-marked honest gaps, drift-resistant badges, and staying in documentation scope.
 - The most stable signal across all eight runs: every skill run proactively executed verification checks; every baseline ran none.
 - One honest caveat: the section framework tempted the small model into inventing a license reference. Evidence-first instructions reduce fabrication; they do not eliminate it at that tier.
+- A follow-up re-run against v1.7.0 (exhibits `*-skill-v2.md`) confirmed the later rules take effect: zero placeholders, honest license disclosures across all four models, and stated audience assumptions.
 
 ## Project Structure
 

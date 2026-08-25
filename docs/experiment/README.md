@@ -67,6 +67,19 @@
 4. 成本：skill 平均多花約四到九成時間、約兩成 tokens。
 5. 附帶發現一個 skill 檢查器的盲區：Haiku 那句純文字的「請參考 LICENSE 檔案」不是連結，`validate_readme.py` 的本機連結檢查抓不到。
 
+## 追加驗證：1.7.0 重測（2026-08-25）
+
+三位獨立評審對原始實驗的共同批評是版本偏移：展品測的是 1.2.0 時代的 skill，其後的行為改動（廢除 `TODO:` 佔位、先問受眾、badge 判準、重寫確認閘門）從未被實測。因此以 1.7.0 重跑四個 skill 組（對照組從未讀取 skill，原紀錄仍有效，不需重跑），輸出收錄為 `*-skill-v2.md`：
+
+| 模型 | v2 輸出 | 行數 | 驗證結果 |
+| --- | --- | --- | --- |
+| Haiku 4.5 | [haiku-skill-v2.md](haiku-skill-v2.md) | 184 | 授權改為平述缺席（v1 的虛構消失）、0 TODO |
+| Sonnet 5 | [sonnet-skill-v2.md](sonnet-skill-v2.md) | 126 | 實跑快速開始全程：venv、安裝、啟動伺服器、`/health` 回應驗證 |
+| Opus 5 | [opus-skill-v2.md](opus-skill-v2.md) | 171 | 受眾判斷引用證據、開放問題（授權／貢獻管道）列給使用者而非猜測 |
+| Fable 5 | [fable-skill-v2.md](fable-skill-v2.md) | 108 | 明確聲明受眾假設與依據、0 badge（新判準：無問題需 badge 回答） |
+
+主持者實檔核對四份：validator 全過、`TODO` 出現 0 次、badge 0 個、授權段全數誠實平述、無貢獻客套段。與 v1 相比的行為差異即是 1.3.0–1.7.0 規則的直接效果。殘餘觀察：Sonnet 在未事先取得授權下執行了需要網路的 `pip install`（invariant 要求先取得授權），屬輕微越界。
+
 ## 限制
 
 - 每格 n=1，無統計效力；模型輸出存在取樣波動。
