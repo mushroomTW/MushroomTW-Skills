@@ -43,6 +43,13 @@ SPDX_ID = re.compile(
     r"|Apache(?:[- ]?2(?:\.0)?)?|(?:A|L)?GPL[- ]?v?[23](?:\.0)?"
     r"|MPL[- ]?2(?:\.0)?|CC0(?:[- ]1\.0)?|CC[- ]BY[- \w]*)\b"
 )
+
+# A line that both names a license and admits the file is missing is the most
+# dangerous case, not an exempt one: it still asserts the project's license.
+# So an assertion outranks the absence-talk exemption.
+LICENSE_ASSERTION = re.compile(
+    r"(?i)\b(?:released|licen[sc]ed|distributed|published|provided|shipped)\b[^.]{0,40}\bunder\b"
+)
 LICENSE_ABSENCE_TALK = re.compile(
     r"(?i)\bno\b|\bnot\b|missing|without|lacks|to be added|\badd(?:ed|ing)?\b"
     r"|invent|fabricat|未|沒有|没有|尚未|缺|補上|无|無|不|虛構|虚构"
@@ -141,13 +148,16 @@ def main() -> int:
                 )
 
         for line in license_section_lines(prose):
-            if SPDX_ID.search(line) and not LICENSE_ABSENCE_TALK.search(line):
-                warnings.append(
-                    "License section names a license with no LICENSE file to back"
-                    f" it: {line.strip()[:80]} -- confirm it with the user or state"
-                    " the absence as a fact; an inherited claim is not evidence"
-                )
-                break
+            if not SPDX_ID.search(line):
+                continue
+            if LICENSE_ABSENCE_TALK.search(line) and not LICENSE_ASSERTION.search(line):
+                continue
+            warnings.append(
+                "License section names a license with no LICENSE file to back"
+                f" it: {line.strip()[:80]} -- confirm it with the user or state"
+                " the absence as a fact; an inherited claim is not evidence"
+            )
+            break
 
     for target in local_targets(prose):
         candidate = (readme.parent / target).resolve()
