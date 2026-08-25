@@ -32,6 +32,17 @@ LINK = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
 # discuss the absence ("no LICENSE file", 「未包含 LICENSE」) are legitimate
 # disclosures and must not be flagged.
 LICENSE_FILE_WORD = re.compile(r"\b(?:LICENSE|LICENCE|COPYING)\b")
+
+# A License section that names a license but has no file to back it. Scoped to
+# the README's own License heading so a dependency's license mentioned elsewhere
+# in the prose stays out of range.
+LICENSE_HEADING = re.compile(r"(?i)\blicen[sc]e\b")
+HEADING_LINE = re.compile(r"^ {0,3}#{1,6}\s")
+SPDX_ID = re.compile(
+    r"(?i)\b(?:MIT|ISC|Unlicense|Zlib|BSD(?:[- ](?:2|3)[- ]Clause)?"
+    r"|Apache(?:[- ]?2(?:\.0)?)?|(?:A|L)?GPL[- ]?v?[23](?:\.0)?"
+    r"|MPL[- ]?2(?:\.0)?|CC0(?:[- ]1\.0)?|CC[- ]BY[- \w]*)\b"
+)
 LICENSE_ABSENCE_TALK = re.compile(
     r"(?i)\bno\b|\bnot\b|missing|without|lacks|to be added|\badd(?:ed|ing)?\b"
     r"|invent|fabricat|未|沒有|没有|尚未|缺|補上|无|無|不|虛構|虚构"
@@ -78,6 +89,19 @@ def local_targets(text: str) -> list[str]:
     return targets
 
 
+def license_section_lines(text: str) -> list[str]:
+    """Return the body lines under the README's own License heading."""
+    body: list[str] = []
+    inside = False
+    for line in text.splitlines():
+        if HEADING_LINE.match(line):
+            inside = bool(LICENSE_HEADING.search(line))
+            continue
+        if inside:
+            body.append(line)
+    return body
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Check README unfinished markers and local links")
     parser.add_argument("readme", type=Path)
@@ -115,6 +139,15 @@ def main() -> int:
                     f"References a license file that does not exist: {line.strip()[:80]}"
                     " -- disclose the gap instead of pointing readers at a missing file"
                 )
+
+        for line in license_section_lines(prose):
+            if SPDX_ID.search(line) and not LICENSE_ABSENCE_TALK.search(line):
+                warnings.append(
+                    "License section names a license with no LICENSE file to back"
+                    f" it: {line.strip()[:80]} -- confirm it with the user or state"
+                    " the absence as a fact; an inherited claim is not evidence"
+                )
+                break
 
     for target in local_targets(prose):
         candidate = (readme.parent / target).resolve()

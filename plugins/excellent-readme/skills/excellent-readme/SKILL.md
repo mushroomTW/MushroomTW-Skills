@@ -168,6 +168,7 @@ These are the failure patterns a README writer falls into by habit, not by ignor
 | Drop content you did not understand while improving | A section present before your edit is absent after it, and you cannot say what replaced it | Keep it and flag it for the user in the delivery report; unexplained content is a question, not garbage |
 | Borrow a command, section, or structure from another project | The command references a file, script, or tool that this repository does not contain | Re-derive every command from this repository's own manifests, scripts, and CLI help |
 | Write prose that starts aging on delivery | The sentence contains a date, a release year, "currently", "recently", "the latest", or a pinned version that also lives in a manifest | State the durable fact, or point at the file that carries the version so the two cannot disagree |
+| Keep a claim because the previous README already made it | The fact reached your draft without ever entering the evidence inventory — you carried it forward, you never checked it | Re-verify an inherited claim exactly like a new one. A license named with no `LICENSE` file in the repository is the most common case |
 
 ## References
 
