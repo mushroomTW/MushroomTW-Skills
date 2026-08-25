@@ -109,10 +109,11 @@ python C:/Users/<user>/.codex/skills/.system/plugin-creator/scripts/validate_plu
 One test project — a FastAPI + WebSocket Werewolf game with no README, no LICENSE, and a booby-trapped configuration (a hardcoded placeholder API key that looks like it should be an environment variable) — was given to four Claude models (Haiku 4.5, Sonnet 5, Opus 5, Fable 5) twice each: once following this skill, once with the skill explicitly forbidden. All eight verbatim outputs and the full comparison live in [docs/experiment/](docs/experiment/README.md) (report in Traditional Chinese).
 
 - For the small model, the skill fixed hard errors: a dependency-incomplete install command, the directory name used as the project title, and quick start buried behind ten other sections.
-- For the frontier models, the facts were already right; the skill changed delivery discipline — funnel ordering, `TODO:`-marked honest gaps, drift-resistant badges, and staying in documentation scope.
+- For the frontier models, the facts were already right; the skill changed delivery discipline — funnel ordering, gaps disclosed as plain facts instead of papered over, badges only where one answers a real question, and staying in documentation scope.
 - The most stable signal across all eight runs: every skill run proactively executed verification checks; every baseline ran none.
-- One honest caveat: the section framework tempted the small model into inventing a license reference. Evidence-first instructions reduce fabrication; they do not eliminate it at that tier.
-- A follow-up re-run against v1.7.0 (exhibits `*-skill-v2.md`) confirmed the later rules take effect: zero placeholders, honest license disclosures across all four models, and stated audience assumptions.
+- Verified by hand across all four skill runs: zero `TODO:` placeholders, zero decorative badges, honest license disclosure, and stated audience assumptions.
+- One honest caveat, since fixed: an earlier version's section framework tempted the small model into inventing a license reference. The placeholder rule that invited it was removed in v1.5.0, and the re-run confirms the fabrication is gone — but a section framework can invite the very filler it is meant to prevent.
+- The exhibits correspond to skill v1.7.0. The two sections added in v1.8.0 are not covered by this experiment.
 
 ## Project Structure
 
