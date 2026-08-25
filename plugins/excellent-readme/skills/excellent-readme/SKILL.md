@@ -99,7 +99,7 @@ Run checks proportional to the task and available authorization:
 - Check Markdown headings, table-of-contents anchors, external links, and local links.
 - Confirm that local images, GIFs, videos, and example files exist.
 - Compare commands against manifests, Makefiles, or `--help`; do not merely check that the text appears somewhere.
-- When safe, run the minimal installation, startup, or usage example. Obtain necessary authorization before actions involving networks, credentials, paid services, or data changes.
+- Run the minimal installation, startup, and usage examples. 🔴 **STOP** at any of them that needs a network, credentials, a paid service, or a data change: invariant 4 governs that case and it applies at every step, not only this one. A command you were not authorized to run is an unrun check, not a verified one — name it in the delivery report rather than letting it pass as confirmed.
 - Re-evaluate the section set against the current repository; do not add filler merely to satisfy a checklist.
 
 Run `python <skill-dir>/scripts/validate_readme.py <readme-path> --project <repository-root>` before delivering any create, improve, or synchronize result. It ignores code blocks, and its warnings are heuristic leads: read each flagged line and judge it before editing. If a check cannot run, do not stall — follow the matching row in [Failure recovery](#failure-recovery) and continue.
