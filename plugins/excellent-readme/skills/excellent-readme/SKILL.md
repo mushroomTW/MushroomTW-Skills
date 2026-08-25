@@ -132,7 +132,7 @@ Checks fail routinely; none of these failures is a reason to stall or to ship a 
 
 ## Never do these
 
-These are the failure patterns a README writer falls into by habit, not by ignoring the rules above. Each one produces text that looks finished and reads as confident, which is exactly why it survives review. Run this list against the draft before the checks in step 5.
+These are the failure patterns a README writer falls into by habit, not by ignoring the rules above. Each one produces text that looks finished and reads as confident, which is exactly why it survives review. Step 6 checks the draft against this list.
 
 | Never do this | How to catch yourself | Do this instead |
 |---|---|---|
