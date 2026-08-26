@@ -14,10 +14,10 @@
 $excellent-readme 請根據這個 repository 的實際內容改善 README，並驗證所有安裝與使用命令。
 ```
 
-在 Claude Code 中執行 namespaced skill：
+在 Claude Code 中執行 skill：
 
 ```text
-/excellent-readme:excellent-readme 請根據這個 repository 的實際內容改善 README，並驗證所有安裝與使用命令。
+/excellent-readme 請根據這個 repository 的實際內容改善 README，並驗證所有安裝與使用命令。
 ```
 
 兩個產品也可以在任務符合 skill 描述時自動載入它。預期結果是一份適合專案規模的 README，以及已驗證項目、未執行檢查與資訊缺口的摘要。
@@ -32,42 +32,48 @@ $excellent-readme 請根據這個 repository 的實際內容改善 README，並�
 - 同步維護多語言 README 版本，無法同步時回報差異。
 - 缺少證據時先詢問使用者或在交付報告回報缺口，不在 README 留下待辦佔位，也不虛構功能與相容性資訊。
 
-## 從 Marketplace 安裝
+## 安裝
 
-此 repository 同時提供 Codex 與 Claude Code 的自架 marketplace catalog。以下命令會先加入 GitHub marketplace，再安裝 `excellent-readme` plugin。
-
-### Codex
+此 repository 直接以 skill 目錄形式發布。先 clone，再把 `skills/excellent-readme/` 複製到各產品的 skill 目錄。
 
 ```powershell
-codex plugin marketplace add mushroomTW/excellent-readme
-codex plugin add excellent-readme@mushroomtw-skills
+git clone https://github.com/mushroomTW/excellent-readme.git
 ```
 
 ### Claude Code
 
 ```powershell
-claude plugin marketplace add mushroomTW/excellent-readme
-claude plugin install excellent-readme@mushroomtw-skills
+$dest = "$HOME/.claude/skills/excellent-readme"
+Remove-Item -Recurse -Force $dest -ErrorAction SilentlyContinue
+Copy-Item -Recurse excellent-readme/skills/excellent-readme $dest
 ```
 
-> [!IMPORTANT]
-> GitHub repository 必須可供安裝端讀取。若是 private repository，請先設定對應的 Git credential。
+### Codex
 
-Codex 與 Claude Code 會從各自的 catalog 安裝同一份 plugin 內容，因此 skill 指示、參考資料與檢查腳本不會分叉。格式依據 [OpenAI Build plugins](https://learn.chatgpt.com/docs/build-plugins) 與 [Claude Code plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) 官方文件。
+```powershell
+$dest = "$HOME/.codex/skills/excellent-readme"
+Remove-Item -Recurse -Force $dest -ErrorAction SilentlyContinue
+Copy-Item -Recurse excellent-readme/skills/excellent-readme $dest
+```
+
+先 `Remove-Item` 是為了讓重新安裝也能使用同一組命令；若不先刪除，`Copy-Item` 會把新版本嵌到現有 skill 目錄裡面。若只想安裝在單一 repository 而非整個帳號，請改用該 repository 的 `.claude/skills/`（Claude Code）或 `.agents/skills/`（Codex）作為目的地。兩個產品在 session 啟動時讀取 skill 目錄，複製後請開啟新的 session。
+
+> [!IMPORTANT]
+> clone 需要對 GitHub repository 的讀取權限。若是 private repository，請先設定對應的 Git credential。
 
 ## Canonical Skill 位置
 
-唯一的 skill 入口是 [`SKILL.md`](plugins/excellent-readme/skills/excellent-readme/SKILL.md)，其輔助檔案位於同一個目錄：
+唯一的 skill 入口是 [`SKILL.md`](skills/excellent-readme/SKILL.md)，其輔助檔案位於同一個目錄：
 
 ```text
-plugins/excellent-readme/skills/excellent-readme/
+skills/excellent-readme/
 ├── SKILL.md
 ├── agents/openai.yaml
 ├── references/
 └── scripts/validate_readme.py
 ```
 
-請勿把 skill 複製到 repository 根目錄。兩個 marketplace 都會安裝包含此目錄的 plugin，因此所有指示只有一個維護來源。
+請勿在 repository 內複製第二份 skill。安裝時只會複製這一個目錄，因此所有指示只有一個維護來源。
 
 ## 工作方式
 
@@ -78,14 +84,14 @@ plugins/excellent-readme/skills/excellent-readme/
 5. 檢查命令、連結、標題、資產與範例是否可追溯且可執行。
 6. 從首次閱讀者角度進行最後複核，回報驗證結果與資訊缺口。
 
-詳細規則位於 [`SKILL.md`](plugins/excellent-readme/skills/excellent-readme/SKILL.md)。README 的設計原則、品質檢核表與風格範例位於同一個 skill 的 [`references/`](plugins/excellent-readme/skills/excellent-readme/references/) 目錄。
+詳細規則位於 [`SKILL.md`](skills/excellent-readme/SKILL.md)。README 的設計原則、品質檢核表與風格範例位於同一個 skill 的 [`references/`](skills/excellent-readme/references/) 目錄。
 
 ## 驗證
 
 README 靜態檢查器僅依賴 Python 標準函式庫，可檢查未完成標記、空連結目標、本機連結，以及指向不存在授權檔的敘述，並略過程式碼區塊與行內程式碼。章節是否齊備、內容是否有用交由品質檢核表判斷，不以關鍵字比對代替：
 
 ```powershell
-python plugins/excellent-readme/skills/excellent-readme/scripts/validate_readme.py README_ZH.md --project .
+python skills/excellent-readme/scripts/validate_readme.py README_ZH.md --project .
 ```
 
 成功時會輸出：
@@ -94,34 +100,20 @@ python plugins/excellent-readme/skills/excellent-readme/scripts/validate_readme.
 README static checks passed.
 ```
 
-驗證兩個 plugin manifest 與 marketplace catalog：
-
-```powershell
-claude plugin validate .
-python C:/Users/<user>/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/excellent-readme
-```
-
 > [!NOTE]
-> README 腳本只做靜態檢查，不能取代命令實際執行、外部連結存取或人工閱讀複核。Codex 驗證器的實際路徑取決於本機 Codex 安裝位置。
+> README 腳本只做靜態檢查，不能取代命令實際執行、外部連結存取或人工閱讀複核。
 
 ## 專案結構
 
 ```text
 excellent-readme/
-├── .claude-plugin/
-│   └── marketplace.json                 # Claude Code marketplace catalog
-├── .agents/plugins/
-│   └── marketplace.json                 # Codex marketplace catalog
-├── plugins/excellent-readme/
-│   ├── .claude-plugin/plugin.json       # Claude Code plugin manifest
-│   ├── .codex-plugin/plugin.json        # Codex plugin manifest
-│   └── skills/excellent-readme/
-│       ├── SKILL.md                     # 核心指示與觸發範圍
-│       ├── agents/openai.yaml           # Codex 顯示資料與預設提示
-│       ├── references/                  # 設計框架、檢核表與範例
-│       └── scripts/                     # README 靜態檢查器
-├── README.md                            # 英文文件
-└── README_ZH.md                         # 繁體中文文件
+├── skills/excellent-readme/
+│   ├── SKILL.md                     # 核心指示與觸發範圍
+│   ├── agents/openai.yaml           # Codex 顯示資料與預設提示
+│   ├── references/                  # 設計框架、檢核表與範例
+│   └── scripts/                     # README 靜態檢查器
+├── README.md                        # 英文文件
+└── README_ZH.md                     # 繁體中文文件
 ```
 
 ## 限制
@@ -130,8 +122,7 @@ excellent-readme/
 - 檢查品質受 repository 中可取得的程式碼、設定、文件與工具影響。
 - 需要網路、憑證、付費服務或會改動資料的驗證，仍須取得適當授權後才能執行。
 - repository 目前未提供授權條款；在加入 `LICENSE` 前，請勿假設可用的授權範圍。
-- 此 repository 提供可直接加入的自架 marketplace；若要出現在 OpenAI 或 Anthropic 的官方公開 marketplace，仍須分別提交並通過平台審查。
 
 ## 開發與貢獻
 
-修改 skill 或 manifest 後，請用實際 repository 測試建立、改善與稽核情境，並重新執行上方三項驗證。提交前確認新增的命令、功能與連結都有 repository 證據支持。
+修改 skill 後，請用實際 repository 測試建立、改善與稽核情境，並對兩份 README 重新執行上方的靜態檢查。提交前確認新增的命令、功能與連結都有 repository 證據支持。
