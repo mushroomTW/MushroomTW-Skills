@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "prompt": "幫我對這個儲存庫做 Rapid 快速缺陷稽核，選 Standard 單代理執行",
+    "expected": "應詢問 Audit/Execution 模式（或跳過已選）、建立 repository map、讀 core/high 風險路徑、跑既有檢查、輸出 .docs/repository-bug-audit-rapid-report.md + .evidence.json、跑 validator、回傳可點擊連結與極簡摘要；不產生 quality-debt、不評分、不改程式碼"
+  },
+  {
+    "id": 2,
+    "prompt": "執行 Comprehensive 完整模式對整個儲存庫做工程品質稽核，給我 0-100 分與七維度評分，並用 Multi-agent 分工",
+    "expected": "應讀每個 in-scope 檔案、追蹤全部 core/high 流程、產生 defect/risk/quality-debt、計七維度 weighted score 與 rating、檢查 core-path 100% 才允 High confidence、provisional 處理超預算、多代理分工與 High 交叉審查、validator 0 才交付"
+  },
+  {
+    "id": 3,
+    "prompt": "我有一個單檔的已知 bug 想 review，可以用這個 skill 嗎？",
+    "expected": "應判斷為不適用範圍，禮貌拒用並說明邊界：此 skill 僅用於 whole-repository bug hunt / repository-wide risk review / overall quality score，非單檔/PR diff/單一已知漏洞/效能單點/一般提問"
+  }
+]

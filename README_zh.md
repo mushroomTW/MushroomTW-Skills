@@ -107,7 +107,9 @@ codex plugin marketplace list && codex plugin list
 | Codex | `~/.agents/skills/` | `<repo>/.agents/skills/` |
 
 ```bash
-cp -r skills/repository-bug-audit ~/.claude/skills/repository-bug-audit
+# 依所在平台選擇其一
+cp -r skills/repository-bug-audit ~/.claude/skills/repository-bug-audit  # Claude Code
+cp -r skills/repository-bug-audit ~/.agents/skills/repository-bug-audit  # Codex / OpenCode
 ```
 
 ### Claude 應用程式

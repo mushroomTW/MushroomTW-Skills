@@ -114,7 +114,9 @@ Copy `skills/repository-bug-audit` — not the repository root — into the host
 | Codex | `~/.agents/skills/` | `<repo>/.agents/skills/` |
 
 ```bash
-cp -r skills/repository-bug-audit ~/.claude/skills/repository-bug-audit
+# 依所在平台選擇其一
+cp -r skills/repository-bug-audit ~/.claude/skills/repository-bug-audit  # Claude Code
+cp -r skills/repository-bug-audit ~/.agents/skills/repository-bug-audit  # Codex / OpenCode
 ```
 
 ### Claude apps
@@ -313,8 +315,8 @@ repository-bug-audit/
             └── test_validate_bug_audit.py    # Validator test suite
 ```
 
-Both hosts scan `skills/` by default, which is why the same folder serves as the Claude Code skill,
-the Codex skill, and the plain-install source.
+Both hosts scan `skills/` by default, which is why the same folder serves as the agent skill
+for Claude Code, Codex, and plain-install sources.
 
 ## Development
 
