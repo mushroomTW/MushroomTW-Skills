@@ -159,7 +159,7 @@ are never overwritten, so a re-audit cannot destroy the previous record.
 Both report layouts use exactly four sections. Rapid uses Executive Summary, Review Coverage and Bug
 Surfaces, Prioritized Findings, and Limitations; Comprehensive replaces the second with
 Risk-Weighted Quality Scores. High and Medium findings get detail blocks; Low findings stay in the
-table. See [`report-template.md`](skills/repository-bug-audit/references/report-template.md).
+table. See [`audit-protocol.md`](skills/repository-bug-audit/references/audit-protocol.md).
 
 ## The evidence model
 
@@ -196,7 +196,7 @@ Findings are deduplicated by root cause and remediation rather than by line numb
 underlying defect surfacing in six files is one finding — and it is not deducted twice unless each
 deduction has a distinct, proven impact.
 
-Full protocol: [`evidence-and-reporting.md`](skills/repository-bug-audit/references/evidence-and-reporting.md).
+Full protocol: [`audit-protocol.md`](skills/repository-bug-audit/references/audit-protocol.md).
 Field-level authority: [`bug-audit-evidence.schema.json`](skills/repository-bug-audit/references/bug-audit-evidence.schema.json).
 
 ## Scoring (Comprehensive mode)
@@ -239,7 +239,7 @@ the validator, which is what stops a strong score from being written over a know
 | 40–59 | Elevated engineering risk |
 | 0–39 | Major engineering risk |
 
-Full rubric: [`scoring-rubric.md`](skills/repository-bug-audit/references/scoring-rubric.md).
+Full rubric: [`audit-protocol.md`](skills/repository-bug-audit/references/audit-protocol.md) §3.
 
 ## Validation
 
@@ -305,9 +305,7 @@ repository-bug-audit/
         │   └── openai.yaml                   # Codex skill-picker metadata
         ├── references/
         │   ├── platform-adapters.md          # Per-host capability mapping
-        │   ├── evidence-and-reporting.md     # Evidence protocol and completion gates
-        │   ├── report-template.md            # Report structure for both modes
-        │   ├── scoring-rubric.md             # Risk calibration and scoring
+        │   ├── audit-protocol.md             # Evidence, scoring & reporting protocol
         │   └── bug-audit-evidence.schema.json # Authoritative evidence schema (v3.0)
         ├── scripts/
         │   └── validate_bug_audit.py         # Artifact-pair validator
@@ -320,14 +318,15 @@ the Codex skill, and the plain-install source.
 
 ## Development
 
-The validator uses only the Python standard library — no third-party packages. Verified on
-CPython 3.14.
+The validator requires `jsonschema` (`pip install jsonschema`). Verified on CPython 3.14.
 
 ```bash
+pip install jsonschema
 python -X utf8 -m unittest discover -s skills/repository-bug-audit/tests -v
 ```
 
-When changing the rules, keep the four sources of truth in step:
-`bug-audit-evidence.schema.json` defines fields and enums, `scoring-rubric.md` defines the
-arithmetic, `validate_bug_audit.py` enforces both, and `test_validate_bug_audit.py` pins the
-behavior. A rule stated in prose but not enforced by the validator will drift.
+When changing the rules, keep the three sources of truth in step:
+`bug-audit-evidence.schema.json` defines fields and enums, `audit-protocol.md` defines the
+human-readable protocol and scoring arithmetic, `validate_bug_audit.py` enforces both, and
+`test_validate_bug_audit.py` pins the behavior. A rule stated in prose but not enforced by the
+validator will drift.

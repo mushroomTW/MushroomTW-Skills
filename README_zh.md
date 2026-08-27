@@ -146,7 +146,7 @@ cp -r skills/repository-bug-audit ~/.claude/skills/repository-bug-audit
 
 兩種報告版型都固定四個章節。Rapid 為：執行摘要、審查覆蓋與缺陷面、優先發現、限制；
 Comprehensive 則把第二節換成「風險加權品質分數」。High 與 Medium 發現會有詳細區塊，Low 發現只
-留在表格中。詳見 [`report-template.md`](skills/repository-bug-audit/references/report-template.md)。
+留在表格中。詳見 [`audit-protocol.md`](skills/repository-bug-audit/references/audit-protocol.md)。
 
 ## 佐證模型
 
@@ -179,7 +179,7 @@ Comprehensive 則把第二節換成「風險加權品質分數」。High 與 Med
 發現以「根本原因與修復方式」去重，而非以行號去重。因此同一個底層缺陷即使出現在六個檔案中，
 仍算一項發現；除非每次扣分都有各自獨立且已證明的影響，否則不會重複扣分。
 
-完整協定：[`evidence-and-reporting.md`](skills/repository-bug-audit/references/evidence-and-reporting.md)。
+完整協定：[`audit-protocol.md`](skills/repository-bug-audit/references/audit-protocol.md)。
 欄位層級的權威定義：[`bug-audit-evidence.schema.json`](skills/repository-bug-audit/references/bug-audit-evidence.schema.json)。
 
 ## 評分機制（Comprehensive 模式）
@@ -223,7 +223,7 @@ Comprehensive 則把第二節換成「風險加權品質分數」。High 與 Med
 | 40–59 | 工程風險偏高 |
 | 0–39 | 重大工程風險 |
 
-完整評分準則：[`scoring-rubric.md`](skills/repository-bug-audit/references/scoring-rubric.md)。
+完整評分準則：[`audit-protocol.md`](skills/repository-bug-audit/references/audit-protocol.md) §3。
 
 ## 驗證
 
@@ -284,9 +284,7 @@ repository-bug-audit/
         │   └── openai.yaml                   # Codex skill 選單中繼資料
         ├── references/
         │   ├── platform-adapters.md          # 各平台能力對照
-        │   ├── evidence-and-reporting.md     # 佐證協定與完成關卡
-        │   ├── report-template.md            # 兩種模式的報告版型
-        │   ├── scoring-rubric.md             # 風險校準與評分
+        │   ├── audit-protocol.md             # 佐證、評分與報告協定
         │   └── bug-audit-evidence.schema.json # 權威佐證 schema（v3.0）
         ├── scripts/
         │   └── validate_bug_audit.py         # 產出配對驗證器
@@ -299,12 +297,13 @@ repository-bug-audit/
 
 ## 開發
 
-驗證器只使用 Python 標準函式庫，不需第三方套件。已在 CPython 3.14 上驗證。
+驗證器需 `jsonschema`（`pip install jsonschema`）。已在 CPython 3.14 上驗證。
 
 ```bash
+pip install jsonschema
 python -X utf8 -m unittest discover -s skills/repository-bug-audit/tests -v
 ```
 
-修改規則時，請讓四個真實來源保持同步：`bug-audit-evidence.schema.json` 定義欄位與列舉、
-`scoring-rubric.md` 定義計算方式、`validate_bug_audit.py` 強制執行前兩者，
+修改規則時，請讓三個真實來源保持同步：`bug-audit-evidence.schema.json` 定義欄位與列舉、
+`audit-protocol.md` 定義人類可讀的協定與評分算式、`validate_bug_audit.py` 強制執行前兩者，
 `test_validate_bug_audit.py` 則把行為釘死。只寫在文字敘述、卻沒有被驗證器強制執行的規則，遲早會漂移。

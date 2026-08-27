@@ -12,6 +12,13 @@ from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 
+try:
+    import jsonschema  # pip install jsonschema
+    from jsonschema import ValidationError
+except ImportError as _e:  # pragma: no cover
+    jsonschema = None  # type: ignore[assignment]
+    ValidationError = Exception  # type: ignore[assignment,misc]
+
 
 SCHEMA_PATH = Path(__file__).resolve().parents[1] / "references" / "bug-audit-evidence.schema.json"
 EXPECTED_WEIGHTS = {
@@ -42,97 +49,60 @@ CRITICAL_TIERS = {"core", "high"}
 RUNTIME_FINDING_TYPES = {"defect", "risk"}
 
 
-def _type_matches(value: Any, expected: str) -> bool:
-    """Match a Python value using JSON Schema type semantics."""
-    if expected == "object":
-        return isinstance(value, dict)
-    if expected == "array":
-        return isinstance(value, list)
-    if expected == "string":
-        return isinstance(value, str)
-    if expected == "boolean":
-        return isinstance(value, bool)
-    if expected == "integer":
-        return isinstance(value, int) and not isinstance(value, bool)
-    if expected == "number":
-        return isinstance(value, (int, float)) and not isinstance(value, bool)
-    if expected == "null":
-        return value is None
-    return True
-
-
-def _resolve_ref(root_schema: dict[str, Any], reference: str) -> dict[str, Any]:
-    if not reference.startswith("#/"):
-        raise ValueError(f"unsupported schema reference: {reference}")
-    node: Any = root_schema
-    for part in reference[2:].split("/"):
-        node = node[part.replace("~1", "/").replace("~0", "~")]
-    return node
-
-
-# ponytail: 自製 JSON Schema 子集求值器，換取零第三方依賴（skill 的可移植承諾）。
-# 僅覆蓋 schema 實際使用的關鍵字（type/enum/const/required/properties/additionalProperties/
-# minItems/maxItems/items/minLength/pattern/minimum/maximum/$ref）。若
-# bug-audit-evidence.schema.json 引入新關鍵字（如 oneOf/anyOf/dependencies），
-# 需在此同步擴充，並在 tests 補對應用例。
 def validate_schema(
     value: Any,
     schema: dict[str, Any],
     root_schema: dict[str, Any] | None = None,
     path: str = "$",
 ) -> list[str]:
-    """Validate the JSON Schema subset required by this skill."""
-    root_schema = root_schema or schema
-    if "$ref" in schema:
-        return validate_schema(value, _resolve_ref(root_schema, schema["$ref"]), root_schema, path)
+    """Validate via jsonschema (Draft 2020-12). Keeps legacy signature for tests."""
+    del root_schema, path  # jsonschema handles $ref internally
+    if jsonschema is None:
+        return ["jsonschema is not installed; run: pip install jsonschema"]
+    try:
+        from jsonschema import Draft202012Validator
+    except ImportError:
+        from jsonschema import Draft7Validator as Draft202012Validator  # type: ignore[assignment]
 
+    validator = Draft202012Validator(schema)
     errors: list[str] = []
-    expected_type = schema.get("type")
-    if expected_type is not None:
-        expected_types = expected_type if isinstance(expected_type, list) else [expected_type]
-        if not any(_type_matches(value, candidate) for candidate in expected_types):
-            return [f"{path}: expected type {expected_type!r}"]
+    for exc in sorted(validator.iter_errors(value), key=lambda e: list(e.absolute_path)):
+        # Build pointer like "$.findings[1].severity"
+        pointer = "$" + "".join(
+            f"[{repr(p)}]" if isinstance(p, int) else f".{p}" for p in exc.absolute_path
+        )
+        # Translate to legacy phrasing expected by tests
+        msg: str
+        if exc.validator == "const":
+            msg = f"expected constant {exc.validator_value!r}"
+        elif exc.validator == "required":
+            # "'verification' is a required property" -> "missing required property 'verification'"
+            m = re.search(r"'([^']+)' is a required property", exc.message)
+            prop = m.group(1) if m else str(exc.validator_value)
+            msg = f"missing required property '{prop}'"
+        elif exc.validator == "additionalProperties":
+            # "Additional properties are not allowed ('compliance' was unexpected)" -> "unexpected property 'compliance'"
+            m = re.search(r"\('([^']+)' was unexpected\)", exc.message)
+            if m:
+                msg = f"unexpected property '{m.group(1)}'"
+            else:
+                # fallback: extract first quoted token
+                m2 = re.search(r"'([^']+)'", exc.message)
+                msg = f"unexpected property '{m2.group(1)}'" if m2 else exc.message
+        elif exc.validator == "enum":
+            # "'🟡 Medium' is not one of ['High', 'Medium', 'Low']" -> "... is not in the allowed enum"
+            msg = exc.message.replace("is not one of", "is not in the allowed enum")
+        elif exc.validator == "type":
+            msg = exc.message
+        else:
+            msg = exc.message
+            if "is not one of" in msg:
+                msg = msg.replace("is not one of", "is not in the allowed enum")
 
-    if "const" in schema and value != schema["const"]:
-        errors.append(f"{path}: expected constant {schema['const']!r}")
-    if "enum" in schema and value not in schema["enum"]:
-        errors.append(f"{path}: value {value!r} is not in the allowed enum")
-
-    if isinstance(value, dict):
-        for key in schema.get("required", []):
-            if key not in value:
-                errors.append(f"{path}: missing required property {key!r}")
-        properties = schema.get("properties", {})
-        if schema.get("additionalProperties") is False:
-            for key in value:
-                if key not in properties:
-                    errors.append(f"{path}: unexpected property {key!r}")
-        for key, child in properties.items():
-            if key in value:
-                errors.extend(validate_schema(value[key], child, root_schema, f"{path}.{key}"))
-
-    if isinstance(value, list):
-        if len(value) < schema.get("minItems", 0):
-            errors.append(f"{path}: expected at least {schema['minItems']} items")
-        if "maxItems" in schema and len(value) > schema["maxItems"]:
-            errors.append(f"{path}: expected no more than {schema['maxItems']} items")
-        item_schema = schema.get("items")
-        if item_schema:
-            for index, item in enumerate(value):
-                errors.extend(validate_schema(item, item_schema, root_schema, f"{path}[{index}]"))
-
-    if isinstance(value, str):
-        if len(value) < schema.get("minLength", 0):
-            errors.append(f"{path}: string is shorter than {schema['minLength']}")
-        pattern = schema.get("pattern")
-        if pattern and re.fullmatch(pattern, value) is None:
-            errors.append(f"{path}: value does not match pattern {pattern!r}")
-
-    if isinstance(value, (int, float)) and not isinstance(value, bool):
-        if "minimum" in schema and value < schema["minimum"]:
-            errors.append(f"{path}: value is below minimum {schema['minimum']}")
-        if "maximum" in schema and value > schema["maximum"]:
-            errors.append(f"{path}: value is above maximum {schema['maximum']}")
+        if pointer == "$":
+            errors.append(f"$: {msg}")
+        else:
+            errors.append(f"{pointer}: {msg}")
     return errors
 
 
