@@ -16,23 +16,23 @@ Audit the current working tree by finding material bugs first, then assess broad
 
 ## Workflow
 
-1. **Select modes** — Input: user request; Output: `audit_mode=rapid|comprehensive` + `execution.review_mode=standard|multi-agent`; Format: one `AskUserQuestion` with 2 questions (skip if already stated).
-2. **Build repository map & inventory** — Input: `AGENTS.md`, `README`, manifests, CI; Output: `inventory[]` (`path`, `status=read|mapped|excluded|unreadable`, `risk_tier=core|high|standard|low`, `reason` when required) covering entire working tree; never use `git diff`/history.
-3. **Trace core/high-risk flows** — Input: `inventory` items with `core|high`; Output: `core_flows[]` (`name`, `risk_tier`, `entry_point=path:symbol`, `status=traced|partial|untraced`, `evidence[]`); every known core/high flow must be traced.
-4. **Run only repo-configured checks** — Input: commands already in `package.json`/`Makefile`/CI; Output: `verification_checks[]` (`name`, `status=passed|failed|not_run|unavailable`, `scope`, `evidence`); never install analyzers/deps or write repro probes; only `reproduced` from executed configured checks.
-5. **Write evidence JSON** — Input: `references/bug-audit-evidence.schema.json` + `references/audit-protocol.md §1,2,5`; Output: `.docs/<pair>.evidence.json` with 12 required top-level fields; never include secrets/full sources.
-6. **Write Markdown report** — Input: evidence JSON; Output: `.docs/<pair>.md` with exactly 4 sections (`§4`); render severity as `🔴 High`/`🟡 Medium`/`🟢 Low`; do not duplicate JSON appendix.
-7. **Validate & fix** — Input: `python -X utf8 <skill-dir>/scripts/validate_bug_audit.py --evidence <evidence> --report <report> [--repo-root <path>]`; Output: exit 0 pass / 1 content / 2 I/O; fix all policy failures before delivery; return clickable links + 1-paragraph summary, never pasted artifacts.
+1. **Select modes** — In: user request; Out: `audit_mode`+`review_mode`; Format: one `AskUserQuestion` 2問（已答則跳過）。
+2. **Build map & inventory** — In: `AGENTS.md`/`README`/manifests/CI; Out: `inventory[]` (`path`,`status`,`risk_tier`,`reason`); 全工作樹，禁用 `git diff`/history。
+3. **Trace flows** — In: `core|high` items; Out: `core_flows[]` (`name`,`entry_point`,`status`,`evidence[]`)；每個已知 core/high 必須 traced。
+4. **Run checks** — In: 已配置指令；Out: `verification_checks[]` (`status=passed|failed|not_run|unavailable`)；禁裝工具/寫探針，`reproduced` 僅來自已執行配置。
+5. **Write evidence** — In: `schema.json`+`audit-protocol.md §1,2,5`; Out: `.docs/<pair>.evidence.json`（12 必填欄位）；禁機密/全源碼。
+6. **Write report** — In: evidence; Out: `.docs/<pair>.md` 恰 4 章（§4），severity 渲染 `🔴/🟡/🟢`，不抄 JSON。
+7. **Validate & fix** — In: `python -X utf8 <skill-dir>/scripts/validate_bug_audit.py --evidence --report [--repo-root]`; Out: exit 0/1/2；修復後回傳連結+摘要，不貼全文。
 
 Rules: validator checks structure/policy, not truth — rule out alternatives by reading implementation, major callers/callees, config, and tests.
 
-## Failure handling — if-then fallbacks
+## Failure handling — if-then
 
-- **If checks not configured / unavailable** → record `verification_checks.status=unavailable` + evidence "no command found"; disclose in `Limitations`; Comprehensive cannot reach High confidence without one `passed`.
-- **If Comprehensive cannot read all in-scope files within budget** → switch to Multi-agent partitioned; if still infeasible, narrow to `core|high` paths, mark `execution.provisional=true`, store each unread as `inventory.status=mapped`+`reason`, state consequence in `limitations` (not file list).
-- **If Multi-agent unavailable** → explain, ask to switch to Standard; never silently fallback (`execution.review_mode` is factual).
-- **If `.docs/` artifact already exists** → add same timestamp `YYYYMMDD-HHMMSS` to both basenames; never overwrite.
-- **If no `core|high` item** → treat as mis-tiering: require at least one; re-evaluate tiering per §5, otherwise provisional with reason.
+- **If checks unavailable** → `status=unavailable` + `Limitations`揭露；Comprehensive High 需一 `passed`。
+- **If 全量讀取超預算** → 切 Multi-agent；仍不可行則縮至 `core|high`、`provisional=true`、未讀記 `mapped`+`reason`。
+- **If Multi-agent 不可用** → 明述並詢問切 Standard；禁靜默降級。
+- **If `.docs/` 已存在** → 兩檔同加 `YYYYMMDD-HHMMSS`，永不覆蓋。
+- **If 無 `core|high`** → 視為分層錯誤，須至少一項，重評 §5 否則 provisional。
 
 ## Scope & inventory
 
@@ -59,6 +59,14 @@ Write exactly one pair in `.docs/` (create if missing):
 | Comprehensive | `.docs/repository-bug-audit-report.md` | `.docs/repository-bug-audit-report.evidence.json` |
 
 If either exists, add shared timestamp `YYYYMMDD-HHMMSS` to both; never overwrite. Keep Markdown concise, no secrets/full sources, no JSON appendix.
+
+## 禁止事項 — 不要做
+
+- 單檔/PR diff/單一漏洞/單點效能/一般提問 — 禁用本 skill
+- 改程式碼/設定/測試/外部系統（需用戶另行明確要求）
+- 裝分析器/相依、寫重現探針；`reproduced` 僅來自已執行配置
+- 以 `git diff`/history 縮範圍；以搜尋不到斷言已修/已測/安全
+- 覆蓋 `.docs/` 產物、抄 JSON 附錄、寫機密/全源碼
 
 ## Validate and deliver
 
