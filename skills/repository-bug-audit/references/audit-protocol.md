@@ -18,7 +18,7 @@
 ### 1.1 Finding 類型
 
 | 類型 | 門檻 |
-|---|---|
+| --- | --- |
 | `defect` | 行為已證明違反可見契約或產生錯誤結果。必須具備 `expected_behavior` / `actual_behavior`、佐證 `observed` 或 `reproduced`、信心度 ≥7、狀態 `confirmed` / `cross-confirmed` |
 | `risk` | 已直接證明存在控制缺口或具體失效條件，但錯誤結果尚未完整觸發。必須具備非空 `preconditions` 與 `verification`；有重大替代解釋時用 `needs-verification` |
 | `quality-debt` | 尚未證明會造成執行期錯誤的工程問題。僅 Comprehensive 允許；Rapid 禁止 |
@@ -28,14 +28,14 @@
 ### 1.2 佐證種類與信心度
 
 | 佐證 | 意義 |
-|---|---|
+| --- | --- |
 | `observed` | 由目前工作樹的程式碼與資料流直接確認 |
 | `reproduced` | 由儲存庫既有設定的測試/建置/lint/analyzer 實際執行後確認 |
 | `inferred` | 多項事實吻合但仍有具名執行期條件未驗證；`defect` 永不適用 |
 | `cross-confirmed` | 兩個獨立來源確認；獨立審查最多將信心度 +1 |
 
 | 信心度 | 處理 |
-|---|---|
+| --- | --- |
 | 9–10、7–8 | 可發表 |
 | 5–6 | 僅能以 `needs-verification` 發表 |
 | 3–4 | 只留於 evidence，不發表不計分 |
@@ -60,12 +60,13 @@
 
 ### 3.1 模式差異
 
-|  | Rapid | Comprehensive |
-|---|---|---|
+| | Rapid | Comprehensive |
+| --- | --- | --- |
 | 分數/評級/維度 | 無 | 有，7 維度 0–100 |
 | 信心度上限 | Medium | High |
 
 Rapid 風險校準：
+
 - **High**：存在至少一項已確認 High `defect`/`risk`，或多項已確認 Medium 形成系統性重大風險
 - **Medium**：無已確認 High，但存在公開 High/Medium `defect`/`risk`，或重大未知需升級
 - **Low**：無公開 High/Medium `defect`/`risk`，選定核心/高風險流程已追蹤，無重大未知
@@ -75,7 +76,7 @@ Rapid 信心度永不為 High；`provisional` 的 Rapid 必須為 Low。
 ### 3.2 七維度與權重
 
 | 維度 | ID | 權重 |
-|---|---|---:|
+| --- | --- | ---: |
 | 正確性與可靠性 | `correctness` | 30 |
 | 安全性與資料處理 | `security` | 25 |
 | 效能與可運維性 | `performance_operability` | 15 |
@@ -87,7 +88,7 @@ Rapid 信心度永不為 High；`provisional` 的 Rapid 必須為 Low。
 成熟度 0–5：
 
 | 等級 | 錨點 |
-|---:|---|
+| ---: | --- |
 | 5 | 可驗證控制一致涵蓋核心風險，無實質缺口 |
 | 4 | 大致健全，僅局部 Low 問題 |
 | 3 | 堪用，但有明確控制/覆蓋缺口需近期處理 |
@@ -105,7 +106,7 @@ Rapid 信心度永不為 High；`provisional` 的 Rapid 必須為 Low。
 ### 3.4 總分與評級
 
 | 分數 | 評級 |
-|---|---|
+| --- | --- |
 | 90–100 | Strong engineering quality |
 | 75–89 | Generally good |
 | 60–74 | Material technical debt |

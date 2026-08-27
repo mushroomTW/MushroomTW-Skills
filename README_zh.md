@@ -8,8 +8,7 @@
 每一項發現都必須具備明確位置、直接佐證、影響、信心度、修復方向與驗證方式，整份紀錄在交付前還會
 經過機器檢查。
 
-同時封裝為 **Claude Code** 與 **OpenAI Codex** 的外掛，也可在 **Claude 應用程式**中以一般
-skill 資料夾使用。
+以一般 skill 資料夾形式提供，適用於任何相容的 host（Claude Code、Codex、OpenCode、Claude Apps 等）。
 
 > 本文件的英文版本請見 [README.md](README.md)。
 
@@ -55,56 +54,12 @@ Comprehensive 模式會依納入範圍的檔案數與執行預算估算閱讀成
 
 ## 安裝
 
-這個儲存庫同時封裝成 Claude Code 與 Codex 的單一外掛市集。兩邊各自讀取自己的 manifest，並透過
-各自預設的 `skills/` 掃描找到同一份 skill，因此只需要維護一份內容。
-
-| 平台 | 外掛 manifest | 市集 manifest |
-| --- | --- | --- |
-| Claude Code | `.claude-plugin/plugin.json` | `.claude-plugin/marketplace.json` |
-| Codex | `.codex-plugin/plugin.json` | `.agents/plugins/marketplace.json` |
-
-### Claude Code —— 以外掛安裝（建議）
-
-```bash
-claude plugin marketplace add /path/to/repository-bug-audit
-```
-
-```bash
-claude plugin install repository-bug-audit@bug-audit-tools
-```
-
-隨時可驗證 manifest：
-
-```bash
-claude plugin validate /path/to/repository-bug-audit --strict
-```
-
-### Codex —— 以外掛安裝（建議）
-
-市集指令需要 Codex CLI v0.131.0 以上版本。
-
-```bash
-codex plugin marketplace add /path/to/repository-bug-audit
-```
-
-```bash
-codex plugin add repository-bug-audit
-```
-
-列出已註冊的市集與已安裝的外掛：
-
-```bash
-codex plugin marketplace list && codex plugin list
-```
-
-### 以一般 skill 資料夾安裝
-
-請複製 `skills/repository-bug-audit`（**不是**儲存庫根目錄）到各平台的 skills 目錄。
+以一般 skill 資料夾安裝 — 將 `skills/repository-bug-audit`（**不是**儲存庫根目錄）複製到 host 的 skills 目錄：
 
 | 平台 | 個人層級 | 專案層級 |
 | --- | --- | --- |
 | Claude Code | `~/.claude/skills/` | `<repo>/.claude/skills/` |
-| Codex | `~/.agents/skills/` | `<repo>/.agents/skills/` |
+| Codex / OpenCode | `~/.agents/skills/` | `<repo>/.agents/skills/` |
 
 ```bash
 # 依所在平台選擇其一
@@ -112,10 +67,7 @@ cp -r skills/repository-bug-audit ~/.claude/skills/repository-bug-audit  # Claud
 cp -r skills/repository-bug-audit ~/.agents/skills/repository-bug-audit  # Codex / OpenCode
 ```
 
-### Claude 應用程式
-
-上傳 `skills/repository-bug-audit` 資料夾。Claude 應用程式沒有子代理機制，因此無法使用多代理
-分工模式，skill 會請你改選 Standard。
+Claude Apps：上傳 `skills/repository-bug-audit` 資料夾。Claude Apps 無子代理機制，Multi-agent 分工不可用，skill 會請你改選 Standard。
 
 ## 使用方式
 
@@ -272,15 +224,8 @@ Low，第二個數字必須是 100% —— 讀再多瑣碎檔案都無法抵銷�
 repository-bug-audit/
 ├── README.md                                 # 英文版說明
 ├── README_zh.md                              # 本文件（繁體中文版）
-├── .claude-plugin/
-│   ├── plugin.json                           # Claude Code 外掛 manifest
-│   └── marketplace.json                      # Claude Code 市集目錄
-├── .codex-plugin/
-│   └── plugin.json                           # Codex 外掛 manifest
-├── .agents/plugins/
-│   └── marketplace.json                      # Codex 市集目錄
 └── skills/
-    └── repository-bug-audit/                 # skill 本體 —— 一般安裝就是複製這個資料夾
+    └── repository-bug-audit/                 # skill 本體 —— 複製此資料夾即完成安裝
         ├── SKILL.md                          # Skill 定義與稽核流程
         ├── agents/
         │   └── openai.yaml                   # Codex skill 選單中繼資料
@@ -294,8 +239,7 @@ repository-bug-audit/
             └── test_validate_bug_audit.py    # 驗證器測試
 ```
 
-兩個平台都預設掃描 `skills/`，所以同一個資料夾能同時作為 Claude Code skill、Codex skill 與
-一般安裝的來源。
+任何會掃描 `skills/` 的 host 皆可透過一般資料夾安裝找到此 skill。
 
 ## 開發
 

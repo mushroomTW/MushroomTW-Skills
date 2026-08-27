@@ -10,8 +10,7 @@ the implementation, its major callers and callees, its configuration, and its te
 Every finding carries a location, direct evidence, impact, confidence, remediation direction, and a
 verification method, and the whole record is machine-checked before delivery.
 
-Ships as a plugin for both **Claude Code** and **OpenAI Codex**, and works as a plain skill folder
-in the **Claude apps**.
+Ships as a plain skill folder for any skills-compatible host (Claude Code, Codex, OpenCode, Claude Apps, etc.).
 
 > **[繁體中文版 (Traditional Chinese)](README_zh.md)**
 
@@ -61,57 +60,12 @@ factual claim about how the audit was performed.
 
 ## Installation
 
-The repository is packaged as a single-plugin marketplace for both Claude Code and Codex. Each
-host reads its own manifest pair and finds the skill through its own default `skills/` scan, so one
-copy of the skill serves both.
-
-| Host | Plugin manifest | Marketplace manifest |
-| --- | --- | --- |
-| Claude Code | `.claude-plugin/plugin.json` | `.claude-plugin/marketplace.json` |
-| Codex | `.codex-plugin/plugin.json` | `.agents/plugins/marketplace.json` |
-
-### Claude Code — as a plugin (recommended)
-
-```bash
-claude plugin marketplace add /path/to/repository-bug-audit
-```
-
-```bash
-claude plugin install repository-bug-audit@bug-audit-tools
-```
-
-Verify the manifests at any time:
-
-```bash
-claude plugin validate /path/to/repository-bug-audit --strict
-```
-
-### Codex — as a plugin (recommended)
-
-Requires Codex CLI v0.131.0 or later for the marketplace commands.
-
-```bash
-codex plugin marketplace add /path/to/repository-bug-audit
-```
-
-```bash
-codex plugin add repository-bug-audit
-```
-
-List what is registered and installed:
-
-```bash
-codex plugin marketplace list && codex plugin list
-```
-
-### As a plain skill folder
-
-Copy `skills/repository-bug-audit` — not the repository root — into the host's skills directory.
+Install as a plain skill folder — copy `skills/repository-bug-audit` (not the repository root) into the host's skills directory:
 
 | Host | Personal scope | Project scope |
 | --- | --- | --- |
 | Claude Code | `~/.claude/skills/` | `<repo>/.claude/skills/` |
-| Codex | `~/.agents/skills/` | `<repo>/.agents/skills/` |
+| Codex / OpenCode | `~/.agents/skills/` | `<repo>/.agents/skills/` |
 
 ```bash
 # 依所在平台選擇其一
@@ -119,11 +73,7 @@ cp -r skills/repository-bug-audit ~/.claude/skills/repository-bug-audit  # Claud
 cp -r skills/repository-bug-audit ~/.agents/skills/repository-bug-audit  # Codex / OpenCode
 ```
 
-### Claude apps
-
-Upload the `skills/repository-bug-audit` folder. The Claude apps have no subagent mechanism, so
-Multi-agent partitioned execution is unavailable there and the skill will ask you to choose
-Standard.
+For Claude Apps, upload the `skills/repository-bug-audit` folder. Claude Apps has no subagent mechanism, so Multi-agent partitioned execution is unavailable and the skill will ask you to choose Standard.
 
 ## Usage
 
@@ -293,15 +243,8 @@ the evidence file.
 repository-bug-audit/
 ├── README.md                                 # This file
 ├── README_zh.md                              # Traditional Chinese version
-├── .claude-plugin/
-│   ├── plugin.json                           # Claude Code plugin manifest
-│   └── marketplace.json                      # Claude Code marketplace catalog
-├── .codex-plugin/
-│   └── plugin.json                           # Codex plugin manifest
-├── .agents/plugins/
-│   └── marketplace.json                      # Codex marketplace catalog
 └── skills/
-    └── repository-bug-audit/                 # The skill itself — copy this for a plain install
+    └── repository-bug-audit/                 # The skill itself — copy this for install
         ├── SKILL.md                          # Skill definition and audit workflow
         ├── agents/
         │   └── openai.yaml                   # Codex skill-picker metadata
@@ -315,8 +258,7 @@ repository-bug-audit/
             └── test_validate_bug_audit.py    # Validator test suite
 ```
 
-Both hosts scan `skills/` by default, which is why the same folder serves as the agent skill
-for Claude Code, Codex, and plain-install sources.
+Any host that scans `skills/` will find the skill through its plain-folder install.
 
 ## Development
 

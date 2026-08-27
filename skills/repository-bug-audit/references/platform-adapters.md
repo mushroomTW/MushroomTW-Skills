@@ -5,18 +5,18 @@ Capabilities are identical everywhere; this file maps them to hosts.
 ## Capability map
 
 | Capability | Claude Code | Claude Apps | Codex |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Startup choice UI | `AskUserQuestion` (ask both modes at once) | Numbered prose | Numbered prose |
 | Independent reviewers | Subagent tool | Unavailable | Parallel agents where supported |
 | Read working tree | `Read`/`Grep`/`Glob` | Uploaded files | Native file tools |
 | Repo-configured checks | Shell tool | Sandbox shell | Native shell |
 | Write artifacts | `Write` → `.docs/` | Sandbox FS | Native write |
-| Skill directory | `${CLAUDE_PLUGIN_ROOT}/skills/repository-bug-audit` · `~/.claude/skills/...` · `<repo>/.claude/skills/...` | Uploaded folder | `.agents/skills/...` or plugin cache |
+| Skill directory | `~/.claude/skills/...` · `<repo>/.claude/skills/...` | Uploaded folder | `~/.agents/skills/...` · `<repo>/.agents/skills/...` |
 
 ## Claude Code
 
 - Ask **both** startup choices in one `AskUserQuestion`; skip what user already stated.
-- Resolve validator as `"${CLAUDE_PLUGIN_ROOT}"/skills/repository-bug-audit/scripts/validate_bug_audit.py` (quote; paths contain version/spaces) or relative to `references/`. On Windows use `/` and `py -3 -X utf8` if `python` missing. Requires `pip install jsonschema`.
+- Resolve validator relative to `references/` (e.g. `../scripts/validate_bug_audit.py`). On Windows use `/` and `py -3 -X utf8` if `python` missing. Requires `pip install jsonschema`.
 - Stay read-only: only `.docs/` pair; only run repo-configured checks. No tool install / repro probes.
 - Multi-agent: one subagent per partition (inventory, flows, candidates, limitations); cross-review High without revealing original verdict. Prefer LSP/graph over grep.
 
@@ -26,7 +26,7 @@ No subagents — explain and ask to switch to Standard. Scope = uploaded files; 
 
 ## Codex
 
-`agents/openai.yaml` drives the picker. Ask modes as numbered prose. Multi-agent via parallel runs with same cross-review rule. Resolve `validate_bug_audit.py` relative to `references/` (cache path carries marketplace/plugin/version).
+`agents/openai.yaml` drives the picker. Ask modes as numbered prose. Multi-agent via parallel runs with same cross-review rule. Resolve `validate_bug_audit.py` relative to `references/`.
 
 ## When a capability is missing
 
