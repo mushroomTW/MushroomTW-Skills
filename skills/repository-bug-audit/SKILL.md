@@ -16,9 +16,15 @@ Ask both in one interaction (skip what the user already stated). Follow [platfor
 
 ## Workflow
 
-1. Select modes → 2. Build repository map & inventory → 3. Trace core/high-risk flows → 4. Run only repo-configured checks → 5. Write evidence JSON (schema `references/bug-audit-evidence.schema.json`, protocol `references/audit-protocol.md`) → 6. Write Markdown report (`references/audit-protocol.md`) → 7. Validate & fix before delivery.
+1. **Select modes** — Input: user request; Output: `audit_mode=rapid|comprehensive` + `execution.review_mode=standard|multi-agent`; Format: one `AskUserQuestion` with 2 questions (skip if already stated).
+2. **Build repository map & inventory** — Input: `AGENTS.md`, `README`, manifests, CI; Output: `inventory[]` (`path`, `status=read|mapped|excluded|unreadable`, `risk_tier=core|high|standard|low`, `reason` when required) covering entire working tree; never use `git diff`/history.
+3. **Trace core/high-risk flows** — Input: `inventory` items with `core|high`; Output: `core_flows[]` (`name`, `risk_tier`, `entry_point=path:symbol`, `status=traced|partial|untraced`, `evidence[]`); every known core/high flow must be traced.
+4. **Run only repo-configured checks** — Input: commands already in `package.json`/`Makefile`/CI; Output: `verification_checks[]` (`name`, `status=passed|failed|not_run|unavailable`, `scope`, `evidence`); never install analyzers/deps or write repro probes; only `reproduced` from executed configured checks.
+5. **Write evidence JSON** — Input: `references/bug-audit-evidence.schema.json` + `references/audit-protocol.md §1,2,5`; Output: `.docs/<pair>.evidence.json` with 12 required top-level fields; never include secrets/full sources.
+6. **Write Markdown report** — Input: evidence JSON; Output: `.docs/<pair>.md` with exactly 4 sections (`§4`); render severity as `🔴 High`/`🟡 Medium`/`🟢 Low`; do not duplicate JSON appendix.
+7. **Validate & fix** — Input: `python -X utf8 <skill-dir>/scripts/validate_bug_audit.py --evidence <evidence> --report <report> [--repo-root <path>]`; Output: exit 0 pass / 1 content / 2 I/O; fix all policy failures before delivery; return clickable links + 1-paragraph summary, never pasted artifacts.
 
-Rules: never install tools/deps; never write repro probes; only `reproduced` from repo-configured checks. Validator checks structure/policy, not truth — rule out alternatives by reading code/callers/config/tests.
+Rules: validator checks structure/policy, not truth — rule out alternatives by reading implementation, major callers/callees, config, and tests.
 
 ## Scope & inventory
 
@@ -27,7 +33,7 @@ Use the entire working tree; never `git diff`/history. Build the map per `refere
 - every item: `read` / `mapped` / `excluded` / `unreadable` + `risk_tier` `core/high/standard/low`; at least one in-scope item is `core`/`high`; core/high coverage gates confidence.
 - Rapid may leave `mapped`; Comprehensive only in `provisional` with `reason`. Details → `references/audit-protocol.md`.
 
-Prefer code-navigation tools (LSP/graph) over grep; a search miss = "Not found within the reviewed scope."
+Use LSP / code-graph for callers/callees; if unavailable, fallback to grep then mark as "Not found within the reviewed scope" (do not claim absent/secure/unused from a search miss alone).
 
 ## Priorities & findings
 
