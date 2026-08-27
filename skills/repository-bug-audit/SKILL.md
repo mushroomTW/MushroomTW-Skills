@@ -9,7 +9,7 @@ Audit the current working tree by finding material bugs first, then assess broad
 
 ## Required startup choices
 
-Ask both in one interaction (skip what the user already stated). Follow [platform-adapters](references/platform-adapters.md) for the host's choice UI. Never silently fall back.
+🔴 **CHECKPOINT — 取得雙選確認後才可進入 Workflow**：Ask both in one interaction (skip what the user already stated). Follow [platform-adapters](references/platform-adapters.md) for the host's choice UI. If Multi-agent unavailable, explain and ask to switch to Standard. **Never silently fall back — 🛑 STOP and wait for user choice.**
 
 1. **Audit mode** — **Rapid** (map whole repo, read core/high-risk paths, only `defect`/`risk`, no score) or **Comprehensive** (read every in-scope file, all three finding types, 0–100 score).
 2. **Execution mode** — **Standard** or **Multi-agent partitioned** (partitions scope, cross-reviews High findings; see [platform-adapters](references/platform-adapters.md)).
@@ -62,9 +62,11 @@ If either exists, add shared timestamp `YYYYMMDD-HHMMSS` to both; never overwrit
 
 ## Validate and deliver
 
+🔴 **CHECKPOINT — 驗證通過前不得交付**：未達 exit 0 禁止回傳產物連結；若需縮範圍/切模式，須先獲用戶確認並標 `provisional`。
+
 ```text
 python -X utf8 <skill-directory>/scripts/validate_bug_audit.py --evidence <evidence.json> --report <report.md>
 # --repo-root <path> when artifacts are outside the audited tree
 ```
 
-Requires `jsonschema` (`pip install jsonschema`). Resolve `<skill-directory>` per [platform-adapters](references/platform-adapters.md); quote paths. Validator checks coverage recomputation, caps, ordering, and that every `inventory`/`location` path exists. Exit 0 = pass, 1 = content violation, 2 = I/O. Do not deliver unvalidated artifacts; return clickable links + short summary, not pasted artifacts.
+Requires `jsonschema` (`pip install jsonschema`). Resolve `<skill-directory>` per [platform-adapters](references/platform-adapters.md); quote paths. Validator checks coverage recomputation, caps, ordering, and that every `inventory`/`location` path exists. Exit 0 = pass, 1 = content violation, 2 = I/O. 🛑 STOP: Do not deliver unvalidated artifacts; return clickable links + short summary, not pasted artifacts.
