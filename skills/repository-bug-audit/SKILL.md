@@ -5,126 +5,76 @@ description: Perform evidence-driven, repository-wide bug discovery and engineer
 
 # Repository Bug Audit
 
-Audit the current working tree by finding material bugs first, then assess broader engineering quality in Comprehensive mode. Produce one concise Markdown report paired with one machine-readable evidence JSON file. Remain read-only except for those two artifacts. Do not modify code, configuration, tests, or external systems unless the user separately requests it. This holds regardless of which editing, shell, or automation capabilities the host exposes: availability is not permission.
+Audit the current working tree by finding material bugs first, then assess broader engineering quality in Comprehensive mode. Produce one concise Markdown report paired with one machine-readable evidence JSON. Remain read-only except for those two artifacts.
 
 ## Required startup choices
 
-Before inventorying or reading the project, ask the user to choose both options in one interaction:
+🔴 **CHECKPOINT — 取得雙選確認後才可進入 Workflow**：Ask both in one interaction (skip what the user already stated). Follow [platform-adapters](references/platform-adapters.md) for the host's choice UI. If Multi-agent unavailable, explain and ask to switch to Standard. **Never silently fall back — 🛑 STOP and wait for user choice.**
 
-1. **Audit mode**
-   - **Rapid bug audit:** Map the repository, inspect core and high-risk paths, publish only `defect` and `risk` findings, and do not assign a score.
-   - **Comprehensive bug and quality audit:** Read every included file, find bugs first, then include `quality-debt` findings and calculate a seven-dimension 0-100 score.
-2. **Execution mode**
-   - **Standard:** The primary agent performs the audit.
-   - **Multi-agent partitioned:** The primary agent partitions scope, integrates evidence, and verifies cross-boundary conclusions.
-
-Use the platform choice interface when available, following the [platform adapters](references/platform-adapters.md) for the host you are running in. Skip a choice already made explicitly by the user. If Multi-agent is selected but independent agents are unavailable, explain the limitation and ask the user to switch to Standard. Never silently fall back.
+1. **Audit mode** — **Rapid** (map whole repo, read core/high-risk paths, only `defect`/`risk`, no score) or **Comprehensive** (read every in-scope file, all three finding types, 0–100 score).
+2. **Execution mode** — **Standard** or **Multi-agent partitioned** (partitions scope, cross-reviews High findings; see [platform-adapters](references/platform-adapters.md)).
 
 ## Workflow
 
-Follow these phases in order:
+1. **Select modes** — In: user request; Out: `audit_mode`+`review_mode`; Format: one `AskUserQuestion` 2問（已答則跳過）。
+2. **Build map & inventory** — In: `AGENTS.md`/`README`/manifests/CI; Out: `inventory[]` (`path`,`status`,`risk_tier`,`reason`); 全工作樹，禁用 `git diff`/history。
+3. **Trace flows** — In: `core|high` items; Out: `core_flows[]` (`name`,`entry_point`,`status`,`evidence[]`)；每個已知 core/high 必須 traced。
+4. **Run checks** — In: 已配置指令；Out: `verification_checks[]` (`status=passed|failed|not_run|unavailable`)；禁裝工具/寫探針，`reproduced` 僅來自已執行配置。
+5. **Write evidence** — In: `schema.json`+`audit-protocol.md §1,2,5`; Out: `.docs/<pair>.evidence.json`（12 必填欄位）；禁機密/全源碼。
+6. **Write report** — In: evidence; Out: `.docs/<pair>.md` 恰 4 章（§4），severity 渲染 `🔴/🟡/🟢`，不抄 JSON。
+7. **Validate & fix** — In: `python -X utf8 <skill-dir>/scripts/validate_bug_audit.py --evidence --report [--repo-root]`; Out: exit 0/1/2；修復後回傳連結+摘要，不貼全文。
 
-1. Select audit and execution modes.
-2. Read repository instructions and build the repository map and inventory.
-3. Review the mode-specific scope and trace every known core or high-risk flow.
-4. Run only safe checks already configured by the project, such as tests, builds, linters, type checks, or analyzers.
-5. Write the evidence JSON using the [evidence schema](references/bug-audit-evidence.schema.json) and [evidence protocol](references/evidence-and-reporting.md).
-6. Write the paired Markdown report using the [report templates](references/report-template.md).
-7. Run the bundled validator and fix structural or policy failures before delivery.
+Rules: validator checks structure/policy, not truth — rule out alternatives by reading implementation, major callers/callees, config, and tests.
 
-Never install an analyzer, dependency, or other tool. Never write a reproduction program or test probe in either the repository or a temporary directory. Only results from checks already configured by the repository may use `reproduced` evidence.
+## Failure handling — if-then
 
-The validator proves schema and policy consistency, and that recorded paths name real files. It does not prove that a finding is true. Eliminate reasonable alternative explanations by reading code, callers, configuration, and tests.
+- **If checks unavailable** → `status=unavailable` + `Limitations`揭露；Comprehensive High 需一 `passed`。
+- **If 全量讀取超預算** → 切 Multi-agent；仍不可行則縮至 `core|high`、`provisional=true`、未讀記 `mapped`+`reason`。
+- **If Multi-agent 不可用** → 明述並詢問切 Standard；禁靜默降級。
+- **If `.docs/` 已存在** → 兩檔同加 `YYYYMMDD-HHMMSS`，永不覆蓋。
+- **If 無 `core|high`** → 視為分層錯誤，須至少一項，重評 §5 否則 provisional。
 
-## Build the repository map
+## Scope & inventory
 
-1. Read applicable `AGENTS.md` files, development rules, README and architecture documents, public contracts, schemas, manifests, test configuration, CI, and deployment configuration.
-2. Identify languages, package managers, entry points, services, data layers, background jobs, external integrations, persistence, state boundaries, trust boundaries, tests, and deployment units.
-3. Inventory first-party runtime code, tests, build scripts, migrations, deployment code, programmatic CI, manifests, schemas, and behavior-affecting configuration.
-4. Mark generated artifacts, dependencies, vendored code, caches, binaries, build output, and large fixtures as `excluded` with a reason. Include ambiguous generated, example, snapshot, seed, or compatibility code whenever it enters a build, deployment, test, or public contract.
-5. Give every item one status: `read`, `mapped`, `excluded`, or `unreadable`. Rapid uses `mapped` for its declared review boundary. Comprehensive may use it only in a provisional report, where it records an in-scope file left unread and requires a reason.
-6. Give every item one `risk_tier`: `core`, `high`, `standard`, or `low`. At least one in-scope item must be `core` or `high` — a repository with a core flow has files that carry it. Coverage of those two tiers is recomputed separately and gates assessment confidence, so tiering is a load-bearing judgement, not a label. Reading many trivial files never compensates for an unread core file.
+Use the entire working tree; never `git diff`/history. Build the map per `references/audit-protocol.md §5`:
 
-Use the entire current working tree as scope. Do not use `git diff`, history, or changed-file lists to narrow the audit. Prefer repository-provided code-navigation tools. A search result or tool summary does not count as reading a file.
+- every item: `read` / `mapped` / `excluded` / `unreadable` + `risk_tier` `core/high/standard/low`; at least one in-scope item is `core`/`high`; core/high coverage gates confidence.
+- Rapid may leave `mapped`; Comprehensive only in `provisional` with `reason`. Details → `references/audit-protocol.md`.
 
-## Bug discovery priorities
+Use LSP / code-graph for callers/callees; if unavailable, fallback to grep then mark as "Not found within the reviewed scope" (do not claim absent/secure/unused from a search miss alone).
 
-Prioritize:
+## Priorities & findings
 
-- mismatches between public contracts and actual behavior;
-- boundary values, error paths, partial failures, timeouts, retries, and cancellation;
-- state transitions, transactions, consistency, concurrency, and resource lifecycle;
-- external input, authorization, sensitive data, and trust boundaries;
-- unbounded work, N+1 behavior, blocking I/O, backpressure, and material performance degradation;
-- whether observable assertions cover core, failure, and security behavior.
+Prioritize contract mismatches, boundaries/partial failures/timeouts, state/consistency/concurrency, trust boundaries, unbounded work/N+1, and observable assertions. Scanner/TODO/complexity are signals only — read implementation, callers, config, tests before filing.
 
-Treat scanner output, compiler or linter output, TODOs, metrics, complexity, and code smells only as search signals. Before creating a finding, read the relevant implementation, major callers and callees, configuration, and tests.
+Finding bars (→ `references/audit-protocol.md §1`): `defect` ≥7 `observed`/`reproduced` `confirmed`; `risk` needs `preconditions`+`verification`; `quality-debt` only Comprehensive. Deduplicate by root cause; severity `High/Medium/Low` (report `🔴/🟡/🟢`).
 
-## Mode rules
+## Artifacts
 
-### Rapid
-
-- Map the whole repository and read core and highest-risk paths plus their major callers, callees, configuration, and tests.
-- Allow lower-risk items to remain `mapped`, but state the review boundary clearly.
-- Create only `defect` and `risk` findings. Never create `quality-debt` findings.
-- Do not include `dimensions`, `total_score`, or `rating`. Assessment confidence cannot exceed Medium.
-- Mark the report provisional when the repository map, selected flows, or minimum evidence record is incomplete.
-
-### Comprehensive
-
-- Read every included file. A complete Comprehensive audit contains no `mapped` items; every in-scope item is `read` or `unreadable`.
-- Trace every known core and high-risk flow and inspect major shared use sites.
-- After inventory, estimate read cost from in-scope file count, size, and the current execution budget. If the whole scope cannot be read within budget, you must either switch to Multi-agent partitioned execution to divide the scope, or narrow to core and highest-risk paths and mark the report provisional. Record each unread in-scope file in `inventory` as `mapped` with a reason: the inventory is the unread-file list, so coverage falls automatically and `limitations` carries the consequence in prose rather than file names. Never claim 100% coverage or High confidence over unread files — the validator enforces coverage recomputation and the confidence rules.
-- Create `defect` and `risk` findings first, then assess `quality-debt`.
-- Calculate seven dimensions and a 0-100 score using the [scoring rubric](references/scoring-rubric.md) only after coverage and evidence are complete.
-- Produce a provisional report when coverage, a core flow, or a conclusion-changing boundary is incomplete. Never claim whole-repository completion in that state.
-
-## Findings and evidence
-
-- A `defect` must prove that expected and actual behavior differ, use `observed` or `reproduced` evidence, have confidence of at least 7, and use `confirmed` or `cross-confirmed` status.
-- A `risk` must prove a control gap or concrete failure condition and include non-empty preconditions and verification. Use `needs-verification` when a material alternative explanation remains.
-- A `quality-debt` finding describes an engineering problem not proven to cause incorrect runtime behavior and is allowed only in Comprehensive mode.
-- Every finding requires a concrete location, direct evidence, impact, confidence, remediation direction, and verification method.
-- Record severity in evidence as `High`, `Medium`, or `Low`, and render it in the report as `🔴 High`, `🟡 Medium`, or `🟢 Low`.
-- Deduplicate by root cause and remediation. Do not deduct the same root cause more than once without distinct, proven impacts.
-- Keep confidence 3-4 candidates in evidence only. Do not publish or score them. Discard confidence 1-2 speculation.
-- Before claiming behavior is absent, handled, tested, secure, or unused, inspect likely implementations, registrations, callers, configuration, and tests. A search miss supports only "Not found within the reviewed scope."
-
-Read the [evidence protocol](references/evidence-and-reporting.md) completely before creating findings or integrating multi-agent results.
-
-## Artifact names
-
-Create exactly one paired report and evidence file in the repository `.docs/` directory, creating the directory when it does not exist:
+Write exactly one pair in `.docs/` (create if missing):
 
 | Mode | Report | Evidence |
-| --- | --- | --- |
+|---|---|---|
 | Rapid | `.docs/repository-bug-audit-rapid-report.md` | `.docs/repository-bug-audit-rapid-report.evidence.json` |
 | Comprehensive | `.docs/repository-bug-audit-report.md` | `.docs/repository-bug-audit-report.evidence.json` |
 
-If either default path already exists, add the same local timestamp to both basenames, for example `repository-bug-audit-report-YYYYMMDD-HHMMSS.md` and `repository-bug-audit-report-YYYYMMDD-HHMMSS.evidence.json`. Never overwrite either existing file. Creating `.docs/` is part of producing the two artifacts and does not relax the read-only rule.
+If either exists, add shared timestamp `YYYYMMDD-HHMMSS` to both; never overwrite. Keep Markdown concise, no secrets/full sources, no JSON appendix.
 
-Do not put secrets, complete source files, or unnecessary raw command output in evidence. Keep Markdown concise and do not duplicate evidence JSON as an appendix.
+## 禁止事項 — 不要做
+
+- 單檔/PR diff/單一漏洞/單點效能/一般提問 — 禁用本 skill
+- 改程式碼/設定/測試/外部系統（需用戶另行明確要求）
+- 裝分析器/相依、寫重現探針；`reproduced` 僅來自已執行配置
+- 以 `git diff`/history 縮範圍；以搜尋不到斷言已修/已測/安全
+- 覆蓋 `.docs/` 產物、抄 JSON 附錄、寫機密/全源碼
 
 ## Validate and deliver
 
-Keep UTF-8 mode on so non-ASCII text in findings prints readably on every platform:
+🔴 **CHECKPOINT — 驗證通過前不得交付**：未達 exit 0 禁止回傳產物連結；若需縮範圍/切模式，須先獲用戶確認並標 `provisional`。
 
 ```text
 python -X utf8 <skill-directory>/scripts/validate_bug_audit.py --evidence <evidence.json> --report <report.md>
+# --repo-root <path> when artifacts are outside the audited tree
 ```
 
-Resolve `<skill-directory>` from the [platform adapters](references/platform-adapters.md), which maps
-the installation layouts of each host. Quote the path; installed skill directories can carry version
-segments and, on some platforms, spaces.
-
-The validator resolves the audited tree as the report's parent directory — the parent of `.docs/` — and checks that every `inventory` path and every finding `location` names a file that actually exists. Pass `--repo-root <path>` when the artifacts are validated somewhere other than the tree they describe.
-
-Exit code `0` means the artifact pair satisfies structural and policy checks. Exit code `1` means content violations must be corrected. Exit code `2` means arguments or files could not be read. Do not deliver unvalidated artifacts. When missing evidence prevents correction, mark the affected conclusion provisional and keep evidence internally consistent.
-
-In chat, return clickable links to both artifacts and a very short summary. Do not paste either artifact.
-
-## Multi-agent execution
-
-See the [platform adapters](references/platform-adapters.md) for the subagent mechanism on the current host. The primary agent owns inventory, shared interfaces, cross-boundary flows, final evidence, validation, and the report. Assign every file or risk area one primary reviewer. Require each subagent to return inventory states, traced flows, structured candidate findings, and limitations. Subagents never assign the final score.
-
-Independently cross-review every candidate High finding without disclosing the original conclusion. The primary agent reads relevant source and tests, resolves conflicts, deduplicates, recalibrates severity and score, and records source agents and confirmation state. Multi-agent mode does not relax coverage, privacy, validation, or read-only requirements.
+Requires `jsonschema` (`pip install jsonschema`). Resolve `<skill-directory>` per [platform-adapters](references/platform-adapters.md); quote paths. Validator checks coverage recomputation, caps, ordering, and that every `inventory`/`location` path exists. Exit 0 = pass, 1 = content violation, 2 = I/O. 🛑 STOP: Do not deliver unvalidated artifacts; return clickable links + short summary, not pasted artifacts.
