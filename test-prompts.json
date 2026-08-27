@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "prompt": "Run a Rapid bug audit on this repository using Standard single-agent execution",
+    "expected": "Should ask for Audit/Execution modes (or skip if already chosen), build repository map, read core/high-risk paths, run configured checks, output .docs/repository-bug-audit-rapid-report.md + .evidence.json, run validator, return clickable links and a brief summary; must not create quality-debt, must not score, must not modify code"
+  },
+  {
+    "id": 2,
+    "prompt": "Run a Comprehensive audit on the entire repository for engineering quality, give me a 0-100 score with seven dimensions using Multi-agent partitioned execution",
+    "expected": "Should read every in-scope file, trace all core/high flows, generate defect/risk/quality-debt, calculate seven-dimension weighted score and rating, enforce 100% core-path for High confidence, handle over-budget with provisional, use multi-agent partitioning and cross-review High findings, deliver only after validator exit 0"
+  },
+  {
+    "id": 3,
+    "prompt": "I have a single file with a known bug and want a review — can I use this skill?",
+    "expected": "Should decline as out-of-scope and explain boundaries: this skill is only for whole-repository bug hunt / repository-wide risk review / overall quality score, not for single file / PR diff / single known vulnerability / single-point performance / general questions"
+  }
+]

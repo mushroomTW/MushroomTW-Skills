@@ -54,7 +54,7 @@ Comprehensive 模式會依納入範圍的檔案數與執行預算估算閱讀成
 
 ## 安裝
 
-以一般 skill 資料夾安裝 — 將 `skills/repository-bug-audit`（**不是**儲存庫根目錄）複製到 host 的 skills 目錄：
+以一般 skill 資料夾安裝 — 本倉庫即 skill 本體，將倉庫根目錄複製到 host 的 skills 目錄：
 
 | 平台 | 個人層級 | 專案層級 |
 | --- | --- | --- |
@@ -62,12 +62,12 @@ Comprehensive 模式會依納入範圍的檔案數與執行預算估算閱讀成
 | Codex / OpenCode | `~/.agents/skills/` | `<repo>/.agents/skills/` |
 
 ```bash
-# 依所在平台選擇其一
-cp -r skills/repository-bug-audit ~/.claude/skills/repository-bug-audit  # Claude Code
-cp -r skills/repository-bug-audit ~/.agents/skills/repository-bug-audit  # Codex / OpenCode
+# 從本倉庫根目錄執行，依平台擇一
+cp -r . ~/.claude/skills/repository-bug-audit  # Claude Code
+cp -r . ~/.agents/skills/repository-bug-audit  # Codex / OpenCode
 ```
 
-Claude Apps：上傳 `skills/repository-bug-audit` 資料夾。Claude Apps 無子代理機制，Multi-agent 分工不可用，skill 會請你改選 Standard。
+Claude Apps：上傳本倉庫（或壓縮檔）作為 skill。Claude Apps 無子代理機制，Multi-agent 分工不可用，skill 會請你改選 Standard。
 
 ## 使用方式
 

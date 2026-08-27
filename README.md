@@ -60,7 +60,7 @@ factual claim about how the audit was performed.
 
 ## Installation
 
-Install as a plain skill folder — copy `skills/repository-bug-audit` (not the repository root) into the host's skills directory:
+Install as a plain skill folder — this repository is the skill itself. Copy the repository root into the host's skills directory:
 
 | Host | Personal scope | Project scope |
 | --- | --- | --- |
@@ -68,12 +68,12 @@ Install as a plain skill folder — copy `skills/repository-bug-audit` (not the 
 | Codex / OpenCode | `~/.agents/skills/` | `<repo>/.agents/skills/` |
 
 ```bash
-# 依所在平台選擇其一
-cp -r skills/repository-bug-audit ~/.claude/skills/repository-bug-audit  # Claude Code
-cp -r skills/repository-bug-audit ~/.agents/skills/repository-bug-audit  # Codex / OpenCode
+# 從本倉庫根目錄執行，依平台擇一
+cp -r . ~/.claude/skills/repository-bug-audit  # Claude Code
+cp -r . ~/.agents/skills/repository-bug-audit  # Codex / OpenCode
 ```
 
-For Claude Apps, upload the `skills/repository-bug-audit` folder. Claude Apps has no subagent mechanism, so Multi-agent partitioned execution is unavailable and the skill will ask you to choose Standard.
+For Claude Apps, upload this repository (or zip) as the skill. Claude Apps has no subagent mechanism, so Multi-agent partitioned execution is unavailable and the skill will ask you to choose Standard.
 
 ## Usage
 
@@ -111,7 +111,7 @@ are never overwritten, so a re-audit cannot destroy the previous record.
 Both report layouts use exactly four sections. Rapid uses Executive Summary, Review Coverage and Bug
 Surfaces, Prioritized Findings, and Limitations; Comprehensive replaces the second with
 Risk-Weighted Quality Scores. High and Medium findings get detail blocks; Low findings stay in the
-table. See [`audit-protocol.md`](skills/repository-bug-audit/references/audit-protocol.md).
+table. See [`audit-protocol.md`](references/audit-protocol.md).
 
 ## The evidence model
 
@@ -148,8 +148,8 @@ Findings are deduplicated by root cause and remediation rather than by line numb
 underlying defect surfacing in six files is one finding — and it is not deducted twice unless each
 deduction has a distinct, proven impact.
 
-Full protocol: [`audit-protocol.md`](skills/repository-bug-audit/references/audit-protocol.md).
-Field-level authority: [`bug-audit-evidence.schema.json`](skills/repository-bug-audit/references/bug-audit-evidence.schema.json).
+Full protocol: [`audit-protocol.md`](references/audit-protocol.md).
+Field-level authority: [`bug-audit-evidence.schema.json`](references/bug-audit-evidence.schema.json).
 
 ## Scoring (Comprehensive mode)
 
@@ -191,7 +191,7 @@ the validator, which is what stops a strong score from being written over a know
 | 40–59 | Elevated engineering risk |
 | 0–39 | Major engineering risk |
 
-Full rubric: [`audit-protocol.md`](skills/repository-bug-audit/references/audit-protocol.md) §3.
+Full rubric: [`audit-protocol.md`](references/audit-protocol.md) §3.
 
 ## Validation
 
@@ -199,7 +199,7 @@ The bundled validator checks the artifact pair before delivery. It reads and wri
 `-X utf8` simply keeps non-ASCII text in its console output readable.
 
 ```bash
-python -X utf8 skills/repository-bug-audit/scripts/validate_bug_audit.py --evidence <evidence.json> --report <report.md>
+python -X utf8 scripts/validate_bug_audit.py --evidence <evidence.json> --report <report.md>
 ```
 
 | Exit code | Meaning |
@@ -240,25 +240,23 @@ the evidence file.
 ## Repository layout
 
 ```text
-repository-bug-audit/
+repository-bug-audit/                         # 本倉庫即 skill 本體
 ├── README.md                                 # This file
 ├── README_zh.md                              # Traditional Chinese version
-└── skills/
-    └── repository-bug-audit/                 # The skill itself — copy this for install
-        ├── SKILL.md                          # Skill definition and audit workflow
-        ├── agents/
-        │   └── openai.yaml                   # Codex skill-picker metadata
-        ├── references/
-        │   ├── platform-adapters.md          # Per-host capability mapping
-        │   ├── audit-protocol.md             # Evidence, scoring & reporting protocol
-        │   └── bug-audit-evidence.schema.json # Authoritative evidence schema (v3.0)
-        ├── scripts/
-        │   └── validate_bug_audit.py         # Artifact-pair validator
-        └── tests/
-            └── test_validate_bug_audit.py    # Validator test suite
+├── SKILL.md                                  # Skill definition and audit workflow
+├── agents/
+│   └── openai.yaml                           # Codex skill-picker metadata
+├── references/
+│   ├── platform-adapters.md                  # Per-host capability mapping
+│   ├── audit-protocol.md                     # Evidence, scoring & reporting protocol
+│   └── bug-audit-evidence.schema.json        # Authoritative evidence schema (v3.0)
+├── scripts/
+│   └── validate_bug_audit.py                 # Artifact-pair validator
+└── tests/
+    └── test_validate_bug_audit.py            # Validator test suite
 ```
 
-Any host that scans `skills/` will find the skill through its plain-folder install.
+The repository root is the skill — copy the whole folder to install.
 
 ## Development
 
@@ -266,11 +264,11 @@ The validator requires `jsonschema` (`pip install jsonschema`). Verified on CPyt
 
 ```bash
 pip install jsonschema
-python -X utf8 -m unittest discover -s skills/repository-bug-audit/tests -v
+python -X utf8 -m unittest discover -s tests -v
 ```
 
 When changing the rules, keep the three sources of truth in step:
-`bug-audit-evidence.schema.json` defines fields and enums, `audit-protocol.md` defines the
-human-readable protocol and scoring arithmetic, `validate_bug_audit.py` enforces both, and
-`test_validate_bug_audit.py` pins the behavior. A rule stated in prose but not enforced by the
+`references/bug-audit-evidence.schema.json` defines fields and enums, `references/audit-protocol.md` defines the
+human-readable protocol and scoring arithmetic, `scripts/validate_bug_audit.py` enforces both, and
+`tests/test_validate_bug_audit.py` pins the behavior. A rule stated in prose but not enforced by the
 validator will drift.

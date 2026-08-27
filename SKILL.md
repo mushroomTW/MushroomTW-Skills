@@ -9,30 +9,30 @@ Audit the current working tree by finding material bugs first, then assess broad
 
 ## Required startup choices
 
-🔴 **CHECKPOINT — 取得雙選確認後才可進入 Workflow**：Ask both in one interaction (skip what the user already stated). Follow [platform-adapters](references/platform-adapters.md) for the host's choice UI. If Multi-agent unavailable, explain and ask to switch to Standard. **Never silently fall back — 🛑 STOP and wait for user choice.**
+🔴 **CHECKPOINT — Obtain confirmation for both choices before entering Workflow**: Ask both in one interaction (skip what the user already stated). Follow [platform-adapters](references/platform-adapters.md) for the host's choice UI. If Multi-agent unavailable, explain and ask to switch to Standard. **Never silently fall back — 🛑 STOP and wait for user choice.**
 
 1. **Audit mode** — **Rapid** (map whole repo, read core/high-risk paths, only `defect`/`risk`, no score) or **Comprehensive** (read every in-scope file, all three finding types, 0–100 score).
 2. **Execution mode** — **Standard** or **Multi-agent partitioned** (partitions scope, cross-reviews High findings; see [platform-adapters](references/platform-adapters.md)).
 
 ## Workflow
 
-1. **Select modes** — In: user request; Out: `audit_mode`+`review_mode`; Format: one `AskUserQuestion` 2問（已答則跳過）。
-2. **Build map & inventory** — In: `AGENTS.md`/`README`/manifests/CI; Out: `inventory[]` (`path`,`status`,`risk_tier`,`reason`); 全工作樹，禁用 `git diff`/history。
-3. **Trace flows** — In: `core|high` items; Out: `core_flows[]` (`name`,`entry_point`,`status`,`evidence[]`)；每個已知 core/high 必須 traced。
-4. **Run checks** — In: 已配置指令；Out: `verification_checks[]` (`status=passed|failed|not_run|unavailable`)；禁裝工具/寫探針，`reproduced` 僅來自已執行配置。
-5. **Write evidence** — In: `schema.json`+`audit-protocol.md §1,2,5`; Out: `.docs/<pair>.evidence.json`（12 必填欄位）；禁機密/全源碼。
-6. **Write report** — In: evidence; Out: `.docs/<pair>.md` 恰 4 章（§4），severity 渲染 `🔴/🟡/🟢`，不抄 JSON。
-7. **Validate & fix** — In: `python -X utf8 <skill-dir>/scripts/validate_bug_audit.py --evidence --report [--repo-root]`; Out: exit 0/1/2；修復後回傳連結+摘要，不貼全文。
+1. **Select modes** — In: user request; Out: `audit_mode`+`review_mode`; Format: single `AskUserQuestion` with 2 questions (skip if already answered).
+2. **Build map & inventory** — In: `AGENTS.md`/`README`/manifests/CI; Out: `inventory[]` (`path`,`status`,`risk_tier`,`reason`); Entire working tree, never use `git diff`/history.
+3. **Trace flows** — In: `core|high` items; Out: `core_flows[]` (`name`,`entry_point`,`status`,`evidence[]`); Every known core/high must be traced.
+4. **Run checks** — In: configured commands; Out: `verification_checks[]` (`status=passed|failed|not_run|unavailable`); Never install tools/write probes; `reproduced` only from executed configured checks.
+5. **Write evidence** — In: `schema.json`+`audit-protocol.md §1,2,5`; Out: `.docs/<pair>.evidence.json` (12 required fields); Never include secrets/full sources.
+6. **Write report** — In: evidence; Out: `.docs/<pair>.md` exactly 4 sections (§4), render severity as `🔴/🟡/🟢`, do not copy JSON.
+7. **Validate & fix** — In: `python -X utf8 <skill-dir>/scripts/validate_bug_audit.py --evidence --report [--repo-root]`; Out: exit 0/1/2; Fix then return links + summary, never paste full artifacts.
 
 Rules: validator checks structure/policy, not truth — rule out alternatives by reading implementation, major callers/callees, config, and tests.
 
 ## Failure handling — if-then
 
-- **If checks unavailable** → `status=unavailable` + `Limitations`揭露；Comprehensive High 需一 `passed`。
-- **If 全量讀取超預算** → 切 Multi-agent；仍不可行則縮至 `core|high`、`provisional=true`、未讀記 `mapped`+`reason`。
-- **If Multi-agent 不可用** → 明述並詢問切 Standard；禁靜默降級。
-- **If `.docs/` 已存在** → 兩檔同加 `YYYYMMDD-HHMMSS`，永不覆蓋。
-- **If 無 `core|high`** → 視為分層錯誤，須至少一項，重評 §5 否則 provisional。
+- **If checks unavailable** → `status=unavailable` + disclose in `Limitations`; Comprehensive High requires one `passed`.
+- **If reading all files exceeds budget** → Switch to Multi-agent; if still infeasible, narrow to `core|high`, `provisional=true`, mark unread as `mapped`+`reason`.
+- **If Multi-agent unavailable** → Explain and ask to switch to Standard; never silently downgrade.
+- **If `.docs/` already exists** → Add same timestamp `YYYYMMDD-HHMMSS` to both; never overwrite.
+- **If no `core|high`** → Treat as mis-tiering, requires at least one; re-evaluate §5 else `provisional`.
 
 ## Scope & inventory
 
@@ -60,17 +60,17 @@ Write exactly one pair in `.docs/` (create if missing):
 
 If either exists, add shared timestamp `YYYYMMDD-HHMMSS` to both; never overwrite. Keep Markdown concise, no secrets/full sources, no JSON appendix.
 
-## 禁止事項 — 不要做
+## Prohibitions — Do Not
 
-- 單檔/PR diff/單一漏洞/單點效能/一般提問 — 禁用本 skill
-- 改程式碼/設定/測試/外部系統（需用戶另行明確要求）
-- 裝分析器/相依、寫重現探針；`reproduced` 僅來自已執行配置
-- 以 `git diff`/history 縮範圍；以搜尋不到斷言已修/已測/安全
-- 覆蓋 `.docs/` 產物、抄 JSON 附錄、寫機密/全源碼
+- Single file / PR diff / single known vulnerability / single-point performance / general question — do not use this skill
+- Modify code, config, tests, or external systems (unless explicitly requested)
+- Install analyzers/dependencies or write reproduction probes; `reproduced` only from executed configured checks
+- Narrow scope via `git diff`/history; claim fixed/tested/secure from a search miss
+- Overwrite `.docs/` artifacts, copy JSON as appendix, or write secrets/full sources
 
 ## Validate and deliver
 
-🔴 **CHECKPOINT — 驗證通過前不得交付**：未達 exit 0 禁止回傳產物連結；若需縮範圍/切模式，須先獲用戶確認並標 `provisional`。
+🔴 **CHECKPOINT — Do not deliver before validation**: Prohibit returning links before exit 0; if narrowing scope or switching mode, obtain user confirmation and mark `provisional`.
 
 ```text
 python -X utf8 <skill-directory>/scripts/validate_bug_audit.py --evidence <evidence.json> --report <report.md>
