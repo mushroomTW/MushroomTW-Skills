@@ -26,6 +26,14 @@ Ask both in one interaction (skip what the user already stated). Follow [platfor
 
 Rules: validator checks structure/policy, not truth — rule out alternatives by reading implementation, major callers/callees, config, and tests.
 
+## Failure handling — if-then fallbacks
+
+- **If checks not configured / unavailable** → record `verification_checks.status=unavailable` + evidence "no command found"; disclose in `Limitations`; Comprehensive cannot reach High confidence without one `passed`.
+- **If Comprehensive cannot read all in-scope files within budget** → switch to Multi-agent partitioned; if still infeasible, narrow to `core|high` paths, mark `execution.provisional=true`, store each unread as `inventory.status=mapped`+`reason`, state consequence in `limitations` (not file list).
+- **If Multi-agent unavailable** → explain, ask to switch to Standard; never silently fallback (`execution.review_mode` is factual).
+- **If `.docs/` artifact already exists** → add same timestamp `YYYYMMDD-HHMMSS` to both basenames; never overwrite.
+- **If no `core|high` item** → treat as mis-tiering: require at least one; re-evaluate tiering per §5, otherwise provisional with reason.
+
 ## Scope & inventory
 
 Use the entire working tree; never `git diff`/history. Build the map per `references/audit-protocol.md §5`:
