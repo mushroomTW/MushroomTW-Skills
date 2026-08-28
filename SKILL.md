@@ -1,0 +1,40 @@
+---
+name: local-sonarqube-setup
+description: 將任意程式碼專案接入本機 Docker SonarQube（預設 http://127.0.0.1:9000），以主機既有 sonar-scanner 建立專案、執行分析並驗證 Quality Gate。當使用者要求導入、設定、執行或排查本機 SonarQube 分析時使用。
+---
+
+# Local SonarQube Setup
+
+## Assumptions
+
+- 執行環境為目前的 Windows 主機，命令以 PowerShell 執行。
+- SonarQube 位址預設 `http://127.0.0.1:9000`；只有使用者或既有設定明確指定時才覆寫。
+- 主機已安裝可直接執行的 `sonar-scanner`。本 Skill 不含安裝、下載或替換 scanner 的流程。
+- 認證由系統環境變數 `SONAR_TOKEN` 提供。語言、建置系統與 coverage 產生方式一律從 repository 實際內容探勘，不套用預設語言假設。
+
+## Hard rules
+
+- Token 只存在於目前程序記憶體。不得進入命令列參數、URL、log、`sonar-project.properties` 或任何回覆；對外只以「已設定／未設定」描述，不提長度、前綴或部分內容。
+- 只讀取 `SONAR_TOKEN` 一次，在同一程序內完成查詢、建立、掃描與驗證。不使用 `setx`；全部步驟結束後才清除 `SONAR_TOKEN` 程序變數。
+- Token 若曾出現在聊天、commit、log 或其他不受控位置，完成後提醒使用者撤銷重發；「本地 token」不是省略理由。
+- 不新增 SonarQube 或資料庫服務、不修改 CI 或 compose、不 commit、不 push（使用者明確要求除外）。
+- 不為了掃描改變 runtime 行為、公開 API、產品程式碼或建置語意。
+- 不得以 `Accepted`、`False positive` 或停用規則假裝完成；不偽造成功。
+- 保留使用者既有未提交變更，不覆蓋、重置或刪除與本任務無關的檔案。
+- 輸出只保留 HTTP 狀態、project key、CE task 狀態、Quality Gate 與 dashboard URL 等非敏感摘要，不回傳完整 scanner log 或 API response。
+- Issues、measures 與詳細日誌只在驗證失敗或使用者要求時查詢；初次探勘後只讀必要的設定區塊與報告摘要，不重複載入整個 repository、完整 scanner log 或完整 API 回應。
+
+## Workflow
+
+1. **探勘**：讀 `AGENTS.md`、README、建置/測試文件與既有 sonar 設定；執行 `git status --short`。從文件或 manifest 推導語言、來源目錄、測試佈局與報告格式，不靠猜測。
+2. **確認服務與掃描器**：`GET /api/system/status` 需為 `UP`，並記錄 scanner 版本。HTTP 可用但 Docker CLI 權限不足不算阻擋條件。
+3. **專案查詢／建立**：先用 `mcp__sonarqube__search_my_sonarqube_projects`。已存在則驗證 key/name 後重用；不存在才 `POST /api/projects/create`，建立後再查一次並記下 dashboard URL。權限不足時回報所需權限，請使用者在 UI 建立。
+4. **掃描設定**：已有設定就最小幅度合併，不整份覆蓋；沒有才建立根目錄 `sonar-project.properties`。排除產物、依賴快取、coverage 輸出、scanner 工作目錄、VCS 目錄與二進位資產，不得排除整個語言目錄、測試目錄或未知原始碼。範本見 `reference/commands.md`。
+5. **產生報告**：先跑 repository 已定義的格式檢查、靜態分析與測試（失敗先回報，不把 SonarQube 問題冒充成測試修復），再以專案原生工具產生 coverage。確認報告路徑存在、非空檔，且暫存產物落在 ignore 範圍內。
+6. **執行掃描**：在單一程序內設定 `SONAR_HOST_URL`、確認 `SONAR_TOKEN` 已生效後執行 `sonar-scanner`。必須確認輸出含 `EXECUTION SUCCESS`、exit code 為 0，且 project key 與 server URL 符合預期。
+7. **驗證與收尾**：由 `.scannerwork/report-task.txt` 取 CE task id，輪詢 `GET /api/ce/task?id=` 至 `SUCCESS`、`FAILED` 或逾時；Quality Gate 用 `mcp__sonarqube__get_project_quality_gate_status` 查詢，`ERROR` 時列出未通過的條件與數值但不改規則。將 `.scannerwork/` 與 coverage 產物加入 ignore，最後以 `git diff --check` 與 `git status --short` 確認只留下預期的設定/文件變更。回報 project key/name、分析結果、Quality Gate 狀態、實際匯入的報告類型與 dashboard URL。
+
+## References
+
+- 進入步驟 2 前讀 `reference/commands.md`：PowerShell 指令、`sonar-project.properties` 範本、MCP 工具對照表。
+- 任何步驟失敗才讀 `reference/troubleshooting.md`。

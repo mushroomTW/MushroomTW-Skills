@@ -1,0 +1,4 @@
+interface:
+  display_name: "Local SonarQube Setup"
+  short_description: "Set up and verify a local SonarQube project"
+  default_prompt: "Use $local-sonarqube-setup to connect this repository to a local SonarQube server and verify its analysis."
