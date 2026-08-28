@@ -1,6 +1,6 @@
 ---
 name: sonarqube-fix-all
-description: Batch-fix code quality and security issues reported by a self-hosted SonarQube instance via an already-configured SonarQube MCP connection, then verify and rescan. Use whenever the user asks to fix, clear, triage, or work through SonarQube issues, or mentions their Sonar quality gate failing. The same requests in Chinese also trigger it: 修 SonarQube 問題、清 sonar issue、把 SonarQube 全部修掉、品質閘門（quality gate）紅了、掃完再重新掃一次。 Language-agnostic; handles projects with no automated test suite, and protects semantically sensitive code such as bytecode/IL manipulation, runtime patching, and reflection-driven code from unsafe rewrites.
+description: Batch-fix code quality and security issues reported by a self-hosted SonarQube instance via an already-configured SonarQube MCP connection, then verify and rescan. Use whenever the user asks to fix, clear, triage, or work through SonarQube issues, or mentions their Sonar quality gate failing. Language-agnostic; handles projects with no automated test suite, and protects semantically sensitive code such as bytecode/IL manipulation, runtime patching, and reflection-driven code from unsafe rewrites.
 ---
 
 # Fix All SonarQube Issues
