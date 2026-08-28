@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fix All SonarQube Issues"
+  short_description: "Batch-fix local Docker SonarQube issues"
+  default_prompt: "Use $sonarqube-fix-all with the configured SonarQube MCP connection to batch-fix all actionable issues from this project's local Docker SonarQube instance without requesting credentials."
