@@ -26,13 +26,13 @@ description: 將任意程式碼專案接入本機 Docker SonarQube（預設 http
 
 ## Workflow
 
-1. **探勘**：讀 `AGENTS.md`、README、建置/測試文件與既有 sonar 設定；執行 `git status --short`。從文件或 manifest 推導語言、來源目錄、測試佈局與報告格式，不靠猜測。
-2. **確認服務與掃描器**：`GET /api/system/status` 需為 `UP`，並記錄 scanner 版本。HTTP 可用但 Docker CLI 權限不足不算阻擋條件。
-3. **專案查詢／建立**：先用 `mcp__sonarqube__search_my_sonarqube_projects`。已存在則驗證 key/name 後重用；不存在才 `POST /api/projects/create`，建立後再查一次並記下 dashboard URL。權限不足時回報所需權限，請使用者在 UI 建立。
+1. **探勘**：讀 `AGENTS.md`、README、建置/測試文件與既有 sonar 設定；執行 `git status --short`。從文件或 manifest 推導語言、來源目錄、測試佈局與報告格式，不靠猜測。`git rev-parse` 失敗（非 git repo）→ 跳過步驟 1 與 7 的所有 git 檢查，並在交付摘要標明「無版控保護，改動未留可回滾紀錄」。
+2. **確認服務與掃描器**：`GET /api/system/status` 需為 `UP`，並記錄 scanner 版本。HTTP 可用但 Docker CLI 權限不足不算阻擋條件。偵測到 `pom.xml` 或 `build.gradle[.kts]` → 改用該建置工具的 sonar plugin（`mvn verify sonar:sonar`、`gradle sonar`），不用 CLI `sonar-scanner`：CLI 掃 JVM 專案讀不到 bytecode，分析會靜默降級成純文字規則。兩者並存時以專案實際建置指令為準。
+3. **專案查詢／建立**：先用 `mcp__sonarqube__search_my_sonarqube_projects`；MCP 與 scanner 必須指向同一台 server，MCP 回傳結果與 `SONAR_HOST_URL` 不一致時停止並回報，不混用兩邊資料。已存在則驗證 key/name 後重用；不存在才 `POST /api/projects/create`，建立後再查一次並記下 dashboard URL。key 依序取：既有 `sonar-project.properties` 的 `sonar.projectKey` → `.sonarlint/connectedMode.json` → git remote 的 repo 名 → 目錄名；空白與非法字元改 `-`（只允許英數與 `-`、`_`、`.`、`:`，不可全為數字）。monorepo 子專案或轉換結果不明確時先問使用者。權限不足時回報所需權限，請使用者在 UI 建立。
 4. **掃描設定**：已有設定就最小幅度合併，不整份覆蓋；沒有才建立根目錄 `sonar-project.properties`。排除產物、依賴快取、coverage 輸出、scanner 工作目錄、VCS 目錄與二進位資產，不得排除整個語言目錄、測試目錄或未知原始碼。範本見 `reference/commands.md`。
 5. **產生報告**：先跑 repository 已定義的格式檢查、靜態分析與測試（失敗先回報，不把 SonarQube 問題冒充成測試修復），再以專案原生工具產生 coverage。確認報告路徑存在、非空檔，且暫存產物落在 ignore 範圍內。
 6. **執行掃描**：在單一程序內設定 `SONAR_HOST_URL`、確認 `SONAR_TOKEN` 已生效後執行 `sonar-scanner`。必須確認輸出含 `EXECUTION SUCCESS`、exit code 為 0，且 project key 與 server URL 符合預期。
-7. **驗證與收尾**：由 `.scannerwork/report-task.txt` 取 CE task id，輪詢 `GET /api/ce/task?id=` 至 `SUCCESS`、`FAILED` 或逾時；Quality Gate 用 `mcp__sonarqube__get_project_quality_gate_status` 查詢，`ERROR` 時列出未通過的條件與數值但不改規則。將 `.scannerwork/` 與 coverage 產物加入 ignore，最後以 `git diff --check` 與 `git status --short` 確認只留下預期的設定/文件變更。回報 project key/name、分析結果、Quality Gate 狀態、實際匯入的報告類型與 dashboard URL。
+7. **驗證與收尾**：由 `.scannerwork/report-task.txt` 取 CE task id，輪詢 `GET /api/ce/task?id=` 至 `SUCCESS`、`FAILED` 或逾時；逾時（預設 5 分鐘）判定為「未完成」而非失敗，回報 task id 與最後狀態請使用者稍後重查，不重跑掩蓋。Quality Gate 用 `mcp__sonarqube__get_project_quality_gate_status` 查詢，`ERROR` 時列出每個未通過條件的名稱、實際值與門檻後停下，把「修程式碼再重掃」或「接受現狀」交回使用者決定；未經同意不改產品程式碼、不動 Quality Gate 設定、不排除檔案。將 `.scannerwork/` 與 coverage 產物加入 ignore，最後以 `git diff --check` 與 `git status --short` 確認只留下預期的設定/文件變更。回報 project key/name、分析結果、Quality Gate 狀態、實際匯入的報告類型與 dashboard URL。
 
 ## References
 
