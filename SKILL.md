@@ -37,7 +37,7 @@ description: 將任意程式碼專案接入本機 Docker SonarQube（預設 http
 6. **執行掃描**：在單一程序內設定 `SONAR_HOST_URL`、確認 `SONAR_TOKEN` 已生效後執行 `sonar-scanner`。必須確認輸出含 `EXECUTION SUCCESS`、exit code 為 0，且 project key 與 server URL 符合預期。
 7. **驗證與收尾**：
    - **CE task**：由 `.scannerwork/report-task.txt` 取 task id，輪詢 `GET /api/ce/task?id=` 至 `SUCCESS` 或 `FAILED`。逾時（預設 5 分鐘）→ 判定為「未完成」而非失敗，回報 task id 與最後狀態請使用者稍後重查，不重跑掩蓋。
-   - **Quality Gate**：用 `mcp__sonarqube__get_project_quality_gate_status` 查詢。`ERROR` → 🛑 **STOP**：列出每個未通過條件的名稱、實際值與門檻後停下，把「修程式碼再重掃」或「接受現狀」交回使用者決定；未經同意不改產品程式碼、不動 Quality Gate 設定、不排除檔案。
+   - **Quality Gate**：用 `mcp__sonarqube__get_project_quality_gate_status` 查詢。`ERROR` → 列出每個未通過條件的名稱、實際值與門檻後停下，把「修程式碼再重掃」或「接受現狀」交回使用者決定；未經同意不改產品程式碼、不動 Quality Gate 設定、不排除檔案。
    - **收尾**：`.scannerwork/` 與 coverage 產物加入 ignore，以 `git diff --check` 與 `git status --short` 確認只留下預期的設定/文件變更。回報 project key/name、分析結果、Quality Gate 狀態、實際匯入的報告類型與 dashboard URL。
 
 ## References
