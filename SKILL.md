@@ -27,7 +27,7 @@ Do not assume a language, build tool, or test runner. Identify them from the man
 | Formatter and linter | project config files, or the ecosystem default already in use |
 | Test command | test config present in the repo |
 | Warning baseline | output of the build command before any change |
-| Local suppression syntax | the language's own mechanism (see §5) |
+| Local suppression syntax | the language's own mechanism (see §6) |
 
 If several toolchains coexist in a monorepo, resolve them per module and keep batches within a single module.
 
