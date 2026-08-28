@@ -33,7 +33,7 @@ If several toolchains coexist in a monorepo, resolve them per module and keep ba
 
 ## 2. Preflight
 
-Stop and report instead of proceeding if any of these fail:
+🛑 **STOP — do not edit a single file until all three pass.** If any of them fails, report which one and wait for the user:
 
 - Working tree is clean, or the user confirms the existing changes should be carried along.
 - The project builds green **before** any changes. Never start batch-fixing on a project that does not build — the build is the only verification signal available in later steps.
@@ -88,7 +88,16 @@ After each file or module batch, run only that module's formatter, linter, and b
 - **With an automated test suite:** run the targeted tests. An issue is *source-fixed* when the build is clean and its tests pass.
 - **Without one** — common for plugins, mods, embedded targets, and anything whose behaviour depends on a runtime host: an issue is *source-fixed* when the build is clean with no new warnings against the baseline and the change touched no sensitive region. Do not invent tests to satisfy this step. Changes needing in-application verification are marked **pending manual smoke test**, with concrete steps listed in the report.
 
-Commit a checkpoint after each passing batch so a later regression can be bisected.
+When that verification comes back red, resolve it inside the batch that caused it — never carry a red build into the next batch:
+
+| Trigger | First fix | If that still fails |
+|---|---|---|
+| Build or lint fails after a batch and the batch's own diff explains it | Correct it within the same batch, re-run the same verification | Revert the batch to the last checkpoint commit, mark its issues **left-open** with the failure quoted, continue with the next batch |
+| Build fails but the diff does not explain it | Re-run the §2 baseline build on the last checkpoint commit to establish whether this batch caused it | Failure is pre-existing → 🛑 **STOP and report**: the verification signal is gone, so no later batch can be called source-fixed |
+| New warnings against the §1 baseline, on a project with no test suite | Not source-fixed — fix the warning or narrow the change until the count returns to baseline | Revert the batch, mark it **pending manual smoke test**, and list the warnings verbatim |
+| Tests that passed before the batch now fail | Fix within the batch | Revert the batch. Never edit, weaken, or skip a test to make a batch pass |
+
+Commit a checkpoint after each passing batch so a later regression can be bisected. Never commit a batch whose verification did not come back clean.
 
 ## 8. Rescan
 
@@ -105,7 +114,11 @@ Where the scanner reads `SONAR_TOKEN` on its own, just let the inherited environ
 
 If `SONAR_TOKEN` is unset or empty in the environment, skip rescanning, continue fixing from the current MCP report, and state that confirmation awaits the next externally triggered analysis. Report only that the variable is unset — never request a token, never read it from elsewhere, and never halt the fix workflow over its absence.
 
-After a successful scan, poll with a bounded wait and fetch unresolved and newly introduced issues. Compare by **issue key set difference**, not by total count — a flat count can hide equal numbers of issues closed and introduced. If the expected keys did not close, stop and diagnose rather than retrying blindly. At most three automatic scan rounds.
+If the scanner itself exits non-zero — server unreachable, authentication rejected, no scanner variant for this toolchain — report the failing error line, skip rescanning, and keep the locally verified results. Never retry a rejected authentication, and never route around it by asking the user for a credential.
+
+After a successful scan, poll the analysis task until it reports success — at 15-second intervals, for at most 5 minutes. If it has not finished by then, report the scan as submitted but unconfirmed and leave the local *source-fixed* results standing. Then fetch unresolved and newly introduced issues and compare by **issue key set difference**, not by total count — a flat count can hide equal numbers of issues closed and introduced.
+
+🛑 **STOP if the expected keys did not close.** Diagnose instead of retrying blindly; the usual causes are a scan that analysed a different branch, a module the scanner did not include, or a fix that did not address what the rule actually flagged. At most three automatic scan rounds — if keys remain open after the third, hand back the remaining key set with what each round changed, and start no further fix pass without the user.
 
 ## 9. Report
 
