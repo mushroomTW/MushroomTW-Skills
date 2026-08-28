@@ -13,7 +13,7 @@ These hold for the entire workflow:
 
 - The analysis server is **self-hosted SonarQube in Docker**, never SonarCloud. Never ask for a SonarCloud organization key or apply SonarCloud-specific setup.
 - Never ask the user to provide, create, display, or modify a SonarQube credential. Use the configured MCP connection for queries, and read the scan token from the `SONAR_TOKEN` system environment variable. Never print, echo, or log its value.
-- Never change an issue's status on the server. `Accepted`, `False positive`, `Won't fix`, file exclusions, and disabling rules in the quality profile are all off-limits unless the user explicitly asks for that specific reclassification.
+- Never change an issue's status on the server, and never assemble a candidate list for the user to approve — choosing the candidates *is* the reclassification judgment. `Accepted`, `False positive`, `Won't fix`, file exclusions, and disabling rules in the quality profile are off-limits unless the request names its target: specific issue keys, or one rule scoped to a named file or module, plus the status to set. "The unimportant ones", "the minor ones", "whatever isn't real" name no target. 🛑 **STOP there:** say so plainly, carry on fixing at the source, and put the findings you judge unfixable into the report's left-open section with reasons (§9) — the user reclassifies on the server from there.
 - Never reset, revert, or discard the user's existing changes. Never push.
 - Keep output lean: summaries and relevant excerpts, not full payloads, issue dumps, or raw logs.
 
