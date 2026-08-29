@@ -59,7 +59,7 @@ Handling: derive it from the repository name (whitespace and other symbols becom
 
 Diagnosis: coverage was never produced, went to a different path, or the tests did not run at all.
 
-Handling: find the project's native test/coverage command and its actual output path, regenerate the report, then scan again. **Never** create an empty placeholder report or point at a path that does not exist; when the project has no coverage tooling, state plainly that no coverage is provided and run the analysis without it.
+Handling: find the project's native test/coverage command and its actual output path, regenerate the report, then scan again. **Never** create an empty placeholder report or point at a path that does not exist; when the project has no coverage tooling, state plainly that no coverage is provided and run the analysis without it. See `reference/coverage.md` for the language-specific property table.
 
 ## Analyzer or report format error
 
@@ -84,3 +84,77 @@ Handling: confirm the CE task reached `SUCCESS`, then query again. If the CE tas
 Diagnosis: the SonarQube Compute Engine is busy, short on memory, or the background task is queued.
 
 Handling: extend the polling limit and re-check; if it stays `PENDING`, inspect the SonarQube container's resources and `api/ce/activity`. When the task is `FAILED`, take a non-sensitive summary of its `errorMessage` and address the cause rather than re-running to paper over it.
+
+## `PKIX path building failed` (HTTPS + self-signed cert)
+
+Diagnosis: SonarQube is behind HTTPS with a self-signed certificate not trusted by the scanner JVM.
+
+Handling: import the server certificate into the scanner JVM truststore (`reference/commands.md §8` + `scanners/scanner-environment/manage-tls-certificates.md`). Do not disable TLS verification.
+
+## `Malformed input or input contains unmappable characters` (non-ASCII filenames)
+
+Diagnosis: `LC_ALL` / `LANG` not UTF-8.
+
+Handling:
+
+```powershell
+$env:LC_ALL = "en_US.UTF-8"
+$env:LANG = "en_US.UTF-8"
+```
+
+Re-run analysis.
+
+## `The maximum number of open files was reached`
+
+Diagnosis: OS limit on file descriptors.
+
+Handling: Linux — raise `ulimit -n` and check `server-installation/pre-installation/linux.md#configuring-the-maximum-number-of-open-files`; macOS — see `pre-installation/macos.md` equivalent. Do not exclude files to hide the limit.
+
+## `Report for commit can't be processed: a newer report has already been processed`
+
+Diagnosis: parallel scans of the same project share the same commit SHA (e.g., matrix job with `GITHUB_SHA` from default branch) and one report is rejected.
+
+Handling: run sequentially (`max-parallel: 1`) or separate jobs per branch; ensure `sonar.branch.name` matches the real branch.
+
+## `Failed to upload analysis report: POST 403` on cloud / firewall
+
+Diagnosis: WAF / firewall blocks the report upload API.
+
+Handling: allow `POST /api/ce/submit` and related endpoints in the cloud firewall / WAF config, then re-run. Do not downgrade to HTTP.
+
+## Analysis stops on Windows — username ends with `!` or special character
+
+Diagnosis: Windows user path `C:\Users\myUser!\` breaks scanner temp/user home.
+
+Handling: set `sonar.userHome` to a path without special characters:
+
+```powershell
+sonar-scanner -Dsonar.userHome=C:\sonar-cache
+```
+
+## `OutOfMemoryError: GC overhead limit exceeded` / heap space
+
+Diagnosis: project too large for default heap.
+
+Handling: increase heap (see `reference/commands.md §6`):
+
+```powershell
+$env:SONAR_SCANNER_JAVA_OPTS = "-Xmx1024m"  # CLI 6.0+, older uses SONAR_SCANNER_OPTS
+```
+
+Also consider excluding unneeded files via `setting-analysis-scope` and using SSD.
+
+## `Self-signed certificate` / mutual TLS behind proxy
+
+Diagnosis: proxy + self-signed cert or mTLS required.
+
+Handling: add cert to scanner truststore and configure client cert per `server-installation/network-security/securing-behind-proxy.md` and `manage-tls-certificates.md`.
+
+## Debug: dump resolved properties
+
+```powershell
+sonar-scanner -Dsonar.scanner.internal.dumpToFile=dump.properties
+# also: Project Settings > Background Tasks > 3-dots > Show SonarScanner Context
+```
+
+Deprecated alias: `sonar.scanner.dumpToFile`.
