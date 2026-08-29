@@ -29,9 +29,19 @@ $env:SONAR_TOKEN = [Environment]::GetEnvironmentVariable('SONAR_TOKEN','Machine'
 
 ## HTTP 401
 
-判定：token 未被 scanner/API 讀到，或 token 已失效撤銷。
+判定：token 未被 scanner/API 讀到，或 token 本身失效、型別不符、打到別台 server。
 
-處置：確認同一程序內 `SONAR_TOKEN` 讀得到（見 commands.md 第 2 節），且清除步驟尚未執行。仍為 401 時請使用者在 SonarQube UI 重新產生 user token 並更新系統環境變數。不要把 token 改成命令列參數重試。
+一線修復：確認同一程序內 `SONAR_TOKEN` 讀得到（見 commands.md 第 2 節），且清除步驟尚未執行。
+
+仍為 401 時依序排查，每項只回報結論，不印 token 內容：
+
+1. **token 是否仍有效**：`(Invoke-RestMethod -Headers $headers -Uri "$env:SONAR_HOST_URL/api/authentication/validate").valid`。`False` 代表已失效或被撤銷。
+2. **token 型別**：Project Analysis Token 只能掃它綁定的那個專案，用來掃別的專案或呼叫一般 API 會 401；跨專案需 Global Analysis Token 或 user token。
+3. **scanner 版本**：SonarQube 10 之前的 scanner 讀 `sonar.login`，不認 `sonar.token`／`SONAR_TOKEN`；版本不符時等同沒帶憑證。以步驟 2 記錄的 scanner 版本比對。
+4. **host 位址**：容器內外位址不同（`localhost` 對服務名／`host.docker.internal`），打到另一台 SonarQube 也會 401。核對 `$env:SONAR_HOST_URL` 與 scanner log 中的 server URL。
+5. **值本身夾帶空白或換行**：設定環境變數時貼入換行很常見。只印 `$env:SONAR_TOKEN -ne $env:SONAR_TOKEN.Trim()` 的布林結果。
+
+以上皆排除才請使用者在 SonarQube UI 重新產生 token 並更新系統環境變數。不得把 token 改成命令列參數重試。
 
 ## HTTP 403
 
