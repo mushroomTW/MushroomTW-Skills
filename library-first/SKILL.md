@@ -19,28 +19,33 @@ description: Use before hand-rolling a general mechanism such as retry, backoff,
 |------|--------|-------|--------|--------|
 | 1 | 命名問題 | 變數名 | 領域詞 | 例 `exponential backoff retry` 非 `callApiAgain` |
 | 2 | 搜尋生態 | 領域詞+語言 | 候選 1-3 個 | 含標準庫 + npm/PyPI/NuGet/pkg.go.dev/crates.io |
-| 3 | 套用 Quality Gate | 候選 | 通過/不通過 | 見下表逐項打勾 |
+| 3 | 評估候選 | 候選 | 採用/排除 | 第三方套件套用 Quality Gate；標準庫確認適用性與版本支援 |
 | 4 | 決策陳述 | 判定結果 | 一句決策語 | 見模板 |
 
 🔴 CHECKPOINT 1 · 🛑 STOP — Step 2 後暫停：確認含標準庫、主流套件、用領域詞而非變數名檢索。
 
-### Quality Gate（五項全過才採用）
+### Quality Gate（第三方套件五項全過才採用）
 
 | # | 檢查 | 條件 | 不通過 |
 |---|------|------|--------|
 | 1 | 維護 | 12月內 commit、未 deprecated | 排除 |
 | 2 | 依賴樹 | 不為小功能引入數十依賴 | 排除 |
 | 3 | License | 與專案相容（閉源 GPL 硬停） | 排除 |
-| 4 | 體積 | 前端 200KB 替 20 行不划算 | 排除 |
+| 4 | 體積 | 僅在前端 bundle size 重要時，200KB 替 20 行不划算 | 排除 |
 | 5 | API | 不需重構周邊 | 排除 |
 
 > 不確定 → 查 repo/registry/License 檔。
+
+> 標準庫不新增依賴，不套用第三方套件的維護 commit、依賴樹與 bundle 體積門檻；改確認目標版本可用、授權相容且 API 適合。
 
 ### 決策語模板
 
 ```
 Decision: used <pkg>@<ver> because gate 1-5 pass, <理由>.
-Decision: wrote manually because <四例外之一>, <已評估 <pkg> 失敗於 gate #>.
+Decision: wrote manually because domain-specific business logic.
+Decision: wrote manually because <performance-critical|security-sensitive>, <佐證>.
+Decision: wrote manually because evaluated <pkg> failed gate #<n>.
+Decision: wrote manually because no suitable candidate exists after checking <來源>.
 ```
 
 ## 四種應手寫
@@ -61,19 +66,19 @@ Decision: wrote manually because <四例外之一>, <已評估 <pkg> 失敗於 g
 | Date/time | `date-fns`, Temporal, NodaTime |
 | Cache/序列化/CLI/hashing | 先搜尋對應生態主流方案 |
 
-> 三行 helper 例外：只用一次的三行 helper 直接手寫。
+> 三行 helper 例外：只用一次、沒有邊界案例或狀態、且不會成長的三行 helper 可直接手寫。
 
-🔴 CHECKPOINT 2 · 🛑 STOP — Step 4 前暫停：決策語含 because、對應 gate/四例外、無軟化措辭。
+🔴 CHECKPOINT 2 — Step 4 提交前自檢：決策語含 because、對應 gate/四例外、無軟化措辭。
 
 ## Failure Handling
 
 | 觸發 | 一線修復 | 仍失敗兜底 |
 |---|---|---|
-| 找不到候選 | 換領域詞重搜 + 查標準庫 | 判無方案 → 手寫 `evaluated insufficient` |
-| gate 1-2 項不通過 | 換次優候選 | 全不通過 → 手寫並記失敗 gate # |
+| 找不到候選 | 換領域詞重搜 + 查標準庫 | 手寫並記已查來源與「no suitable candidate」 |
+| 任一 gate 不通過 | 換次優候選 | 全不通過 → 手寫並記失敗 gate # |
 | License 不確定 | 讀 LICENSE/registry 欄位 | 仍不確定 → 視為不相容 |
 | 候選過多 | 按 gate 篩至 1-3 個深查 | 決策語列已排除原因 |
-| 手寫後邊界爆炸 | 重跑 Step 2-3 評替換 | 封裝為套件，不在業務中膨脹 |
+| 手寫後邊界爆炸 | 重跑 Step 2-3 評替換 | 封裝為內部模組，不在業務中膨脹 |
 
 ## Never Do
 
@@ -84,13 +89,13 @@ Decision: wrote manually because <四例外之一>, <已評估 <pkg> 失敗於 g
 5. 為三行 helper 引套件。
 6. 用軟化措辭 — 禁「可以考慮/視情況/靈活把握」，必須 pass/fail。
 
-## Examples（對應 test-prompts）
+## Examples
 
 | 場景 | Step 1 命名 | Step 2 候選 | Gate 結果 | Decision |
 |---|---|---|---|---|
-| 指數退避重試 (Node) | `exponential backoff retry` | `cockatiel`/`p-retry` + 標準庫 | 1-5 pass | `used cockatiel because gate全過，API不侵入且依賴輕` |
-| 訂單滿千折百 | `order discount rule (domain)` | 無（業務規則） | 無候選 | `wrote manually because domain-specific, evaluated insufficient` |
-| Schema 驗證 | `schema validation` | `Zod` vs 手寫 regex | Zod 1-5 pass | `used zod because License MIT、體積可接受、API可組合` |
+| 指數退避重試 (Node) | `exponential backoff retry` | `cockatiel`/`p-retry` + 標準庫 | `cockatiel` 1-5 pass | `Decision: used cockatiel@<ver> because gate 1-5 pass, API不侵入且依賴輕` |
+| 訂單滿千折百 | `order discount rule (domain)` | 不適用（業務規則） | 不需搜尋 | `Decision: wrote manually because domain-specific business logic` |
+| Schema 驗證 | `schema validation` | `Zod` vs 手寫 regex | Zod 1-5 pass | `Decision: used zod@<ver> because gate 1-5 pass, License MIT、體積可接受、API可組合` |
 
 ## References
 
