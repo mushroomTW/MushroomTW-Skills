@@ -63,7 +63,7 @@ MushroomTW-Skills/
 └── sonarqube-fix-all/            SKILL.md + agents/
 ```
 
-各 skill 目錄只放 skill 本體。`repository-bug-audit` 另外在磁碟上保留 `tests/` 與 `test-prompts.json` 供開發使用，兩者皆已 gitignore，不屬於安裝內容。
+各 skill 目錄只放 skill 本體。留在磁碟上的開發資產——三個 skill 旁的 `test-prompts.json` 與 `repository-bug-audit/tests/`——由根目錄唯一的 `.gitignore` 統一排除，不進版控；用 `cp -r` 安裝時它們仍會跟著 skill 一起被複製過去。
 
 ## 版控狀態
 

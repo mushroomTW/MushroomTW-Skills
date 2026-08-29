@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.omc/
+
+# skill 安裝副本與鎖檔
+.agents/skills/
+.claude/skills/
+skills-lock.json
+
+# 開發用測試資產，不進版控
+tests/
+test-prompts.json

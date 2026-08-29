@@ -63,7 +63,7 @@ MushroomTW-Skills/
 └── sonarqube-fix-all/            SKILL.md + agents/
 ```
 
-Each skill directory holds only the skill itself. `repository-bug-audit` also keeps `tests/` and `test-prompts.json` on disk for development; both are gitignored and are not part of what gets installed.
+Each skill directory holds only the skill itself. Development assets kept on disk — the `test-prompts.json` next to three of the skills, and `repository-bug-audit/tests/` — are excluded from version control by the single `.gitignore` at the root; a `cp -r` install still copies them along with the skill.
 
 ## Version control
 
