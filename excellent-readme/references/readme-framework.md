@@ -1,0 +1,118 @@
+# README Design Framework
+
+This framework combines CodeLove's “15 Essential Sections Every README Needs” with hackergrrl's “The Art of README.” Together they support three decisions: treat the README as an entry point, move from broad understanding to concrete usage, and make examples, installation, and limitations more important than decoration.
+
+## The cognitive funnel
+
+Order information around the reader's adoption decision:
+
+1. **Identify**: title, one-line description, use case, and necessary context.
+2. **Evaluate**: minimal usage example, main features, compatibility, limitations, and license.
+3. **Try**: installation, prerequisites, configuration, startup, and expected output.
+4. **Integrate**: API or CLI reference, tech stack, architecture, and project structure.
+5. **Participate**: security, contribution, roadmap, acknowledgements, and author information.
+
+Order the top of the page by how quickly each element lets a non-fit reader short-circuit and leave; a fast, honest “not for me” serves that reader as well as an adoption does. Content near the top should be short, concrete, and easy to evaluate. Put deeper background and maintenance information lower down. If a section does not help the target reader make a decision or complete a task, move it to a separate document, link to it, or omit it.
+
+## Fifteen candidate sections
+
+| Section | Keep it when | Minimum content |
+| --- | --- | --- |
+| Title and introduction | Always | One sentence explaining what the project does and who it helps |
+| Table of contents | The README is long | Working anchor links; do not list empty sections |
+| About | There is meaningful context or a use case | Problem, purpose, and scope |
+| Features | There are multiple user-facing capabilities | Outcomes rather than internal implementation |
+| Tech Stack | Technology choices affect use or contribution | The main technologies actually used |
+| Architecture | The system spans multiple components | Components and data or control flow; add a diagram when useful |
+| Project Structure | Contributors need repository orientation | The purpose of important directories and files |
+| Getting Started | Almost always | The path from installation to first successful result |
+| Configuration | There are environment variables, config files, or external services | Name, purpose, requiredness, default, and secret-handling rules |
+| Security | There are credentials, user data, networks, or deployment risks | Security boundaries, prohibited practices, and reporting path |
+| API or CLI | It is a library, SDK, or CLI | Copyable calls or commands and their output |
+| How to Contribute | External contributions are welcome | Where to ask questions, whether PRs are accepted, and the development, testing, submission, and conduct entry points |
+| What's Next | There is a confirmed public roadmap | Short-term direction without invented commitments |
+| License | The repository contains license information | License type as an [SPDX identifier](https://spdx.org/licenses/) (`MIT`, `Apache-2.0`) and a link to the license file |
+| Acknowledgements / Author | It helps readers use or trust the project | Confirmed credits and contact information |
+
+These are candidate sections, not a completeness score. A short, accurate README is better than a long README full of filler.
+
+## Usage-example rules
+
+- Lead with the smallest complete, copyable success case.
+- For a CLI, show both the command and representative output.
+- For an API, show the input, call, and return value; document optional parameters, defaults, and types.
+- If an example needs extra files, keep an executable example in the repository and link to it.
+- Do not make critical information available only through a screenshot, animation, badge, or external video.
+
+## Badge rules
+
+A badge is a compact status line, not decoration. Add one only when it answers a question the reader would otherwise have to open another file to answer.
+
+Choose the badge type in this order:
+
+1. **Dynamic**: the value is fetched when the page renders, so it cannot drift. Prefer this for package versions, build or coverage status, and the latest release.
+2. **Static with a recorded source**: use only when no dynamic endpoint exists. Record the origin beside the badge so a later synchronize pass can verify the value.
+3. **Static without a note**: acceptable only for values that cannot drift, such as a stack label that names a dependency rather than its version.
+
+A static value and its recorded source look like this:
+
+```markdown
+<!-- badge source: rust-toolchain.toml (channel) -->
+[![Rust 1.97.1](https://img.shields.io/badge/Rust-1.97.1-000000.svg)](https://www.rust-lang.org/)
+```
+
+Apply these rules to every badge:
+
+- Link it to something the reader can verify: the license file, the registry page, the CI run, or the project's own documentation.
+- Write alt text that carries the same fact as the image, because the image may fail to load. `[![License: MIT]` works; `[![badge]` does not.
+- Add a license badge only when a LICENSE file exists and its type matches.
+- Keep the set small enough to read at a glance; each extra badge lowers the value of the others.
+
+### Choosing a style
+
+Shields.io accepts `flat` (the default), `flat-square`, `plastic`, `for-the-badge`, and `social`. Pick one and apply it to every badge in the file; a mixed set reads as a collage rather than a status line.
+
+| Style | Renders as | Reach for it when |
+| --- | --- | --- |
+| `flat` | Small, rounded, muted | The default. Several badges that should stay secondary to the title. |
+| `flat-square` | Small, sharp corners | Same density as `flat`, matching a squared-off visual identity. |
+| `for-the-badge` | Large, uppercase, wide | Two to four badges used as a deliberate header block. |
+| `plastic` | Small with a gradient | The project's existing assets already use that older style. |
+| `social` | GitHub-button styling | Star, fork, follow, or watch counts specifically. |
+
+The same badge in three styles, so the difference is visible before choosing:
+
+```markdown
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+```
+
+Add `logo=` with a [simple-icons](https://simpleicons.org/) slug, plus `logoColor=`, when the icon speeds recognition rather than merely decorating:
+
+```markdown
+[![Runtime: Tokio](https://img.shields.io/badge/runtime-Tokio-4c8eda.svg?style=for-the-badge&logo=rust&logoColor=white)](https://tokio.rs/)
+```
+
+## Maintenance status
+
+When the evidence shows the project is dormant, archived, or in maintenance mode — a long-quiet commit history, an archive flag, or the user saying so — state it near the top of the README instead of leaving readers to infer it. A short note about what still works, what will not be fixed, and whether new maintainers are welcome protects the adoption decision better than silence. Never conclude a project is unmaintained from age alone: activity can live in branches, forks, or another repository of a monorepo, so treat dormancy as a fact to verify like any other.
+
+## Anti-patterns
+
+- A slogan with no use case.
+- Architecture and technology details before installation and examples.
+- Commands, environment variables, paths, or deployment steps that do not exist.
+- A sentence written only so its section can exist — a license paragraph pointing at a missing LICENSE file, a contribution section with no real channel behind it.
+- Installation steps that assume the reader already lives in the project's ecosystem: `make install` with no word about prerequisites, build tools, or supported platforms.
+- A large badge wall used as a substitute for limitations, maintenance status, or evidence.
+- Every API, design decision, and tutorial forced into the README until it loses focus.
+- Internal protocol tables, data-structure dumps, or module walkthroughs in a README whose identified reader is an end user rather than a contributor.
+- A copied list that can drift from the manifest or configuration without a verification mechanism.
+
+## Sources
+
+- [15 Essential Sections Every README Needs](https://codelove.tw/@tony/post/am2Gjq)
+- [The Art of README — Traditional Chinese](https://github.com/hackergrrl/art-of-readme/blob/master/README-zh-TW.md)
+- [standard-readme](https://github.com/RichardLitt/standard-readme) — contributing answers and i18n file naming
+- [Make a README](https://www.makeareadme.com/) — maintenance-status disclosure
