@@ -1,44 +1,44 @@
-# 指令與設定範本
+# Commands and configuration templates
 
-Windows PowerShell 為主，Bash 對應寫法附在需要處。所有片段預期在**同一個程序**內依序執行，token 只存在該程序記憶體。
+PowerShell first, with the Bash equivalent where one is needed. Every snippet is expected to run in order **inside a single process**, so the token stays in that process's memory.
 
-## 1. 服務與掃描器檢查
+## 1. Service and scanner check
 
 ```powershell
-$env:SONAR_HOST_URL = 'http://127.0.0.1:9000'   # 使用者或既有設定指定其他位址時才覆寫
-(Invoke-RestMethod "$env:SONAR_HOST_URL/api/system/status").status   # 需為 UP
+$env:SONAR_HOST_URL = 'http://127.0.0.1:9000'   # override only when the user or existing configuration specifies another address
+(Invoke-RestMethod "$env:SONAR_HOST_URL/api/system/status").status   # must be UP
 sonar-scanner --version
 ```
 
-`status` 非 `UP` 時停止，先處理伺服器；HTTP 可用但 Docker CLI 權限不足不算阻擋條件。
+Stop when `status` is not `UP` and deal with the server first; HTTP being reachable while the Docker CLI lacks permissions is not a blocker.
 
-## 2. 認證檢查與清除
+## 2. Authentication check and cleanup
 
-`SONAR_TOKEN` 即 SonarScanner 讀取的標準變數名，由系統環境變數直接提供，不需另行映射。
+`SONAR_TOKEN` is the standard variable name SonarScanner reads, supplied directly by the system environment; no extra mapping is needed.
 
 ```powershell
 if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
-    throw '環境變數 SONAR_TOKEN 未設定。請在 SonarQube 產生 user token 後，於系統環境變數設定 SONAR_TOKEN 並重開 shell。'
+    throw 'Environment variable SONAR_TOKEN is not set. Generate a user token in SonarQube, set SONAR_TOKEN as a system environment variable, then reopen the shell.'
 }
 ```
 
-Bash 對應：
+Bash equivalent:
 
 ```bash
-[ -n "$SONAR_TOKEN" ] || { echo 'SONAR_TOKEN 未設定'; exit 1; }
+[ -n "$SONAR_TOKEN" ] || { echo 'SONAR_TOKEN is not set'; exit 1; }
 ```
 
-全部步驟（含驗證）完成後才清除，清除過早會讓後續 API 呼叫失敗：
+Clear it only after every step (verification included) has finished — clearing it too early makes the later API calls fail:
 
 ```powershell
 Remove-Item Env:SONAR_TOKEN -ErrorAction SilentlyContinue
 ```
 
-不使用 `setx`；不寫入任何檔案。
+Do not use `setx`; do not write it to any file.
 
-## 3. Web API 認證 header
+## 3. Web API authentication header
 
-只在 MCP 工具沒有對應功能時使用（例如建立專案）。
+Use this only where no MCP tool covers the need (creating a project, for example).
 
 ```powershell
 $pair    = "$($env:SONAR_TOKEN):"
@@ -46,20 +46,20 @@ $basic   = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($pair))
 $headers = @{ Authorization = "Basic $basic" }
 ```
 
-SonarQube 10 以上亦接受 `@{ Authorization = "Bearer $($env:SONAR_TOKEN)" }`。
+SonarQube 10 and later also accepts `@{ Authorization = "Bearer $($env:SONAR_TOKEN)" }`.
 
-不得 `echo $headers`、`$pair`、`$basic`，也不得把 `$headers` 放進錯誤訊息或交付摘要。
+Never `echo $headers`, `$pair`, or `$basic`, and never put `$headers` into an error message or a delivery summary.
 
-## 4. 專案查詢與建立
+## 4. Project lookup and creation
 
-查詢優先走 MCP：`mcp__sonarqube__search_my_sonarqube_projects`。無法使用時 fallback：
+Prefer MCP for the lookup: `mcp__sonarqube__search_my_sonarqube_projects`. Fallback when it is unavailable:
 
 ```powershell
 (Invoke-RestMethod -Headers $headers `
     -Uri "$env:SONAR_HOST_URL/api/projects/search?projects=$projectKey").components
 ```
 
-不存在且 token 具 `Create Projects` 權限時才建立（無對應 MCP 工具）：
+Create it only when it does not exist and the token holds the `Create Projects` permission (no MCP tool covers this):
 
 ```powershell
 $projectKey  = 'my-project-key'
@@ -69,46 +69,46 @@ Invoke-RestMethod -Method Post -Headers $headers `
     -Body @{ project = $projectKey; name = $projectName }
 ```
 
-建立後再查詢一次確認，並記下 dashboard URL：`$env:SONAR_HOST_URL/dashboard?id=$projectKey`。首次分析前 Quality Gate 為 `NONE` 屬正常。
+Query again after creating to confirm, and note the dashboard URL: `$env:SONAR_HOST_URL/dashboard?id=$projectKey`. A Quality Gate of `NONE` before the first analysis is normal.
 
-## 5. `sonar-project.properties` 範本
+## 5. `sonar-project.properties` template
 
-已有設定時最小幅度合併，不整份覆蓋。放在 repository 根目錄，使用檔案編輯工具寫入，不用 shell 重導向。
+Merge minimally into existing configuration instead of overwriting the whole file. Put it in the repository root and write it with a file-editing tool, not shell redirection.
 
 ```properties
 sonar.projectKey=my-project-key
 sonar.projectName=My Project
 sonar.sourceEncoding=UTF-8
 
-# 依實際檔案確認的來源範圍
+# source scope confirmed against the actual files
 sonar.sources=.
 
-# 產物、依賴快取、coverage 輸出、scanner 工作目錄、VCS 目錄、二進位資產
+# build output, dependency caches, coverage output, scanner work directory, VCS directories, binary assets
 sonar.exclusions=**/bin/**,**/obj/**,**/dist/**,**/build/**,**/out/**,**/target/**,\
   **/node_modules/**,**/vendor/**,**/.venv/**,**/venv/**,\
   **/coverage/**,**/*.lcov,**/.scannerwork/**,**/.git/**,\
   **/*.dll,**/*.exe,**/*.so,**/*.dylib,**/*.jar,**/*.png,**/*.jpg,**/*.pdf,**/*.zip
 ```
 
-規則：
+Rules:
 
-- `sonar.host.url` 由環境變數 `SONAR_HOST_URL` 提供即可，寫進檔案並非必要；token 絕不寫入此檔。
-- 排除清單只針對能確認的產物；不得為了方便排除整個語言目錄、測試目錄或未知的原始碼。
-- 只有在能確認測試目錄與測試分類規則時才加 `sonar.tests`；嵌入原始碼的測試保留既有分析方式。
-- 語言專屬的 report 參數（coverage、既有 linter 報告）必須查該 SonarQube 版本與 analyzer 的文件確認正確 property 名稱，不得猜測。沒有可匯入的報告就明確標示「未提供」。
+- `sonar.host.url` can come from the `SONAR_HOST_URL` environment variable; writing it into the file is not required, and the token never goes in this file.
+- Exclusions cover only artifacts you can confirm; never exclude an entire language directory, the test directory, or unknown source code for convenience.
+- Add `sonar.tests` only when the test directory and the test classification rules are confirmed; tests embedded in source keep their existing analysis treatment.
+- Language-specific report parameters (coverage, existing linter reports) must be confirmed against the documentation for that SonarQube version and analyzer — never guess a property name. When there is no report to import, state plainly that none is provided.
 
-## 6. 執行掃描
+## 6. Run the scan
 
 ```powershell
 sonar-scanner
-if ($LASTEXITCODE -ne 0) { throw "sonar-scanner 失敗，exit code $LASTEXITCODE" }
+if ($LASTEXITCODE -ne 0) { throw "sonar-scanner failed with exit code $LASTEXITCODE" }
 ```
 
-輸出需同時滿足：包含 `EXECUTION SUCCESS`、exit code 為 0、log 中的 project key 與 server URL 與預期一致。只保留成功/失敗摘要，不回傳完整 scanner log。
+The output must satisfy all of: it contains `EXECUTION SUCCESS`, the exit code is 0, and the project key and server URL in the log match what you expect. Keep only the success/failure summary; do not return the full scanner log.
 
-## 7. 驗證 CE task 與 Quality Gate
+## 7. Verify the CE task and the Quality Gate
 
-解析 `report-task.txt` 取得 CE task id：
+Parse `report-task.txt` for the CE task id:
 
 ```powershell
 $report = @{}
@@ -118,7 +118,7 @@ Get-Content .scannerwork\report-task.txt | ForEach-Object {
 $ceTaskId = $report['ceTaskId']
 ```
 
-輪詢至終態或逾時：
+Poll until a terminal state or the timeout:
 
 ```powershell
 $deadline = (Get-Date).AddMinutes(5)
@@ -131,33 +131,33 @@ do {
 $status
 ```
 
-Quality Gate 優先走 MCP：`mcp__sonarqube__get_project_quality_gate_status`。無法使用時 fallback：
+Prefer MCP for the Quality Gate: `mcp__sonarqube__get_project_quality_gate_status`. Fallback when it is unavailable:
 
 ```powershell
 (Invoke-RestMethod -Headers $headers `
     -Uri "$env:SONAR_HOST_URL/api/qualitygates/project_status?projectKey=$projectKey").projectStatus.status
 ```
 
-`ERROR` 時列出未通過條件的名稱與數值，不自行修改 Quality Gate 規則。
+On `ERROR`, list the name and value of each failing condition; do not change the Quality Gate rules yourself.
 
-## 8. MCP 工具優先路徑
+## 8. Preferred MCP tools
 
-| 需求 | 工具 |
+| Need | Tool |
 | --- | --- |
-| 查專案 | `mcp__sonarqube__search_my_sonarqube_projects` |
-| Quality Gate 狀態 | `mcp__sonarqube__get_project_quality_gate_status` |
+| Find projects | `mcp__sonarqube__search_my_sonarqube_projects` |
+| Quality Gate status | `mcp__sonarqube__get_project_quality_gate_status` |
 | Issues | `mcp__sonarqube__search_sonar_issues_in_projects` |
 | Measures | `mcp__sonarqube__get_component_measures` |
-| 分支 | `mcp__sonarqube__list_branches` |
-| 建立專案 | 無 MCP 工具，只能用 `POST /api/projects/create` |
+| Branches | `mcp__sonarqube__list_branches` |
+| Create a project | No MCP tool; only `POST /api/projects/create` |
 
-Issues 與 measures 只在驗證失敗或使用者要求時查詢。
+Query issues and measures only when verification fails or the user asks.
 
-## 9. 工作樹收尾
+## 9. Working-tree wrap-up
 
 ```powershell
 git diff --check
 git status --short
 ```
 
-`.scannerwork/`、coverage 輸出與其他掃描產物加入適當 ignore 規則。除非使用者明確要求，不執行 `git commit` 或 `git push`。
+Add `.scannerwork/`, coverage output, and any other scan artifacts to the appropriate ignore rules. Do not run `git commit` or `git push` unless the user explicitly asks.

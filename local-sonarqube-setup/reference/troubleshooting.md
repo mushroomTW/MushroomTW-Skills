@@ -1,86 +1,86 @@
-# 故障排除
+# Troubleshooting
 
-只在對應失敗發生時閱讀。格式：症狀 → 判定 → 處置。
+Read this only when the matching failure occurs. Format: symptom → diagnosis → handling.
 
 ## `Unable to establish loopback connection`
 
-判定：執行環境的本機網路/程序限制，不是專案設定問題。
+Diagnosis: a local network or process restriction in the execution environment, not a project configuration problem.
 
-處置：改在允許本機 loopback 連線的環境（一般使用者終端機、非受限沙箱）重跑同一組指令。**不得**為了規避而修改 `sonar-project.properties`、改用其他 host URL 或關閉功能來掩蓋。
+Handling: re-run the same commands in an environment that allows local loopback connections (an ordinary user terminal, not a restricted sandbox). **Never** work around it by editing `sonar-project.properties`, switching to another host URL, or disabling functionality to hide it.
 
-## `SONAR_TOKEN` 在目前程序讀不到
+## `SONAR_TOKEN` is not visible in the current process
 
-判定：變數設在 Machine 或 User 範圍，但目前 shell 早於設定時間啟動，因此沒有繼承。
+Diagnosis: the variable is set at Machine or User scope, but the current shell started before it was set and therefore did not inherit it.
 
-處置：先確認變數存在於哪個範圍（只印布林值，不印內容）：
+Handling: first confirm which scope holds the variable (print booleans only, never the value):
 
 ```powershell
 "machine=$(-not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable('SONAR_TOKEN','Machine')))"
 "user=$(-not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable('SONAR_TOKEN','User')))"
 ```
 
-任一為 `True` 時，重開 shell 讓程序繼承，或在目前程序內載入：
+If either is `True`, reopen the shell so the process inherits it, or load it inside the current process:
 
 ```powershell
 $env:SONAR_TOKEN = [Environment]::GetEnvironmentVariable('SONAR_TOKEN','Machine')
 ```
 
-兩者皆為 `False` 才是真的未設定，請使用者產生 token 後設定系統環境變數。
+Only when both are `False` is it genuinely unset — ask the user to generate a token and set the system environment variable.
 
 ## HTTP 401
 
-判定：token 未被 scanner/API 讀到，或 token 本身失效、型別不符、打到別台 server。
+Diagnosis: the scanner or API never received the token, or the token is invalid, of the wrong type, or aimed at a different server.
 
-一線修復：確認同一程序內 `SONAR_TOKEN` 讀得到（見 commands.md 第 2 節），且清除步驟尚未執行。
+First fix: confirm `SONAR_TOKEN` is readable inside the same process (see section 2 of commands.md) and that the cleanup step has not run yet.
 
-仍為 401 時依序排查，每項只回報結論，不印 token 內容：
+Still 401 — work through these in order, reporting only the conclusion of each and never printing the token:
 
-1. **token 是否仍有效**：`(Invoke-RestMethod -Headers $headers -Uri "$env:SONAR_HOST_URL/api/authentication/validate").valid`。`False` 代表已失效或被撤銷。
-2. **token 型別**：Project Analysis Token 只能掃它綁定的那個專案，用來掃別的專案或呼叫一般 API 會 401；跨專案需 Global Analysis Token 或 user token。
-3. **scanner 版本**：SonarQube 10 之前的 scanner 讀 `sonar.login`，不認 `sonar.token`／`SONAR_TOKEN`；版本不符時等同沒帶憑證。以步驟 2 記錄的 scanner 版本比對。
-4. **host 位址**：容器內外位址不同（`localhost` 對服務名／`host.docker.internal`），打到另一台 SonarQube 也會 401。核對 `$env:SONAR_HOST_URL` 與 scanner log 中的 server URL。
-5. **值本身夾帶空白或換行**：設定環境變數時貼入換行很常見。只印 `$env:SONAR_TOKEN -ne $env:SONAR_TOKEN.Trim()` 的布林結果。
+1. **Is the token still valid**: `(Invoke-RestMethod -Headers $headers -Uri "$env:SONAR_HOST_URL/api/authentication/validate").valid`. `False` means it has expired or been revoked.
+2. **Token type**: a Project Analysis Token can only scan the project it is bound to; using it for another project or a general API call returns 401. Cross-project work needs a Global Analysis Token or a user token.
+3. **Scanner version**: scanners older than SonarQube 10 read `sonar.login` and do not recognize `sonar.token` / `SONAR_TOKEN`; a mismatched version is equivalent to sending no credentials. Compare against the scanner version recorded in step 2.
+4. **Host address**: addresses differ inside and outside a container (`localhost` versus the service name or `host.docker.internal`), and hitting a different SonarQube also returns 401. Cross-check `$env:SONAR_HOST_URL` against the server URL in the scanner log.
+5. **Whitespace or newlines in the value itself**: pasting a newline in when setting the environment variable is common. Print only the boolean result of `$env:SONAR_TOKEN -ne $env:SONAR_TOKEN.Trim()`.
 
-以上皆排除才請使用者在 SonarQube UI 重新產生 token 並更新系統環境變數。不得把 token 改成命令列參數重試。
+Only once all of these are ruled out, ask the user to regenerate the token in the SonarQube UI and update the system environment variable. Never retry by moving the token into a command-line argument.
 
 ## HTTP 403
 
-判定：token 有效但權限不足，最常見是缺 `Create Projects` 或該專案的 `Execute Analysis`。
+Diagnosis: the token is valid but lacks permissions — most often `Create Projects`, or `Execute Analysis` on that project.
 
-處置：回報實際缺少的權限名稱，或請使用者在 SonarQube UI 先建立專案／授權後再重跑。不得偽造成功，也不得改用其他既有專案 key 頂替。
+Handling: report the name of the permission that is actually missing, or ask the user to create the project or grant access in the SonarQube UI before re-running. Never fake success, and never substitute some other existing project key.
 
-## Project key 格式被拒
+## Project key format rejected
 
-判定：SonarQube 對 project key 有字元限制——允許英數字、`-`、`_`、`.`、`:`，且不可全為數字。
+Diagnosis: SonarQube restricts project key characters — alphanumerics, `-`, `_`, `.`, `:` are allowed, and the key cannot be all digits.
 
-處置：由 repository 名稱轉換（空白與其他符號改為 `-`），確認轉換後的 key 與使用者意圖一致再建立。非顯而易見的命名先向使用者確認。
+Handling: derive it from the repository name (whitespace and other symbols become `-`) and confirm the converted key matches the user's intent before creating it. Check any non-obvious naming with the user first.
 
-## Coverage 報告路徑不存在或為空檔
+## Coverage report path missing or empty
 
-判定：coverage 未產生、輸出到別的路徑，或測試根本沒跑起來。
+Diagnosis: coverage was never produced, went to a different path, or the tests did not run at all.
 
-處置：先查專案原生的測試/coverage 指令與其實際輸出路徑，重跑產生報告後再掃描。**不得**建立空白假報告或指向不存在的路徑；專案沒有 coverage 工具時，明確標示「未提供 coverage」並執行不含 coverage 的分析。
+Handling: find the project's native test/coverage command and its actual output path, regenerate the report, then scan again. **Never** create an empty placeholder report or point at a path that does not exist; when the project has no coverage tooling, state plainly that no coverage is provided and run the analysis without it.
 
-## Analyzer 或 report 格式錯誤
+## Analyzer or report format error
 
-判定：property 名稱不符該語言 analyzer、報告格式版本不符，或報告內容路徑與掃描根目錄對不上。
+Diagnosis: the property name does not match that language's analyzer, the report format version does not match, or the paths inside the report do not line up with the scan root.
 
-處置：查該 SonarQube 版本與 analyzer 的文件確認正確 property 與支援格式，修正原因。保留原始錯誤的非敏感摘要（規則 key、檔案路徑、格式名稱），不貼完整 log。不得以 `Accepted`、`False positive` 或停用規則假裝完成。
+Handling: check the documentation for that SonarQube version and analyzer to confirm the correct property and the supported formats, then fix the cause. Keep a non-sensitive summary of the original error (rule key, file path, format name) rather than pasting the full log. Never fake completion with `Accepted`, `False positive`, or by disabling rules.
 
-## 編碼或二進位檔警告
+## Encoding or binary-file warnings
 
-判定：來源檔編碼與 `sonar.sourceEncoding` 不符，或二進位檔被納入掃描範圍。
+Diagnosis: source file encoding does not match `sonar.sourceEncoding`, or binary files were pulled into the scan scope.
 
-處置：分析仍成功時不阻擋，但要在交付摘要中說明。只有在這些警告造成分析**失敗**時，才調整掃描範圍（排除二進位資產）或修正檔案編碼。
+Handling: do not treat this as a blocker while the analysis still succeeds, but explain it in the delivery summary. Only when these warnings make the analysis **fail** should you adjust the scan scope (excluding binary assets) or fix the file encoding.
 
-## Quality Gate 顯示 `NONE`
+## Quality Gate shows `NONE`
 
-判定：專案已建立但尚未有任何完成的分析，屬正常狀態而非錯誤。
+Diagnosis: the project exists but has no completed analysis yet — a normal state, not an error.
 
-處置：確認 CE task 已到 `SUCCESS` 後重查。若 CE task 已成功但仍為 `NONE`，改查 measures 確認資料是否真的上傳。
+Handling: confirm the CE task reached `SUCCESS`, then query again. If the CE task succeeded and it is still `NONE`, query measures to confirm whether the data was actually uploaded.
 
-## CE task 停在 `PENDING` 或逾時
+## CE task stuck in `PENDING` or timing out
 
-判定：SonarQube Compute Engine 忙碌、記憶體不足，或背景任務排隊。
+Diagnosis: the SonarQube Compute Engine is busy, short on memory, or the background task is queued.
 
-處置：延長輪詢上限後重查；持續 `PENDING` 時檢查 SonarQube 容器資源與 `api/ce/activity`。task 為 `FAILED` 時取其 `errorMessage` 的非敏感摘要處理原因，不重跑掩蓋。
+Handling: extend the polling limit and re-check; if it stays `PENDING`, inspect the SonarQube container's resources and `api/ce/activity`. When the task is `FAILED`, take a non-sensitive summary of its `errorMessage` and address the cause rather than re-running to paper over it.
