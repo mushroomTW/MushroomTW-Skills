@@ -42,10 +42,13 @@ description: Use before hand-rolling a general mechanism such as retry, backoff,
 
 ```
 Decision: used <pkg>@<ver> because gate 1-5 pass, <理由>.
+Decision: used standard library <API> because target version <ver> supports it and API fits.
 Decision: wrote manually because domain-specific business logic.
-Decision: wrote manually because <performance-critical|security-sensitive>, <佐證>.
+Decision: wrote manually because performance-critical, measured <metric> shows library overhead is unacceptable.
+Decision: wrote manually because security-sensitive, full auditability is required and opaque dependencies are unacceptable.
 Decision: wrote manually because evaluated <pkg> failed gate #<n>.
 Decision: wrote manually because no suitable candidate exists after checking <來源>.
+Decision: wrote manually because this is a one-off three-line helper with no edge cases, state, or growth.
 ```
 
 ## 四種應手寫
@@ -68,7 +71,7 @@ Decision: wrote manually because no suitable candidate exists after checking <�
 
 > 三行 helper 例外：只用一次、沒有邊界案例或狀態、且不會成長的三行 helper 可直接手寫。
 
-🔴 CHECKPOINT 2 — Step 4 提交前自檢：決策語含 because、對應 gate/四例外、無軟化措辭。
+🔴 CHECKPOINT 2 — Step 4 提交前自檢：決策語含 because、對應評估結果或手寫理由、無軟化措辭。
 
 ## Failure Handling
 
