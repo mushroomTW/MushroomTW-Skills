@@ -5,71 +5,78 @@ description: Connect any code project to a local Docker SonarQube (default http:
 
 # Local SonarQube Setup
 
+> Local Docker at `127.0.0.1:9000` · PowerShell on Windows · `SONAR_TOKEN` env only · no scanner install.
+
+**TL;DR routing**
+
+```
+pom.xml / build.gradle[.kts] exists? → use mvn/gradle plugin, not CLI
+*.csproj / .sln? → SonarScanner for .NET (CLI cannot read bytecode)
+NPM / Python / Other? → sonar-scanner CLI (or Docker fallback)
+shallow clone? → git fetch --unshallow before scan
+Java <21 and auto-provisioning OFF? → upgrade or enable auto
+```
+
+Canonical behavior: https://docs.sonarsource.com/sonarqube-community-build/analyzing-source-code
+
 ## Assumptions
 
-- Execution is on Windows host, PowerShell.
-- SonarQube at `http://127.0.0.1:9000` unless config says otherwise.
-- Host already has runnable `sonar-scanner`; JVM projects use build-tool plugin (step 2). No scanner install/replacement.
-- Auth via `SONAR_TOKEN` env. Language/build/coverage inferred from repo, no defaults.
-- SCM is full clone: `git rev-parse --is-shallow-repository`=`true` → `git fetch --unshallow`, else blame skipped.
-- Java 21+ (or 11+ with JRE auto-provisioning). Verified in step 2.
+- Windows PowerShell; SonarQube `127.0.0.1:9000` default; host has `sonar-scanner` (JVM→plugin), no install.
+- `SONAR_TOKEN` env only; language/build/coverage inferred; full clone (`is-shallow`→`fetch --unshallow`); Java 21+ (11+ if auto-provisioning).
 
-## Hard rules
+## Invariants
 
-- Token lives only in current process memory; never in args, URLs, logs, `sonar-project.properties`, or replies. Describe only as set/not set.
-- Read `SONAR_TOKEN` once, do query/create/scan/verify in same process. No `setx`; clear only after all steps done.
-- If token ever leaked to chat/log/commit, tell user to revoke and reissue.
-- Do not add services, modify CI/compose, commit or push unless user explicitly asks.
-- Do not change runtime behavior, public APIs, production code, or build semantics for the scan.
-- Never fake with `Accepted`/`False positive`/disabling rules.
-- Preserve uncommitted changes; do not overwrite unrelated files.
-- Output only non-sensitive summaries (HTTP status, key, CE, Gate, URL), never full logs.
-- Query issues/measures only on failure or request; otherwise read only config blocks and summaries.
+1. Token only in process memory — never in args/URL/log/file; describe only as set/not set; if leaked → tell user to revoke; read once and do all steps in same process, no `setx`, clear only after verify.
+2. Never fake Gate with `Accepted`/`False positive`/disabling rules; never change production code/build semantics to pass.
+3. Do not add services, modify CI/compose, commit or push unless explicitly asked; preserve uncommitted changes; do not overwrite unrelated files.
+4. Output only non-sensitive summaries (status, key, CE, Gate, URL), never full logs; query issues/measures only on failure or request.
+5. Discover language/build/coverage from repo, not defaults; Community Build loads only supported languages.
 
-## Workflow
+## Workflow — 4 phases, 7 steps
 
-1. **Discovery**: read `AGENTS.md`, README, build/test docs, existing sonar config; `git status --short`. Derive language/sources/tests/reports from manifests, not guesswork. Shallow → `git fetch --unshallow`. Not a git repo → skip git checks and note no rollback trail.
-2. **Confirm service and scanner**: `GET /api/system/status` must be `UP`; `sonar-scanner --version` (needed for 401). Docker CLI no permission ≠ blocker.
-   - Java: `java -version` 21+; auto-provisioning ON (CLI 6.0+ default, 7.2+ needs 11+) → auto, else require 21+. See `reference/commands.md §1.6`.
-   - Scanner table: Maven→`mvn verify sonar:sonar`, Gradle→`gradle sonar`, .NET→Scanner for .NET, NPM/Python/Other→CLI. CLI cannot read bytecode → degrades JVM analysis. Follow actual build command.
-   - 🔴 **CHECKPOINT — scanner + Java**: report variant + Java, confirm if mixed toolchain.
-3. **Find or create project**: key order `sonar.projectKey` → `.sonarlint/connectedMode.json` → git remote → dir name; sanitize to `[A-Za-z0-9-_.:]`, not all digits; monorepo ambiguity → ask. Query via `mcp__sonarqube__search_my_sonarqube_projects`; host mismatch → stop. Reuse if exists; else `POST /api/projects/create`. 🔴 **CHECKPOINT — key/name before create**: cannot delete; verify dashboard `.../dashboard?id=$key`; 403 → report permission.
-4. **Scan configuration**: minimally merge into `sonar-project.properties`; create only if none. 🔴 **CHECKPOINT — show diff before write**. Exclude only confirmed artifacts (build/dependency/coverage/`.scannerwork`/`.git`/binaries); never whole language/test dir. Hierarchy: Global < Project < file < CLI args (file/CLI not persisted; Global Exclusions cannot be overridden). See `reference/commands.md §5` for template + `sonar.projectBaseDir`/`project.settings`. Community Build loads only supported languages.
-5. **Produce reports**: run repo's own checks/tests first (report failures), then native coverage **before** scanner. Coverage format must match `reference/coverage.md` per language (canonical `test-coverage/*`); verify paths exist and non-empty. No report → state none, never placeholder.
-6. **Run scan**: in same process set `SONAR_HOST_URL`, confirm `SONAR_TOKEN`, run chosen scanner. Must see `EXECUTION SUCCESS`, exit 0, key/URL match. Docker fallback `sonar-scanner-cli` with cache `-v cache:/opt/sonar-scanner/.sonar/cache` (user 1000 RW, `host.docker.internal` on Windows). OOM → `SONAR_SCANNER_JAVA_OPTS="-Xmx512m"` (pre-6.0 `SONAR_SCANNER_OPTS`).
-7. **Verify and wrap up**: CE from `.scannerwork/report-task.txt` poll `GET /api/ce/task?id=` to `SUCCESS/FAILED` (5m timeout → report taskId + status, re-check later). Gate via `mcp__sonarqube__get_project_quality_gate_status`; `ERROR` → list `name: actual vs threshold`, hand back choice. Wrap: add `.scannerwork/`/coverage to ignore, `git diff --check` + `git status --short`, report key/name, Gate, imported report types, dashboard URL. Debug: `sonar.scanner.internal.dumpToFile` or `Background Tasks > Show SonarScanner Context`.
+| Phase | Step | Action | Output | 🛑 Checkpoint |
+|---|---|---|---|---|
+| **A · Preflight** | 1 Discovery | Read `AGENTS.md`/README/build docs/sonar config; `git status --short`; derive language/sources/tests/reports. Shallow=`true`→`git fetch --unshallow`. Not git→note no rollback. | Evidence table (path→source) | — |
+| | 2 Service+Scanner+Java | `GET /api/system/status`=`UP`; `sonar-scanner --version`; `java -version` 21+ (or 11+ if auto-provisioning ON — CLI 6.0+ default). Scanner per table: Maven `mvn verify sonar:sonar` · Gradle `gradle sonar` · .NET `dotnet sonarscanner` · Other CLI. Docker CLI permission fail ≠ blocker. | `UP` + version + chosen scanner | 🔴 Scanner+Java if mixed toolchain |
+| **B · Setup** | 3 Project | Key order: `sonar.projectKey` → `.sonarlint/connectedMode.json` → git remote → dir name; sanitize `[A-Za-z0-9-_.:]` not all digits; monorepo ambiguity→ask. Query `mcp__sonarqube__search_my_sonarqube_projects`; host mismatch→stop. Reuse or `POST /api/projects/create`. | `key / name / dashboard URL` | 🔴 Key/name before create (cannot delete) |
+| | 4 Config | Minimal merge into `sonar-project.properties` (create only if none). Exclude only confirmed artifacts, never whole `src`/`tests`. Hierarchy Global < Project < file < CLI (file/CLI not persisted; Global Exclusions cannot override). `sonar.projectBaseDir`/`project.settings` in `reference/commands.md §5`. | Diff shown | 🔴 Diff before write |
+| **C · Execute** | 5 Reports | Run repo checks/tests first (report failures). Then native coverage **before** scanner; format per `reference/coverage.md` (JaCoCo `jacoco.xml`→`sonar.coverage.jacoco.xmlReportPaths`, JS `lcov.info`→`sonar.javascript.lcov.reportPaths`, Python `coverage.xml`→`sonar.python.coverage.reportPaths`, .NET Coverlet/dotCover→`sonar.cs.*`, Generic→`sonar.coverageReportPaths`). Verify non-empty. None→state none. | `path (bytes, format)` list | — |
+| | 6 Scan | Same process: `SONAR_HOST_URL` + `SONAR_TOKEN` → run chosen scanner. Need `EXECUTION SUCCESS` + exit 0 + key/URL match. Docker fallback: `sonar-scanner-cli` with `-v cache:/opt/sonar-scanner/.sonar/cache` (user 1000 RW, Windows→`host.docker.internal`). OOM→`SONAR_SCANNER_JAVA_OPTS="-Xmx512m"` (pre-6.0 `SONAR_SCANNER_OPTS`). | 3-line summary | — |
+| **D · Verify** | 7 CE+Gate+Wrap | CE: parse `.scannerwork/report-task.txt` → poll `GET /api/ce/task?id=` to `SUCCESS/FAILED` (5m; timeout→report taskId+status). Gate: `mcp__sonarqube__get_project_quality_gate_status`; `ERROR`→list `name: actual vs threshold`, hand back. Wrap: add `.scannerwork/`/coverage to ignore, `git diff --check`+`git status --short`, report key/Gate/imported types/URL. Debug: `sonar.scanner.internal.dumpToFile` or `Background Tasks > Show SonarScanner Context`. | `CE / Gate / URL` | — |
 
-## Failure recovery
+Execution is one process; PowerShell dot values need quotes.
 
-| Trigger | Fix | Still fails |
-|---|---|---|
-| `status`≠`UP` | `docker ps` + restart | Report unreachable, stop |
-| shallow=`true` | `git fetch --unshallow` | Keep warning in summary |
-| Java <21 auto-off | Upgrade 21 or enable auto | Report mismatch, stop |
-| `SONAR_TOKEN` invisible | Check Machine/User booleans, reload env | Ask to generate token |
-| 401 | Checklist validity→type→version→host→whitespace (`troubleshooting.md`) | Regenerate token, never CLI args |
-| 403 | Report `Create Projects`/`Execute Analysis` | Ask UI create/grant |
-| key rejected | Sanitize →`-`, confirm | Ask user to pick |
-| coverage missing/empty | Run native cmd, verify non-empty (`coverage.md`) | State none, scan without |
-| analyzer/format error | Confirm `sonar.*` vs docs | Fix property, rescan |
-| CE `PENDING`/timeout | Extend poll, `api/ce/activity` | Report taskId+status |
-| Gate `ERROR` | List `name: actual vs threshold` | Hand back, no `Accepted` |
+## Failure handling
+
+| Phase | Trigger | First | Still fails |
+|---|---|---|---|
+| A | `status`≠`UP` | `docker ps`+restart | Stop, report unreachable |
+| A | shallow=`true` | `git fetch --unshallow` | Warning in summary |
+| A | Java <21 auto-off | Upgrade or enable auto | Report mismatch, stop |
+| A/B | `SONAR_TOKEN` invisible | Machine/User booleans, reload env | Ask UI generate |
+| B | 401 | validity→type→version→host→whitespace (`troubleshooting.md`) | Regenerate, never CLI token |
+| B | 403 | Report `Create Projects`/`Execute Analysis` | UI create/grant |
+| B | key rejected | Sanitize →`-` confirm | Ask pick |
+| C | coverage missing/empty | Run native cmd, verify non-empty | State none, scan without |
+| C | analyzer/format error | Confirm `sonar.*` vs docs | Fix+rescan |
+| D | CE `PENDING`/timeout | Extend poll, `api/ce/activity` | Report taskId+status |
+| D | Gate `ERROR` | List `name: actual vs threshold` | Hand back, no `Accepted` |
 
 ## Never do these
 
 | Never | Tell | Instead |
 |---|---|---|
-| Token in CLI/URL/log/file | Args contain token | Env var in same process, `-Dsonar.token=$env:SONAR_TOKEN` or inherit |
-| CLI for Maven/Gradle/.NET | `pom.xml` exists but `sonar-scanner` | `mvn sonar:sonar` / `gradle sonar` / `dotnet sonarscanner` |
+| Token in CLI/URL/log/file | Args contain token | Env in same process, `-Dsonar.token=$env:SONAR_TOKEN` or inherit |
+| CLI for Maven/Gradle/.NET | `pom.xml` exists + `sonar-scanner` | `mvn sonar:sonar` / `gradle sonar` / `dotnet sonarscanner` |
 | Guess coverage key | Not in `coverage.md` | Lookup exact `sonar.*` |
-| Exclude whole `src`/`tests` | Exclusion=`src/**` | Only confirmed artifacts |
-| Fake Gate with `Accepted` | Gate `ERROR` → server edit | List conditions, fix source |
-| Overwrite properties wholesale | Diff removes keys | Minimal merge + checkpoint |
+| Exclude `src/**` / `tests/**` | Exclusion over-broad | Only confirmed artifacts |
+| Fake Gate | Gate `ERROR`→server edit | List conditions, fix source |
+| Overwrite properties | Diff removes keys | Minimal merge + checkpoint |
 | Treat `NONE` as error | No prior analysis | Confirm CE `SUCCESS`, re-query |
 
 ## References
 
-- Official — Analyzing source code: https://docs.sonarsource.com/sonarqube-community-build/analyzing-source-code — property/format/behavior canonical.
-- `reference/commands.md` — before step 2: commands, template, selection table, hierarchy, MCP list.
-- `reference/coverage.md` — before step 5: language coverage table (B).
-- `reference/troubleshooting.md` — on failure: 401/403/PKIX/OOM/locale/WAF.
+- Official — Analyzing source code: https://docs.sonarsource.com/sonarqube-community-build/analyzing-source-code — canonical.
+- `reference/commands.md` — before step 2: commands, template, hierarchy, Docker, MCP.
+- `reference/coverage.md` — before step 5: language table (B).
+- `reference/troubleshooting.md` — on failure: PKIX/OOM/locale/WAF/401/403.
