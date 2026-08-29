@@ -16,13 +16,14 @@ Capabilities are identical everywhere; this file maps them to hosts.
 ## Claude Code
 
 - Ask **both** startup choices in one `AskUserQuestion`; skip what user already stated.
+- Execution is always Multi-agent partitioned (one subagent per partition); if subagents are unavailable, explain and 🛑 STOP — never fall back to single-agent.
 - Resolve validator relative to `references/` (e.g. `../scripts/validate_bug_audit.py`). On Windows use `/` and `py -3 -X utf8` if `python` missing. Requires `pip install jsonschema`.
 - Stay read-only: only `.docs/` pair; only run repo-configured checks. No tool install / repro probes.
 - Multi-agent: one subagent per partition (inventory, flows, candidates, limitations); cross-review High without revealing original verdict. Prefer LSP/graph over grep.
 
 ## Claude Apps
 
-No subagents — explain and ask to switch to Standard. Scope = uploaded files; mark inaccessible as `unreadable`. Validator: add `--repo-root <tree>` if `.docs/` is not under the tree. `unavailable` checks are legitimate but cap Comprehensive confidence below High.
+No subagents — 🛑 STOP and explain that Multi-agent is required; do not fall back to a single-agent Standard run. Scope = uploaded files; mark inaccessible as `unreadable`. Validator: add `--repo-root <tree>` if `.docs/` is not under the tree. `unavailable` checks are legitimate but cap Comprehensive confidence below High.
 
 ## Codex
 
@@ -30,4 +31,4 @@ No subagents — explain and ask to switch to Standard. Scope = uploaded files; 
 
 ## When a capability is missing
 
-Never silently downgrade — `execution.review_mode` is a factual claim. State what is missing and its impact, let user choose, record consequence in `limitations` and re-check `provisional`.
+Never silently downgrade — `execution.review_mode` is always `multi-agent` and is a factual claim. If Multi-agent is unavailable, 🛑 STOP, state what is missing and its impact, and let the user decide how to proceed; record consequence in `limitations` and re-check `provisional`.

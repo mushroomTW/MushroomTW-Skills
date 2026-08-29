@@ -9,14 +9,15 @@ Audit the current working tree by finding material bugs first, then assess broad
 
 ## Required startup choices
 
-🔴 **CHECKPOINT — Obtain confirmation for both choices before entering Workflow**: Ask both in one interaction (skip what the user already stated). Follow [platform-adapters](references/platform-adapters.md) for the host's choice UI. If Multi-agent unavailable, explain and ask to switch to Standard. **Never silently fall back — 🛑 STOP and wait for user choice.**
+🔴 **CHECKPOINT — Obtain confirmation for the choice before entering Workflow**: Ask in one interaction (skip what the user already stated). Follow [platform-adapters](references/platform-adapters.md) for the host's choice UI. Execution is always **Multi-agent partitioned**. If Multi-agent is unavailable, explain and 🛑 STOP — never silently fall back or downgrade to a single-agent run.
 
 1. **Audit mode** — **Rapid** (map whole repo, read core/high-risk paths, only `defect`/`risk`, no score) or **Comprehensive** (read every in-scope file, all three finding types, 0–100 score).
-2. **Execution mode** — **Standard** or **Multi-agent partitioned** (partitions scope, cross-reviews High findings; see [platform-adapters](references/platform-adapters.md)).
+
+Execution mode is fixed: **Multi-agent partitioned** (one subagent per partition, cross-reviews High findings; see [platform-adapters](references/platform-adapters.md)).
 
 ## Workflow
 
-1. **Select modes** — In: user request; Out: `audit_mode`+`review_mode`; Format: single `AskUserQuestion` with 2 questions (skip if already answered).
+1. **Select modes** — In: user request; Out: `audit_mode`+`review_mode=multi-agent`; Format: single `AskUserQuestion` (skip if already answered); `review_mode` is fixed to `multi-agent`.
 2. **Build map & inventory** — In: `AGENTS.md`/`README`/manifests/CI; Out: `inventory[]` (`path`,`status`,`risk_tier`,`reason`); Entire working tree, never use `git diff`/history.
 3. **Trace flows** — In: `core|high` items; Out: `core_flows[]` (`name`,`entry_point`,`status`,`evidence[]`); Every known core/high must be traced.
 4. **Run checks** — In: configured commands; Out: `verification_checks[]` (`status=passed|failed|not_run|unavailable`); Never install tools/write probes; `reproduced` only from executed configured checks.
@@ -30,7 +31,7 @@ Rules: validator checks structure/policy, not truth — rule out alternatives by
 
 - **If checks unavailable** → `status=unavailable` + disclose in `Limitations`; Comprehensive High requires one `passed`.
 - **If reading all files exceeds budget** → Switch to Multi-agent; if still infeasible, narrow to `core|high`, `provisional=true`, mark unread as `mapped`+`reason`.
-- **If Multi-agent unavailable** → Explain and ask to switch to Standard; never silently downgrade.
+- **If Multi-agent unavailable** → Explain that Multi-agent is required and 🛑 STOP; never silently downgrade or run single-agent.
 - **If `.docs/` already exists** → Add same timestamp `YYYYMMDD-HHMMSS` to both; never overwrite.
 - **If no `core|high`** → Treat as mis-tiering, requires at least one; re-evaluate §5 else `provisional`.
 

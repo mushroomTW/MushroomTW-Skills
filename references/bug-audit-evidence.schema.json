@@ -99,7 +99,7 @@
       "additionalProperties": false,
       "required": ["review_mode", "provisional"],
       "properties": {
-        "review_mode": { "enum": ["standard", "multi-agent"] },
+        "review_mode": { "enum": ["multi-agent"] },
         "provisional": { "type": "boolean" }
       }
     },

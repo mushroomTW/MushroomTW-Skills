@@ -52,7 +52,7 @@ Public findings order: `defect → risk → quality-debt`; within each type `Hig
 - Deduplicate by **root cause and remediation**, not line number. Normalize fingerprints as lowercase `category|root-cause|primary-symbol`.
 - The same root cause across multiple files counts as one finding; do not deduct twice unless each deduction has independent, proven impact.
 - Each finding deducts in exactly one dimension (decided by `category`, see §3.3); the validator enforces this.
-- Multi-agent: the primary agent reads relevant source and tests to resolve conflicts; if conflict remains, lower confidence and use `needs-verification`, never average scores.
+- Multi-agent (fixed execution mode): the primary agent reads relevant source and tests to resolve conflicts; if conflict remains, lower confidence and use `needs-verification`, never average scores.
 
 ---
 
@@ -214,5 +214,5 @@ Each rationale ≤2 sentences, reference only related finding IDs, no Compliance
 ### 5.3 Comprehensive Only
 
 - When non-provisional, no `mapped` (every item `read` or `unreadable`); all known core/high flows traced; all 7 dimensions and total present; mark `provisional` when a conclusion-changing boundary is incomplete
-- Over budget: either split via Multi-agent, or narrow to core/high paths and mark `provisional`, recording each unread as `mapped`+`reason` in inventory, `limitations` states consequence, not file list
+- Over budget: either split further via Multi-agent, or narrow to core/high paths and mark `provisional`, recording each unread as `mapped`+`reason` in inventory, `limitations` states consequence, not file list
 - High confidence requires 100% coverage + traced + non-provisional + at least one verification `passed`; Medium requires ≥90% and traced
