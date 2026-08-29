@@ -40,7 +40,7 @@ cp -r sonarqube-fix-all      ~/.claude/skills/sonarqube-fix-all
 
 `local-sonarqube-setup` 另外要求主機已有可執行的 `sonar-scanner` 與 `SONARQUBE_TOKEN` 環境變數，它不負責安裝 scanner。`sonarqube-fix-all` 需要一個已設定好的 SonarQube MCP 連線，並讀取 `SONAR_TOKEN`。
 
-五個之中有四個附了給 Codex 用的 `agents/openai.yaml`；`library-first` 只有單一個 `SKILL.md`，沒有輔助檔案。
+五個都附了給 Codex 用的 `agents/openai.yaml`；除了這個檔案之外，`library-first` 只有單一個 `SKILL.md`，沒有其他輔助檔案。
 
 ## 倉庫結構
 
@@ -57,7 +57,7 @@ MushroomTW-Skills/
 │   └── sonarqube-fix-all.md / .zh.md
 │
 ├── excellent-readme/             SKILL.md + agents/ references/ scripts/
-├── library-first/                SKILL.md
+├── library-first/                SKILL.md + agents/
 ├── local-sonarqube-setup/        SKILL.md + agents/ reference/
 ├── repository-bug-audit/         SKILL.md + agents/ references/ scripts/
 └── sonarqube-fix-all/            SKILL.md + agents/

@@ -40,7 +40,7 @@ cp -r sonarqube-fix-all      ~/.claude/skills/sonarqube-fix-all
 
 `local-sonarqube-setup` additionally expects a `sonar-scanner` already on the host and a `SONARQUBE_TOKEN` environment variable; it does not install the scanner. `sonarqube-fix-all` expects an already-configured SonarQube MCP connection and reads `SONAR_TOKEN`.
 
-Four of the five ship an `agents/openai.yaml` for Codex; `library-first` is a single `SKILL.md` with no supporting files.
+All five ship an `agents/openai.yaml` for Codex; beyond that file, `library-first` is a single `SKILL.md` with no other supporting files.
 
 ## Repository layout
 
@@ -57,7 +57,7 @@ MushroomTW-Skills/
 │   └── sonarqube-fix-all.md / .zh.md
 │
 ├── excellent-readme/             SKILL.md + agents/ references/ scripts/
-├── library-first/                SKILL.md
+├── library-first/                SKILL.md + agents/
 ├── local-sonarqube-setup/        SKILL.md + agents/ reference/
 ├── repository-bug-audit/         SKILL.md + agents/ references/ scripts/
 └── sonarqube-fix-all/            SKILL.md + agents/
