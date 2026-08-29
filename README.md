@@ -67,7 +67,9 @@ Each skill directory holds only the skill itself. `repository-bug-audit` also ke
 
 ## Version control
 
-The root directory is **not** a git repository. Every skill is its own git repository, and none of them has a remote — these are local-only copies.
+The whole collection lives in a single git repository at the root; no skill directory carries a `.git` of its own any more. Each skill used to be a separate local repository, and those histories were merged in with `git subtree`, so every original commit is still reachable from `git log`. Note that the pre-merge commits recorded their paths at their own repository root, so `git log -- <skill>/` shows only the merge point — read the full `git log` to follow one skill's evolution.
+
+The repository has no remote — this is a local-only copy.
 
 No subproject contains a `README.md`; all documentation was consolidated into `docs/`.
 

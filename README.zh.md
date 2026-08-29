@@ -67,7 +67,9 @@ MushroomTW-Skills/
 
 ## 版控狀態
 
-根目錄**不是** git repository。每個 skill 都是獨立的 git repository，且都沒有設定 remote——這些是只存在本機的副本。
+整個技能集由根目錄的單一 git repository 統一管理，各 skill 目錄不再各自帶 `.git`。原本每個 skill 都是獨立的本機 repository，這些歷史已用 `git subtree` 併入根倉庫，原始 commit 全數保留、仍可從 `git log` 查到。要注意併入前的 commit 記錄的是各子倉庫根目錄的路徑，所以 `git log -- <skill>/` 只會看到併入那一筆，要追某個 skill 的完整演進請看完整的 `git log`。
+
+倉庫沒有設定 remote——這是只存在本機的副本。
 
 各子專案內都沒有 `README.md`，說明文件已全數集中到 `docs/`。
 
