@@ -81,19 +81,6 @@ The canonical case is cognitive complexity on a routine that is a single linear 
 
 Every suppressed and every left-open issue is listed individually in the final report with its reason.
 
-### Never do these
-
-Each of these builds green and looks like progress. The tell is how you catch yourself mid-fix.
-
-| Never | The tell | Instead |
-|---|---|---|
-| Apply a tool-wide or IDE autofix across many files at once | The diff touches files you never opened | One batch, one module, having read the affected symbol first |
-| Change a public signature, name, or visibility to clear a rule | The fix edits a declaration that callers outside the module reference | Suppress with a reason, or leave it open for a human API decision |
-| Empty a `catch`, or assign to a throwaway, to clear an unused-variable or empty-block finding | The fix deletes handling rather than adding it | Handle, log, or rethrow — if none of those is honest, suppress with that reason |
-| Widen a suppression from the line to the file, the module, or the quality profile | The directive carries no rule id, or sits at the top of the file | Narrowest scope, one rule id, written reason |
-| Call an issue *source-fixed* when its verification did not run | The report lists a fix whose build or tests you skipped | Mark it **pending manual smoke test** with the steps |
-| Re-run the scanner hoping a stale result clears | Two rounds in a row return the same open key set | Stop and diagnose (§8) |
-
 ## 7. Verify each batch
 
 After each file or module batch, run only that module's formatter, linter, and build. Then:
