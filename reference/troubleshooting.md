@@ -84,3 +84,20 @@ $env:SONAR_TOKEN = [Environment]::GetEnvironmentVariable('SONAR_TOKEN','Machine'
 判定：SonarQube Compute Engine 忙碌、記憶體不足，或背景任務排隊。
 
 處置：延長輪詢上限後重查；持續 `PENDING` 時檢查 SonarQube 容器資源與 `api/ce/activity`。task 為 `FAILED` 時取其 `errorMessage` 的非敏感摘要處理原因，不重跑掩蓋。
+
+## 反模式對照
+
+這節與其他節不同，**進入步驟 3 前先讀一次**。左欄任一動作出現在你的計畫裡，換成右欄再往下走。
+
+| 不得這樣做 | 改為 |
+| --- | --- |
+| `-Dsonar.token=xxx`，或把 token 寫進 properties、URL、log | 只用程序環境變數 `SONAR_TOKEN` |
+| 用 `setx` 或寫檔保存 token | 只留在目前程序記憶體，收尾時 `Remove-Item Env:SONAR_TOKEN` |
+| 標 `Accepted`／`False positive`、停用規則、調鬆 Quality Gate 讓它過 | 列出未通過條件的名稱、實際值與門檻，交回使用者決定 |
+| 用 `sonar.exclusions` 把有問題的原始碼排掉 | 只排除產物、依賴快取、coverage 輸出與二進位資產 |
+| coverage 產不出來就指向不存在的路徑或建空報告 | 標示「未提供 coverage」，執行不含 coverage 的分析 |
+| Maven／Gradle 專案直接跑 CLI `sonar-scanner` | 改用 `mvn verify sonar:sonar`／`gradle sonar` |
+| 服務不通就自己 `docker run` 起一台 SonarQube | 狀態非 `UP` 即停止並回報，不新增服務 |
+| 整份覆蓋既有 `sonar-project.properties` | 最小幅度合併，寫入前給使用者確認 |
+| CE task 逾時就重跑一次當作沒事 | 判為「未完成」，回報 task id 請使用者稍後重查 |
+| 專案名不確定就自己挑一個 key 建下去 | key 依步驟 3 的四層順序決定，不明確先問使用者 |

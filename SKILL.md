@@ -43,4 +43,4 @@ description: 將任意程式碼專案接入本機 Docker SonarQube（預設 http
 ## References
 
 - 進入步驟 2 前讀 `reference/commands.md`：PowerShell 指令、`sonar-project.properties` 範本、MCP 工具對照表。
-- 任何步驟失敗才讀 `reference/troubleshooting.md`。
+- 進入步驟 3 前讀 `reference/troubleshooting.md` 的「反模式對照」一節；其餘各節只在對應步驟失敗時才讀。
