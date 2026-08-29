@@ -27,7 +27,7 @@ description: 將任意程式碼專案接入本機 Docker SonarQube（預設 http
 ## Workflow
 
 1. **探勘**：讀 `AGENTS.md`、README、建置/測試文件與既有 sonar 設定；執行 `git status --short`。從文件或 manifest 推導語言、來源目錄、測試佈局與報告格式，不靠猜測。`git rev-parse` 失敗（非 git repo）→ 跳過步驟 1 與 7 的所有 git 檢查，並在交付摘要標明「無版控保護，改動未留可回滾紀錄」。
-2. **確認服務與掃描器**：`GET /api/system/status` 需為 `UP`，並記錄 scanner 版本。HTTP 可用但 Docker CLI 權限不足不算阻擋條件。偵測到 `pom.xml` 或 `build.gradle[.kts]` → 改用該建置工具的 sonar plugin（`mvn verify sonar:sonar`、`gradle sonar`），不用 CLI `sonar-scanner`：CLI 掃 JVM 專案讀不到 bytecode，分析會靜默降級成純文字規則。兩者並存時以專案實際建置指令為準。
+2. **確認服務與掃描器**：`GET /api/system/status` 需為 `UP`，並以 `sonar-scanner --version` 記錄 scanner 版本（401 排查會用到）。HTTP 可用但 Docker CLI 權限不足不算阻擋條件。偵測到 `pom.xml` 或 `build.gradle[.kts]` → 改用該建置工具的 sonar plugin（`mvn verify sonar:sonar`、`gradle sonar`），不用 CLI `sonar-scanner`：CLI 掃 JVM 專案讀不到 bytecode，分析會靜默降級成純文字規則。兩者並存時以專案實際建置指令為準。
 3. **專案查詢／建立**：
    - **決定 key**：依序取既有 `sonar-project.properties` 的 `sonar.projectKey` → `.sonarlint/connectedMode.json` → git remote 的 repo 名 → 目錄名。空白與非法字元改 `-`（只允許英數與 `-`、`_`、`.`、`:`，不可全為數字）。monorepo 子專案或轉換結果不明確 → 先問使用者。
    - **查詢**：用 `mcp__sonarqube__search_my_sonarqube_projects`。MCP 與 scanner 必須指向同一台 server；回傳結果與 `SONAR_HOST_URL` 不一致 → 停止並回報，不混用兩邊資料。
