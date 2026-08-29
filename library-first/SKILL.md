@@ -84,6 +84,14 @@ Decision: wrote manually because <四例外之一>, <已評估 <pkg> 失敗於 g
 5. 為三行 helper 引套件。
 6. 用軟化措辭 — 禁「可以考慮/視情況/靈活把握」，必須 pass/fail。
 
+## Examples（對應 test-prompts）
+
+| 場景 | Step 1 命名 | Step 2 候選 | Gate 結果 | Decision |
+|---|---|---|---|---|
+| 指數退避重試 (Node) | `exponential backoff retry` | `cockatiel`/`p-retry` + 標準庫 | 1-5 pass | `used cockatiel because gate全過，API不侵入且依賴輕` |
+| 訂單滿千折百 | `order discount rule (domain)` | 無（業務規則） | 無候選 | `wrote manually because domain-specific, evaluated insufficient` |
+| Schema 驗證 | `schema validation` | `Zod` vs 手寫 regex | Zod 1-5 pass | `used zod because License MIT、體積可接受、API可組合` |
+
 ## References
 
 - 來源：`npm` / `PyPI` / `NuGet` / `pkg.go.dev` / `crates.io` + 標準庫
