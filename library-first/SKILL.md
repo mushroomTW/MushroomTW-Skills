@@ -82,7 +82,7 @@ Decision: deferred because gate #<n> depends on <缺少的專案事實>; immedia
 |---|---|---|
 | 找不到候選 | 換領域詞重搜 + 查標準庫 | 手寫並記已查來源與「no suitable candidate」 |
 | 任一 gate 不通過 | 換次優候選 | 全不通過 → 手寫並記失敗 gate # |
-| License 不確定 | 讀 LICENSE/registry 欄位 | 仍不確定 → 視為不相容 |
+| 套件的授權身分不明 | 讀套件 LICENSE 與 registry 欄位 | 仍無法確認授權條款 → `Fail`，排除該候選 |
 | 專案版本、授權政策或整合限制缺失 | 讀 manifest、lockfile、LICENSE 與既有依賴 | 仍缺失 → `deferred`，提出一個可回答的精確問題 |
 | 候選過多 | 按 gate 篩至 1-3 個深查 | 決策語列已排除原因 |
 | 手寫後邊界爆炸 | 重跑 Step 2-3 評替換 | 封裝為內部模組，不在業務中膨脹 |
