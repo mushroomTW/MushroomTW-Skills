@@ -10,7 +10,7 @@ description: Use before hand-rolling a general mechanism such as retry, backoff,
 ## Invariants
 
 1. 必須顯式決策：`Decision: used X because Y` 或 `wrote manually because Z`。
-2. 未過 Quality Gate 視為不存在。
+2. 第三方套件未過 Quality Gate 視為不存在；標準庫依適用性與版本支援評估。
 3. 不確定必查證，不可猜測。
 
 ## Workflow
@@ -44,7 +44,7 @@ description: Use before hand-rolling a general mechanism such as retry, backoff,
 Decision: used <pkg>@<ver> because gate 1-5 pass, <理由>.
 Decision: used standard library <API> because target version <ver> supports it and API fits.
 Decision: wrote manually because domain-specific business logic.
-Decision: wrote manually because performance-critical, measured <metric> shows library overhead is unacceptable.
+Decision: wrote manually because performance-critical, measured <library> <metric> at <value> against budget <threshold>, so overhead is unacceptable.
 Decision: wrote manually because security-sensitive, full auditability is required and opaque dependencies are unacceptable.
 Decision: wrote manually because evaluated <pkg> failed gate #<n>.
 Decision: wrote manually because no suitable candidate exists after checking <來源>.
