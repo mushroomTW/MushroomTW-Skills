@@ -2,7 +2,7 @@
 
 **English** | [繁體中文](README.zh.md)
 
-Five agent skills for Claude Code and Codex, covering README authoring, dependency decisions, repository auditing, and SonarQube quality workflows.
+Five portable Agent Skills for README authoring, dependency decisions, repository auditing, and SonarQube quality workflows. They follow the open Agent Skills format and can be installed into Claude Code, Codex, Cursor, OpenCode, and other skills-compatible agents; workflows that need SonarQube or code-graph integrations still require those capabilities on the host.
 
 Each skill is a self-contained skill folder at the root; its documentation lives in `docs/`.
 
@@ -20,23 +20,34 @@ Each skill is a self-contained skill folder at the root; its documentation lives
 
 ## Install
 
-Every directory here is a plain skill folder — copy it into the host's skills directory:
-
-| Host | Personal scope | Project scope |
-| --- | --- | --- |
-| Claude Code | `~/.claude/skills/` | `<repo>/.claude/skills/` |
-| Codex | `~/.codex/skills/` | — |
+Every directory here is a plain skill folder. From the repository root, the [`skills` CLI](https://github.com/vercel-labs/skills) can discover supported agents and install all five. The first invocation of `npx` may use the network to download the CLI:
 
 ```bash
-cp -r excellent-readme       ~/.claude/skills/excellent-readme
-cp -r library-first          ~/.claude/skills/library-first
-cp -r local-sonarqube-setup  ~/.claude/skills/local-sonarqube-setup
-cp -r repository-bug-audit   ~/.claude/skills/repository-bug-audit
-cp -r sonarqube-fix-all      ~/.claude/skills/sonarqube-fix-all
+npx skills add . --list
+npx skills add . --all --global
+```
+
+For a manual installation, copy one skill directory to a location supported by the host. These are common paths, not an exhaustive runtime registry:
+
+| Route | Personal scope | Project scope |
+| --- | --- | --- |
+| Universal Agent Skills fallback | `~/.agents/skills/<skill-name>/` | `<repo>/.agents/skills/<skill-name>/` |
+| Claude Code | `~/.claude/skills/` | `<repo>/.claude/skills/` |
+| Codex | `~/.codex/skills/` | `<repo>/.agents/skills/` |
+| Other compatible agents | Use CLI auto-discovery or the host's documented skills directory | Use CLI auto-discovery or the host's documented skills directory |
+
+```bash
+cp -r <skill-name> <host-skills-directory>/<skill-name>
 ```
 
 > [!NOTE]
-> Both hosts read their skills directories when a session starts, so start a new session after copying.
+> Reload or restart the agent when its host requires a new session to discover installed skills. Use `npx skills list` to inspect the paths recognized by the CLI.
+
+To use one skill as reference material without installing it:
+
+```bash
+npx skills use . --skill <skill-name>
+```
 
 `local-sonarqube-setup` additionally expects a `sonar-scanner` already on the host and a `SONARQUBE_TOKEN` environment variable; it does not install the scanner. `sonarqube-fix-all` expects an already-configured SonarQube MCP connection and reads `SONAR_TOKEN`.
 

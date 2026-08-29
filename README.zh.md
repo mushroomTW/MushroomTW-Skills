@@ -2,7 +2,7 @@
 
 [English](README.md) | **繁體中文**
 
-給 Claude Code 與 Codex 用的五個 agent skill，涵蓋 README 撰寫、相依決策、儲存庫稽核與 SonarQube 品質流程。
+五個可攜式 Agent Skill，涵蓋 README 撰寫、相依決策、儲存庫稽核與 SonarQube 品質流程。它們遵循開放的 Agent Skills 格式，可安裝到 Claude Code、Codex、Cursor、OpenCode 與其他相容的 agent；需要 SonarQube 或程式碼圖譜整合的流程，仍要求 host 提供對應能力。
 
 每個 skill 都是根目錄下一個獨立的 skill 資料夾，說明文件放在 `docs/`。
 
@@ -20,23 +20,34 @@
 
 ## 安裝
 
-這裡每個目錄都是標準的 skill 資料夾，複製到 host 的 skills 目錄即可：
-
-| Host | 個人層級 | 專案層級 |
-| --- | --- | --- |
-| Claude Code | `~/.claude/skills/` | `<repo>/.claude/skills/` |
-| Codex | `~/.codex/skills/` | — |
+這裡每個目錄都是標準的 skill 資料夾。在倉庫根目錄可用 [`skills` CLI](https://github.com/vercel-labs/skills) 自動偵測相容 agent 並安裝全部五個 skill。第一次執行 `npx` 時可能需要連網下載 CLI：
 
 ```bash
-cp -r excellent-readme       ~/.claude/skills/excellent-readme
-cp -r library-first          ~/.claude/skills/library-first
-cp -r local-sonarqube-setup  ~/.claude/skills/local-sonarqube-setup
-cp -r repository-bug-audit   ~/.claude/skills/repository-bug-audit
-cp -r sonarqube-fix-all      ~/.claude/skills/sonarqube-fix-all
+npx skills add . --list
+npx skills add . --all --global
+```
+
+若採手動安裝，請把單一 skill 目錄複製到 host 支援的位置。下表是常見路徑，不是所有 runtime 的完整清單：
+
+| 路徑 | 個人層級 | 專案層級 |
+| --- | --- | --- |
+| 通用 Agent Skills fallback | `~/.agents/skills/<skill-name>/` | `<repo>/.agents/skills/<skill-name>/` |
+| Claude Code | `~/.claude/skills/` | `<repo>/.claude/skills/` |
+| Codex | `~/.codex/skills/` | `<repo>/.agents/skills/` |
+| 其他相容 agent | 使用 CLI 自動偵測，或查閱 host 的 skills 目錄文件 | 使用 CLI 自動偵測，或查閱 host 的 skills 目錄文件 |
+
+```bash
+cp -r <skill-name> <host-skills-directory>/<skill-name>
 ```
 
 > [!NOTE]
-> 兩個 host 都在 session 啟動時讀取 skills 目錄，複製後請開啟新的 session。
+> 若 host 只在 session 啟動時載入 skill，安裝後請重新載入或開啟新 session。可用 `npx skills list` 檢查 CLI 辨識到的安裝路徑。
+
+若只想把單一 skill 當成參考資料使用，不安裝到 host：
+
+```bash
+npx skills use . --skill <skill-name>
+```
 
 `local-sonarqube-setup` 另外要求主機已有可執行的 `sonar-scanner` 與 `SONARQUBE_TOKEN` 環境變數，它不負責安裝 scanner。`sonarqube-fix-all` 需要一個已設定好的 SonarQube MCP 連線，並讀取 `SONAR_TOKEN`。
 
