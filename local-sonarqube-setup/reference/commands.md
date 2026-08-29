@@ -12,6 +12,56 @@ sonar-scanner --version
 
 Stop when `status` is not `UP` and deal with the server first; HTTP being reachable while the Docker CLI lacks permissions is not a blocker.
 
+### 1.5 SCM checkout check (shallow clone)
+
+```powershell
+git rev-parse --is-shallow-repository  # true → shallow, blame will be skipped
+# fix
+git fetch --unshallow
+# verify
+git rev-parse --is-shallow-repository  # must be false
+```
+
+Official prerequisite: `analyzing-source-code/overview.md` — full clone required.
+
+### 1.6 Scanner selection and Java runtime
+
+**Selection table** — from `scanners/scanner-environment/general-requirements.md`:
+
+| Build system | Scanner | Command |
+|---|---|---|
+| Maven | SonarScanner for Maven | `mvn verify sonar:sonar` |
+| Gradle | SonarScanner for Gradle | `gradle sonar` |
+| .NET / MSBuild | SonarScanner for .NET | `dotnet sonarscanner begin/end` |
+| NPM | SonarScanner for NPM | `sonar-scanner` via npm |
+| Python | SonarScanner for Python | `sonar-scanner` / `pysonar` |
+| Other | SonarScanner CLI | `sonar-scanner` |
+
+> CLI cannot analyze C# / VB.NET — must use Scanner for .NET.
+
+**Java runtime**:
+
+```powershell
+java -version
+sonar-scanner --version  # check embedded JRE / auto-provisioning notes
+```
+
+| Scanner | Auto-provisioning ON | Auto-provisioning OFF |
+|---|---|---|
+| Maven / Gradle | Java 11+ (auto) | Java 21+ (17 removed) |
+| CLI 7.2+ | Java 11+ (auto) | Java 21+ |
+| CLI <7.2 | Java 17+ (auto) | Java 21+ |
+| .NET / NPM / Python | n/a | Java 21+ |
+
+Auto-provisioning downloads scanner engine + analyzers at analysis time from the server (see `analysis-overview.md#scanner-engine-and-analyzers-download`). When ON, no manual upgrade is needed. When OFF, ensure `JAVA_HOME` points to 21+.
+
+```powershell
+# when build needs different Java than scanner
+$env:JAVA_HOME = "C:\Program Files\Java\jdk-21"
+```
+
+Troubleshoot with `SONAR_SCANNER_JAVA_OPTS` vs `SONAR_SCANNER_OPTS` distinction in §6.
+
 ## 2. Authentication check and cleanup
 
 `SONAR_TOKEN` is the standard variable name SonarScanner reads, supplied directly by the system environment; no extra mapping is needed.
@@ -90,12 +140,41 @@ sonar.exclusions=**/bin/**,**/obj/**,**/dist/**,**/build/**,**/out/**,**/target/
   **/*.dll,**/*.exe,**/*.so,**/*.dylib,**/*.jar,**/*.png,**/*.jpg,**/*.pdf,**/*.zip
 ```
 
-Rules:
+### 5.1 Parameter hierarchy (from `analysis-parameters/configuration-overview.md`)
 
-- `sonar.host.url` can come from the `SONAR_HOST_URL` environment variable; writing it into the file is not required, and the token never goes in this file.
-- Exclusions cover only artifacts you can confirm; never exclude an entire language directory, the test directory, or unknown source code for convenience.
-- Add `sonar.tests` only when the test directory and the test classification rules are confirmed; tests embedded in source keep their existing analysis treatment.
-- Language-specific report parameters (coverage, existing linter reports) must be confirmed against the documentation for that SonarQube version and analyzer — never guess a property name. When there is no report to import, state plainly that none is provided.
+Precedence low → high: **Global (UI)** < **Project (UI)** < **Scanner config file** (`sonar-project.properties`, `pom.xml`, `build.gradle`, `.csproj`) < **Scanner CLI args** (`-Dsonar.*`). Env vars are overridden by CLI args. Notes:
+
+- CLI/file values are **not persisted** to DB — only UI values are. Next analysis without the same args reverts.
+- `Global Source File Exclusions` / `Global Test File Exclusions` cannot be overridden at project level.
+- Property keys are case-sensitive.
+- In PowerShell, quote any value containing a dot: `'-Dsonar.projectKey=my-key'`.
+
+### 5.2 Alternative locations
+
+- CLI args: `sonar-scanner -Dsonar.projectKey=myproject -Dsonar.sources=src1`
+- Alternate base dir: `sonar.projectBaseDir=/path/to/subproject` (then `sonar.sources` is relative to it)
+- Alternate config file: `sonar-scanner -Dproject.settings=../myproject.properties` (resolved relative to **launch dir**, not `projectBaseDir`)
+- `sonar.projectKey` is mandatory either in file or CLI
+
+### 5.3 Language-specific reports
+
+Never guess a property name. Use `reference/coverage.md` table and confirm against `analyzing-source-code/test-coverage/*` for your SonarQube version. Common keys (verify!):
+
+- Java: `sonar.coverage.jacoco.xmlReportPaths`
+- JS/TS: `sonar.javascript.lcov.reportPaths`
+- Python: `sonar.python.coverage.reportPaths`
+- .NET: `sonar.cs.dotcover.reportsPaths` / `sonar.cs.vscoveragexml.reportsPaths`
+- PHP: `sonar.php.coverage.reportPaths`
+- Generic: `sonar.coverageReportPaths`
+
+When there is no report to import, state plainly that none is provided.
+
+### 5.4 Scope notes
+
+- `sonar.host.url` can come from `SONAR_HOST_URL` env; writing it into the file is not required, token never goes in this file.
+- Exclusions cover only artifacts you can confirm; never exclude an entire language directory, the test directory, or unknown source code.
+- Add `sonar.tests` only when test directory and classification are confirmed.
+- Community Build loads only files for supported languages — unrecognized extensions are silently ignored.
 
 ## 6. Run the scan
 
@@ -105,6 +184,16 @@ if ($LASTEXITCODE -ne 0) { throw "sonar-scanner failed with exit code $LASTEXITC
 ```
 
 The output must satisfy all of: it contains `EXECUTION SUCCESS`, the exit code is 0, and the project key and server URL in the log match what you expect. Keep only the success/failure summary; do not return the full scanner log.
+
+**Out-of-memory**: increase heap via `SONAR_SCANNER_JAVA_OPTS` (CLI 6.0+) or `SONAR_SCANNER_OPTS` (older):
+
+```powershell
+$env:SONAR_SCANNER_JAVA_OPTS = "-Xmx512m"   # Windows: no double quotes
+# or
+$env:SONAR_SCANNER_JAVA_OPTS = "-Xmx1024m"
+```
+
+Debug dump: `sonar-scanner -Dsonar.scanner.internal.dumpToFile=dump.properties` (also in UI `Background Tasks > Show SonarScanner Context`).
 
 ## 7. Verify the CE task and the Quality Gate
 
@@ -140,7 +229,33 @@ Prefer MCP for the Quality Gate: `mcp__sonarqube__get_project_quality_gate_statu
 
 On `ERROR`, list the name and value of each failing condition; do not change the Quality Gate rules yourself.
 
-## 8. Preferred MCP tools
+## 8. Docker fallback
+
+When host `sonar-scanner` is unavailable, use the Docker image (no install needed):
+
+```powershell
+docker run --rm `
+  -e SONAR_HOST_URL="http://host.docker.internal:9000" `
+  -e SONAR_TOKEN="$env:SONAR_TOKEN" `
+  -v "${PWD}:/usr/src" `
+  sonarsource/sonar-scanner-cli
+```
+
+Cache to avoid re-downloading analyzers each run:
+
+```powershell
+docker run --rm `
+  -v "${PWD}/.sonar-cache:/opt/sonar-scanner/.sonar/cache" `
+  -v "${PWD}:/usr/src" `
+  -e SONAR_HOST_URL="http://host.docker.internal:9000" `
+  sonarsource/sonar-scanner-cli
+# also via SONAR_USER_HOME
+$env:SONAR_USER_HOME = "C:/cache/sonar"
+```
+
+> Ensure user 1000 has RW on mounted dirs; otherwise permission errors. On Windows use `host.docker.internal` not `localhost` when SonarQube runs in Docker.
+
+## 9. Preferred MCP tools
 
 | Need | Tool |
 | --- | --- |
@@ -153,7 +268,7 @@ On `ERROR`, list the name and value of each failing condition; do not change the
 
 Query issues and measures only when verification fails or the user asks.
 
-## 9. Working-tree wrap-up
+## 10. Working-tree wrap-up
 
 ```powershell
 git diff --check
