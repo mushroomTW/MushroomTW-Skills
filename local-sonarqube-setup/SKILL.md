@@ -1,6 +1,6 @@
 ---
 name: local-sonarqube-setup
-description: Connect any code project to a local Docker SonarQube (default http://127.0.0.1:9000), creating the project, running the analysis, and verifying the Quality Gate with the host's existing sonar-scanner or the build tool's sonar plugin. Use when the user asks to introduce, configure, run, or troubleshoot a local SonarQube analysis.
+description: Connect a supported code project to a local Docker SonarQube (default http://127.0.0.1:9000), creating the project, running the analysis, and verifying the Quality Gate with the host's existing sonar-scanner or build-tool plugin. Use when the user asks to introduce, configure, run, or troubleshoot a local SonarQube analysis.
 ---
 
 # Local SonarQube Setup
@@ -11,7 +11,7 @@ description: Connect any code project to a local Docker SonarQube (default http:
 
 ```
 pom.xml / build.gradle[.kts] exists? → use mvn/gradle plugin, not CLI
-*.csproj / .sln? → SonarScanner for .NET (CLI cannot read bytecode)
+*.csproj / .sln? → .NET scanner required; SONAR_TOKEN env unsupported → credential STOP
 NPM / Python / Other? → sonar-scanner CLI (or Docker fallback)
 shallow clone? → git fetch --unshallow before scan
 Java <21 and auto-provisioning OFF? → upgrade or enable auto
@@ -22,7 +22,7 @@ Canonical behavior: https://docs.sonarsource.com/sonarqube-community-build/analy
 ## Assumptions
 
 - Windows PowerShell; SonarQube `127.0.0.1:9000` default; host has `sonar-scanner` (JVM→plugin), no install.
-- `SONAR_TOKEN` env only; language/build/coverage inferred; full clone (`is-shallow`→`fetch --unshallow`); Java 21+ (11+ if auto-provisioning).
+- `SONAR_TOKEN` env only; .NET scanner cannot consume it, so stop instead of exposing a token in args/files. Infer language/build/coverage; require a full clone (`is-shallow`→`fetch --unshallow`) and Java 21+ (11+ if auto-provisioning).
 
 ## Invariants
 
@@ -37,7 +37,7 @@ Canonical behavior: https://docs.sonarsource.com/sonarqube-community-build/analy
 | Phase | Step | Action | Output | 🛑 Checkpoint |
 |---|---|---|---|---|
 | **A · Preflight** | 1 Discovery | Read `AGENTS.md`/README/build docs/sonar config; `git status --short`; derive language/sources/tests/reports. Shallow=`true`→`git fetch --unshallow`. Not git→note no rollback. | Evidence table (path→source) | — |
-| | 2 Service+Scanner+Java | `GET /api/system/status`=`UP`; `sonar-scanner --version`; `java -version` 21+ (or 11+ if auto-provisioning ON — CLI 6.0+ default). Scanner per table: Maven `mvn verify sonar:sonar` · Gradle `gradle sonar` · .NET `dotnet sonarscanner` · Other CLI. Docker CLI permission fail ≠ blocker. | `UP` + version + chosen scanner | 🔴 Scanner+Java if mixed toolchain |
+| | 2 Service+Scanner+Java | `GET /api/system/status`=`UP`; `sonar-scanner --version`; `java -version` 21+ (or 11+ if auto-provisioning ON — CLI 6.0+ default). Scanner per table: Maven `mvn verify sonar:sonar` · Gradle `gradle sonar` · .NET requires `dotnet sonarscanner`, but current scanner does not support env-only token transport · Other CLI. Docker CLI permission fail ≠ blocker. | `UP` + version + chosen scanner | 🔴 Scanner+Java if mixed toolchain; 🔴 .NET credential STOP |
 | **B · Setup** | 3 Project | Key order: `sonar.projectKey` → `.sonarlint/connectedMode.json` → git remote → dir name; sanitize `[A-Za-z0-9-_.:]` not all digits; monorepo ambiguity→ask. Query `mcp__sonarqube__search_my_sonarqube_projects`; host mismatch→stop. Reuse or `POST /api/projects/create`. | `key / name / dashboard URL` | 🔴 Key/name before create (cannot delete) |
 | | 4 Config | Minimal merge into `sonar-project.properties` (create only if none). Exclude only confirmed artifacts, never whole `src`/`tests`. Hierarchy Global < Project < file < CLI (file/CLI not persisted; Global Exclusions cannot override). `sonar.projectBaseDir`/`project.settings` in `reference/commands.md §5`. | Diff shown | 🔴 Diff before write |
 | **C · Execute** | 5 Reports | Run repo checks/tests first (report failures). Then native coverage **before** scanner; format per `reference/coverage.md` (JaCoCo `jacoco.xml`→`sonar.coverage.jacoco.xmlReportPaths`, JS `lcov.info`→`sonar.javascript.lcov.reportPaths`, Python `coverage.xml`→`sonar.python.coverage.reportPaths`, .NET Coverlet/dotCover→`sonar.cs.*`, Generic→`sonar.coverageReportPaths`). Verify non-empty. None→state none. | `path (bytes, format)` list | — |
@@ -53,6 +53,7 @@ Execution is one process; PowerShell dot values need quotes.
 | A | `status`≠`UP` | `docker ps`+restart | Stop, report unreachable |
 | A | shallow=`true` | `git fetch --unshallow` | Warning in summary |
 | A | Java <21 auto-off | Upgrade or enable auto | Report mismatch, stop |
+| A | .NET scanner selected | Report that `SONAR_TOKEN` env is unsupported | Stop; never move the token to `/d:sonar.token`, a file, or output |
 | A/B | `SONAR_TOKEN` invisible | Machine/User booleans, reload env | Ask UI generate |
 | B | 401 | validity→type→version→host→whitespace (`troubleshooting.md`) | Regenerate, never CLI token |
 | B | 403 | Report `Create Projects`/`Execute Analysis` | UI create/grant |
@@ -66,7 +67,7 @@ Execution is one process; PowerShell dot values need quotes.
 
 | Never | Tell | Instead |
 |---|---|---|
-| Token in CLI/URL/log/file | Args contain token | Env in same process, `-Dsonar.token=$env:SONAR_TOKEN` or inherit |
+| Token in CLI/URL/log/file | Args contain token | Inherit `SONAR_TOKEN` unchanged; Docker uses `--env SONAR_TOKEN` with no `=value` |
 | CLI for Maven/Gradle/.NET | `pom.xml` exists + `sonar-scanner` | `mvn sonar:sonar` / `gradle sonar` / `dotnet sonarscanner` |
 | Guess coverage key | Not in `coverage.md` | Lookup exact `sonar.*` |
 | Exclude `src/**` / `tests/**` | Exclusion over-broad | Only confirmed artifacts |

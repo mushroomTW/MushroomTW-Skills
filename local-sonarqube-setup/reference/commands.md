@@ -32,7 +32,7 @@ Official prerequisite: `analyzing-source-code/overview.md` — full clone requir
 |---|---|---|
 | Maven | SonarScanner for Maven | `mvn verify sonar:sonar` |
 | Gradle | SonarScanner for Gradle | `gradle sonar` |
-| .NET / MSBuild | SonarScanner for .NET | `dotnet sonarscanner begin/end` |
+| .NET / MSBuild | SonarScanner for .NET | Credential STOP: current scanner requires a token property and does not support `SONAR_TOKEN` |
 | NPM | SonarScanner for NPM | `sonar-scanner` via npm |
 | Python | SonarScanner for Python | `sonar-scanner` / `pysonar` |
 | Other | SonarScanner CLI | `sonar-scanner` |
@@ -65,6 +65,9 @@ Troubleshoot with `SONAR_SCANNER_JAVA_OPTS` vs `SONAR_SCANNER_OPTS` distinction 
 ## 2. Authentication check and cleanup
 
 `SONAR_TOKEN` is the standard variable name SonarScanner reads, supplied directly by the system environment; no extra mapping is needed.
+
+> [!CAUTION]
+> SonarScanner for .NET currently does not support `SONAR_TOKEN` and documents `/d:sonar.token=...`. That would expose the expanded secret in process arguments, so this skill stops on .NET instead of using the documented argument or writing a token file.
 
 ```powershell
 if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
@@ -236,7 +239,7 @@ When host `sonar-scanner` is unavailable, use the Docker image (no install neede
 ```powershell
 docker run --rm `
   -e SONAR_HOST_URL="http://host.docker.internal:9000" `
-  -e SONAR_TOKEN="$env:SONAR_TOKEN" `
+  --env SONAR_TOKEN `
   -v "${PWD}:/usr/src" `
   sonarsource/sonar-scanner-cli
 ```
@@ -248,6 +251,7 @@ docker run --rm `
   -v "${PWD}/.sonar-cache:/opt/sonar-scanner/.sonar/cache" `
   -v "${PWD}:/usr/src" `
   -e SONAR_HOST_URL="http://host.docker.internal:9000" `
+  --env SONAR_TOKEN `
   sonarsource/sonar-scanner-cli
 # also via SONAR_USER_HOME
 $env:SONAR_USER_HOME = "C:/cache/sonar"

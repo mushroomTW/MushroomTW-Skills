@@ -12,7 +12,7 @@ Each skill is a self-contained skill folder at the root; its documentation lives
 | --- | --- | --- | --- |
 | `excellent-readme` | Writes, improves, audits, or re-syncs a `README.md` against what the repository actually contains. Claims it cannot trace to a file are reported as gaps rather than written as facts. | [EN](docs/excellent-readme.md) ・ [繁中](docs/excellent-readme.zh.md) | `excellent-readme/` |
 | `library-first` | Before you hand-roll retry, validation, caching, auth, or date handling, forces one search of that language's own ecosystem and a stated reason for the build-or-adopt decision. | [EN](docs/library-first.md) ・ [繁中](docs/library-first.zh.md) | `library-first/` |
-| `local-sonarqube-setup` | Points a project at a local Docker SonarQube (`127.0.0.1:9000`), generates coverage with the project's own tooling, scans, and checks the Quality Gate. Reads the token from `SONARQUBE_TOKEN` and keeps it out of files, logs, and replies. | [EN](docs/local-sonarqube-setup.md) ・ [繁中](docs/local-sonarqube-setup.zh.md) | `local-sonarqube-setup/` |
+| `local-sonarqube-setup` | Points a project at a local Docker SonarQube (`127.0.0.1:9000`), generates coverage with the project's own tooling, scans, and checks the Quality Gate. Reads the token from `SONAR_TOKEN` and keeps it out of files, arguments, logs, and replies. | [EN](docs/local-sonarqube-setup.md) ・ [繁中](docs/local-sonarqube-setup.zh.md) | `local-sonarqube-setup/` |
 | `repository-bug-audit` | Reads the implementation, its callers, its config, and its tests before calling anything a bug. Delivers a Markdown report paired with a machine-checked evidence JSON, plus a 0–100 risk score in Comprehensive mode. | [EN](docs/repository-bug-audit.md) ・ [繁中](docs/repository-bug-audit.zh.md) | `repository-bug-audit/` |
 | `sonarqube-fix-all` | Works through SonarQube findings in batches, verifying each batch against the build before moving on. Skips and reports bytecode-manipulating, reflection-driven, and timing-dependent code instead of rewriting it. | [EN](docs/sonarqube-fix-all.md) ・ [繁中](docs/sonarqube-fix-all.zh.md) | `sonarqube-fix-all/` |
 
@@ -49,7 +49,7 @@ To use one skill as reference material without installing it:
 npx skills use . --skill <skill-name>
 ```
 
-`local-sonarqube-setup` additionally expects a `sonar-scanner` already on the host and a `SONARQUBE_TOKEN` environment variable; it does not install the scanner. `sonarqube-fix-all` expects an already-configured SonarQube MCP connection and reads `SONAR_TOKEN`.
+`local-sonarqube-setup` additionally expects a compatible scanner already on the host and a `SONAR_TOKEN` environment variable; it does not install the scanner. SonarScanner for .NET currently lacks this environment-variable path, so the skill stops instead of exposing the token in arguments or files. `sonarqube-fix-all` expects an already-configured SonarQube MCP connection and also reads `SONAR_TOKEN`.
 
 All five ship an `agents/openai.yaml` for Codex; beyond that file, `library-first` is a single `SKILL.md` with no other supporting files.
 

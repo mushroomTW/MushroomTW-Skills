@@ -4,7 +4,7 @@
 
 > 本文件位於 `docs/`。skill 本體位於 [`local-sonarqube-setup/SKILL.md`](../local-sonarqube-setup/SKILL.md)。
 
-把任意程式碼專案接入**本機 Docker SonarQube**（預設 `http://127.0.0.1:9000`）：建立專案、產生報告、執行分析、驗證 Quality Gate。
+把支援的程式碼專案接入**本機 Docker SonarQube**（預設 `http://127.0.0.1:9000`）：建立專案、產生報告、執行分析、驗證 Quality Gate。
 
 這個 skill 只負責「接上去並跑起來」。要批次修掉 Sonar 回報的問題，請改用 [sonarqube-fix-all](sonarqube-fix-all.zh.md)。
 
@@ -17,7 +17,7 @@
 - 執行環境為 Windows 主機，命令以 PowerShell 執行
 - SonarQube 位址預設 `http://127.0.0.1:9000`，只有明確指定時才覆寫
 - 主機已安裝可直接執行的 `sonar-scanner`——**本 skill 不含 scanner 的安裝、下載或替換流程**
-- 認證由系統環境變數 `SONARQUBE_TOKEN` 提供
+- 認證由系統環境變數 `SONAR_TOKEN` 提供。目前 SonarScanner for .NET 不支援此路徑，因此 skill 會停止，不把 token 暴露於參數或檔案。
 - 語言、建置系統與 coverage 產生方式一律從 repository 實際內容探勘，不套用預設語言假設
 
 ## 硬性規則（節錄）

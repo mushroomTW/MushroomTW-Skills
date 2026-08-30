@@ -12,7 +12,7 @@
 | --- | --- | --- | --- |
 | `excellent-readme` | 依照 repository 的實際內容撰寫、改善、稽核或同步 `README.md`。無法追溯到檔案的敘述會被列為待補資訊，而不是寫成事實。 | [繁中](docs/excellent-readme.zh.md) ・ [EN](docs/excellent-readme.md) | `excellent-readme/` |
 | `library-first` | 在你動手寫重試、驗證、快取、認證或日期處理之前，先強制搜尋該語言自己的生態系，並要求把「用套件還是自己寫」的理由講出來。 | [繁中](docs/library-first.zh.md) ・ [EN](docs/library-first.md) | `library-first/` |
-| `local-sonarqube-setup` | 把專案指向本機 Docker SonarQube（`127.0.0.1:9000`），用專案原生工具產生 coverage、執行掃描並檢查 Quality Gate。token 讀自 `SONARQUBE_TOKEN`，不進入檔案、log 或任何回覆。 | [繁中](docs/local-sonarqube-setup.zh.md) ・ [EN](docs/local-sonarqube-setup.md) | `local-sonarqube-setup/` |
+| `local-sonarqube-setup` | 把專案指向本機 Docker SonarQube（`127.0.0.1:9000`），用專案原生工具產生 coverage、執行掃描並檢查 Quality Gate。token 讀自 `SONAR_TOKEN`，不進入檔案、參數、log 或任何回覆。 | [繁中](docs/local-sonarqube-setup.zh.md) ・ [EN](docs/local-sonarqube-setup.md) | `local-sonarqube-setup/` |
 | `repository-bug-audit` | 在把任何東西稱為缺陷之前，先讀過實作、它的呼叫端、設定與測試。交付一份 Markdown 報告搭配一份經機器檢查的佐證 JSON，Comprehensive 模式另有 0–100 風險分數。 | [繁中](docs/repository-bug-audit.zh.md) ・ [EN](docs/repository-bug-audit.md) | `repository-bug-audit/` |
 | `sonarqube-fix-all` | 分批處理 SonarQube 的發現，每批都先對建置驗證過才往下走。碰到 bytecode 操作、反射驅動與時序相依的程式碼會跳過並回報，而不是動手改寫。 | [繁中](docs/sonarqube-fix-all.zh.md) ・ [EN](docs/sonarqube-fix-all.md) | `sonarqube-fix-all/` |
 
@@ -49,7 +49,7 @@ cp -r <skill-name> <host-skills-directory>/<skill-name>
 npx skills use . --skill <skill-name>
 ```
 
-`local-sonarqube-setup` 另外要求主機已有可執行的 `sonar-scanner` 與 `SONARQUBE_TOKEN` 環境變數，它不負責安裝 scanner。`sonarqube-fix-all` 需要一個已設定好的 SonarQube MCP 連線，並讀取 `SONAR_TOKEN`。
+`local-sonarqube-setup` 另外要求主機已有相容 scanner 與 `SONAR_TOKEN` 環境變數，它不負責安裝 scanner。目前 SonarScanner for .NET 不支援此環境變數路徑，因此 skill 會停止，不把 token 暴露於參數或檔案。`sonarqube-fix-all` 需要已設定好的 SonarQube MCP 連線，同樣讀取 `SONAR_TOKEN`。
 
 五個都附了給 Codex 用的 `agents/openai.yaml`；除了這個檔案之外，`library-first` 只有單一個 `SKILL.md`，沒有其他輔助檔案。
 

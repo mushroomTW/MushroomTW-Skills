@@ -4,7 +4,7 @@
 
 > This document lives in `docs/`. The skill itself is at [`local-sonarqube-setup/SKILL.md`](../local-sonarqube-setup/SKILL.md).
 
-Connect any code project to a **local Docker SonarQube** instance (default `http://127.0.0.1:9000`): create the project, produce reports, run the analysis, and verify the Quality Gate.
+Connect a supported code project to a **local Docker SonarQube** instance (default `http://127.0.0.1:9000`): create the project, produce reports, run the analysis, and verify the Quality Gate.
 
 This skill only gets a project connected and analyzed. To batch-fix the issues SonarQube reports, use [sonarqube-fix-all](sonarqube-fix-all.md) instead.
 
@@ -17,7 +17,7 @@ When the user asks to set up, configure, run, or troubleshoot a local SonarQube 
 - The host is the current Windows machine; commands run in PowerShell
 - SonarQube defaults to `http://127.0.0.1:9000`, overridden only when explicitly specified
 - A directly runnable `sonar-scanner` is already installed — **this skill does not install, download, or replace the scanner**
-- Credentials come from the `SONARQUBE_TOKEN` system environment variable
+- Credentials come from the `SONAR_TOKEN` system environment variable. SonarScanner for .NET currently does not support this path, so the skill stops instead of exposing the token in arguments or files.
 - Language, build system, and coverage generation are always discovered from the repository's actual contents; no default language assumptions are applied
 
 ## Hard Rules (Excerpt)
