@@ -17,7 +17,7 @@ Capabilities are identical everywhere; this file maps them to hosts.
 
 - Ask **both** startup choices in one `AskUserQuestion`; skip what user already stated.
 - Execution is always Multi-agent partitioned (one subagent per partition); if subagents are unavailable, explain and 🛑 STOP — never fall back to single-agent.
-- Resolve validator relative to `references/` (e.g. `../scripts/validate_bug_audit.py`). On Windows use `/` and `py -3 -X utf8` if `python` missing. Requires `pip install jsonschema`.
+- Resolve validator relative to `references/` (e.g. `../scripts/validate_bug_audit.py`). On Windows use `/` and `py -3 -X utf8` if `python` is missing. It requires a preinstalled `jsonschema`; if absent, follow the SKILL failure matrix and do not install it during the audit.
 - Stay read-only: only `.docs/` pair; only run repo-configured checks. No tool install / repro probes.
 - Multi-agent: one subagent per partition (inventory, flows, candidates, limitations); cross-review High without revealing original verdict. Prefer LSP/graph over grep.
 

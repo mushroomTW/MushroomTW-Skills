@@ -13,7 +13,7 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 
 try:
-    import jsonschema  # pip install jsonschema
+    import jsonschema  # External prerequisite; the audit never installs dependencies.
     from jsonschema import ValidationError
 except ImportError as _e:  # pragma: no cover
     jsonschema = None  # type: ignore[assignment]
@@ -58,7 +58,7 @@ def validate_schema(
     """Validate via jsonschema (Draft 2020-12). Keeps legacy signature for tests."""
     del root_schema, path  # jsonschema handles $ref internally
     if jsonschema is None:
-        return ["jsonschema is not installed; run: pip install jsonschema"]
+        return ["jsonschema is not installed; validation is unavailable"]
     try:
         from jsonschema import Draft202012Validator
     except ImportError:

@@ -27,13 +27,19 @@ Execution mode is fixed: **Multi-agent partitioned** (one subagent per partition
 
 Rules: validator checks structure/policy, not truth — rule out alternatives by reading implementation, major callers/callees, config, and tests.
 
-## Failure handling — if-then
+## Failure handling
 
-- **If checks unavailable** → `status=unavailable` + disclose in `Limitations`; Comprehensive High requires one `passed`.
-- **If reading all files exceeds budget** → Switch to Multi-agent; if still infeasible, narrow to `core|high`, `provisional=true`, mark unread as `mapped`+`reason`.
-- **If Multi-agent unavailable** → Explain that Multi-agent is required and 🛑 STOP; never silently downgrade or run single-agent.
-- **If `.docs/` already exists** → Add same timestamp `YYYYMMDD-HHMMSS` to both; never overwrite.
-- **If no `core|high`** → Treat as mis-tiering, requires at least one; re-evaluate §5 else `provisional`.
+| Trigger | Recovery | Terminal condition |
+|---|---|---|
+| Configured check unavailable | Record `status=unavailable` and disclose the lost signal in `Limitations` | Continue; Comprehensive confidence cannot be High without one `passed` check |
+| One partition agent fails | Reassign that unchanged partition once to a fresh agent | If no replacement can run, Multi-agent is unavailable → 🛑 STOP before conclusions |
+| Multi-agent capability unavailable | Explain that partitioning and High cross-review cannot be performed | 🛑 STOP; never run or claim a single-agent audit |
+| Comprehensive cannot read every file within budget | Repartition once; if still infeasible, request confirmation to narrow to `core|high` | On approval, set `provisional=true` and mark every unread item `mapped` with a reason; on rejection, 🛑 STOP |
+| `.docs/` pair already exists | Add one shared `YYYYMMDD-HHMMSS` suffix to both new files | Continue without overwriting |
+| Inventory has no `core|high` | Re-evaluate tiers once from entry points, trust boundaries, state, and deployment paths | If still empty, 🛑 STOP as invalid inventory; never invent a tier or produce artifacts the validator must reject |
+| Validator exits 1 | Correct only the reported artifact violations, then rerun | Do not deliver until exit 0 |
+| Validator exits 2 | Correct a deterministic path, encoding, or I/O error and retry once | If unresolved, 🛑 STOP without artifact links |
+| `jsonschema` is unavailable | State that validation cannot run and name the missing prerequisite | 🛑 STOP without artifact links; never install it within the audit |
 
 ## Scope & inventory
 
@@ -71,11 +77,11 @@ If either exists, add shared timestamp `YYYYMMDD-HHMMSS` to both; never overwrit
 
 ## Validate and deliver
 
-🔴 **CHECKPOINT — Do not deliver before validation**: Prohibit returning links before exit 0; if narrowing scope or switching mode, obtain user confirmation and mark `provisional`.
+🔴 **CHECKPOINT — Do not deliver before validation**: Prohibit returning links before exit 0. Obtain confirmation before narrowing scope and mark `provisional`; never switch away from Multi-agent.
 
 ```text
 python -X utf8 <skill-directory>/scripts/validate_bug_audit.py --evidence <evidence.json> --report <report.md>
 # --repo-root <path> when artifacts are outside the audited tree
 ```
 
-Requires `jsonschema` (`pip install jsonschema`). Resolve `<skill-directory>` per [platform-adapters](references/platform-adapters.md); quote paths. Validator checks coverage recomputation, caps, ordering, and that every `inventory`/`location` path exists. Exit 0 = pass, 1 = content violation, 2 = I/O. 🛑 STOP: Do not deliver unvalidated artifacts; return clickable links + short summary, not pasted artifacts.
+Requires a preinstalled `jsonschema`. Resolve `<skill-directory>` per [platform-adapters](references/platform-adapters.md); quote paths. Validator checks coverage recomputation, caps, ordering, and that every `inventory`/`location` path exists. Exit 0 = pass, 1 = content violation, 2 = I/O. Follow the failure matrix for nonzero exits or a missing prerequisite. 🛑 STOP: Do not deliver unvalidated artifacts; after exit 0 return clickable links + a short summary, not pasted artifacts.
