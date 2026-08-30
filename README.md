@@ -2,7 +2,7 @@
 
 **English** | [繁體中文](README.zh.md)
 
-Five portable Agent Skills for README authoring, dependency decisions, repository auditing, and SonarQube quality workflows. They follow the open Agent Skills format and can be installed into Claude Code, Codex, Cursor, OpenCode, and other skills-compatible agents; workflows that need SonarQube or code-graph integrations still require those capabilities on the host.
+Five portable Agent Skills for README authoring, dependency decisions, repository auditing, and SonarQube quality workflows. They follow the open Agent Skills format and can be installed into Claude Code, Codex, Cursor, OpenCode, and other skills-compatible agents; workflows that need SonarQube still require that capability on the host.
 
 Each skill is a self-contained skill folder at the root; its documentation lives in `docs/`.
 
@@ -13,7 +13,7 @@ Each skill is a self-contained skill folder at the root; its documentation lives
 | `excellent-readme` | Writes, improves, audits, or re-syncs a `README.md` against what the repository actually contains. Claims it cannot trace to a file are reported as gaps rather than written as facts. | [EN](docs/excellent-readme.md) ・ [繁中](docs/excellent-readme.zh.md) | `excellent-readme/` |
 | `library-first` | Before you hand-roll retry, validation, caching, auth, or date handling, forces one search of that language's own ecosystem and a stated reason for the build-or-adopt decision. | [EN](docs/library-first.md) ・ [繁中](docs/library-first.zh.md) | `library-first/` |
 | `local-sonarqube-setup` | Points a project at a local Docker SonarQube (`127.0.0.1:9000`), generates coverage with the project's own tooling, scans, and checks the Quality Gate. Reads the token from `SONAR_TOKEN` and keeps it out of files, arguments, logs, and replies. | [EN](docs/local-sonarqube-setup.md) ・ [繁中](docs/local-sonarqube-setup.zh.md) | `local-sonarqube-setup/` |
-| `repository-bug-audit` | Reads the implementation, its callers, its config, and its tests before calling anything a bug. Delivers a Markdown report paired with a machine-checked evidence JSON, plus a 0–100 risk score in Comprehensive mode. | [EN](docs/repository-bug-audit.md) ・ [繁中](docs/repository-bug-audit.zh.md) | `repository-bug-audit/` |
+| `repository-bug-audit` | Reads the implementation, its callers, its config, and its tests before calling anything a bug. Delivers one machine-validated Markdown report, plus a 0–100 risk score in Comprehensive mode. | [EN](docs/repository-bug-audit.md) ・ [繁中](docs/repository-bug-audit.zh.md) | `repository-bug-audit/` |
 | `sonarqube-fix-all` | Works through SonarQube findings in batches, verifying each batch against the build before moving on. Skips and reports bytecode-manipulating, reflection-driven, and timing-dependent code instead of rewriting it. | [EN](docs/sonarqube-fix-all.md) ・ [繁中](docs/sonarqube-fix-all.zh.md) | `sonarqube-fix-all/` |
 
 `local-sonarqube-setup` and `sonarqube-fix-all` are meant to run in that order: the first connects a project and produces a first analysis, the second batch-fixes what it reports.
@@ -55,7 +55,7 @@ All five ship an `agents/openai.yaml` for Codex; beyond that file, `library-firs
 
 ## Repository layout
 
-```
+```txt
 MushroomTW-Skills/
 ├── README.md / README.zh.md      ← this overview (EN / 繁中)
 ├── LICENSE                       (MIT)

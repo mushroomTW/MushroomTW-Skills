@@ -49,7 +49,7 @@ Fetch all open issues with the largest practical page size, retaining only key, 
 
 Group by severity → rule → file. Process Blocker/Critical/High before Medium/Low; combine compatible same-file fixes and fetch each rule definition once per round.
 
-Use code-graph or symbol tools for definitions, callers, and impact. Read the affected symbol and required context; broaden only when needed.
+Read the affected symbol and the context a fix needs — its definition, its callers, and the blast radius; broaden only when needed.
 
 ## 5. Sensitive regions — do not rewrite
 

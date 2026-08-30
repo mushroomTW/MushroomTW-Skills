@@ -12,12 +12,11 @@
 
 ## 產出內容
 
-每次執行都會在被稽核的儲存庫中建立恰好兩個成對檔案：
+每次執行只會在被稽核的儲存庫中留下一個檔案：
 
-- 一份給人閱讀的**精簡 Markdown 報告**，以及
-- 一份**機器可讀的佐證 JSON**，保存完整稽核紀錄 —— 檔案清冊、已追蹤流程、實際執行的檢查、所有發現、限制，以及（Comprehensive 模式）各構面分數。
+- 一份給人閱讀的**精簡 Markdown 報告** —— 這是唯一交付的產出。
 
-報告是摘要，JSON 才是紀錄。Markdown 不會把 JSON 當附錄再抄一遍，兩者在交付前會互相交叉驗證。
+報告背後，技能仍會建立一份機器可讀的佐證紀錄（檔案清冊、已追蹤流程、實際執行的檢查、所有發現、限制，以及 Comprehensive 模式的各構面分數），驗證器在交付前用它反向核對報告。那份佐證檔是驗證的輸入而非產出：跑完即刪，Markdown 也不會把它當附錄再抄一遍。
 
 ## 稽核模式
 
@@ -71,14 +70,14 @@ Claude Apps：上傳本倉庫（或壓縮檔）作為 skill。Claude Apps 無子
 
 ## 產出檔案
 
-| 模式 | 報告 | 佐證 |
-| --- | --- | --- |
-| Rapid | `.docs/repository-bug-audit-rapid-report.md` | `.docs/repository-bug-audit-rapid-report.evidence.json` |
-| Comprehensive | `.docs/repository-bug-audit-report.md` | `.docs/repository-bug-audit-report.evidence.json` |
+| 模式 | 報告 |
+| --- | --- |
+| Rapid | `.docs/repository-bug-audit-rapid-report.md` |
+| Comprehensive | `.docs/repository-bug-audit-report.md` |
 
-兩份產出都會寫入被稽核儲存庫的 `.docs/` 目錄；若該目錄不存在則會建立。
+報告會寫入被稽核儲存庫的 `.docs/` 目錄；若該目錄不存在則會建立。佐證檔只在驗證器執行期間以 `<report-stem>.evidence.json` 的形式放在報告旁邊——驗證器要求這個檔名與 `.docs/` 上層目錄——跑完就移除。
 
-若預設路徑已存在，兩個檔名會加上**相同**的本地時間戳記，例如 `repository-bug-audit-report-20260806-153000.md` 與對應的 `.evidence.json`。既有檔案永遠不會被覆寫，因此重新稽核不會摧毀先前的紀錄。
+若預設路徑已存在，報告會加上本地時間戳記，例如 `repository-bug-audit-report-20260806-153000.md`。既有檔案永遠不會被覆寫，因此重新稽核不會摧毀先前的報告。
 
 兩種報告版型都固定四個章節。Rapid 為：執行摘要、審查覆蓋與缺陷面、優先發現、限制；Comprehensive 則把第二節換成「風險加權品質分數」。High 與 Medium 發現會有詳細區塊，Low 發現只留在表格中。詳見 [`audit-protocol.md`](../repository-bug-audit/references/audit-protocol.md)。
 
@@ -155,7 +154,7 @@ Claude Apps：上傳本倉庫（或壓縮檔）作為 skill。Claude Apps 無子
 
 ## 驗證
 
-隨附的驗證器會在交付前檢查這組成對產出。它讀寫檔案時都明確指定 UTF-8；`-X utf8` 只是讓主控台輸出中的非 ASCII 文字顯示正常。
+隨附的驗證器會在交付前拿佐證紀錄反向核對報告。它讀寫檔案時都明確指定 UTF-8；`-X utf8` 只是讓主控台輸出中的非 ASCII 文字顯示正常。
 
 ```bash
 python -X utf8 scripts/validate_bug_audit.py --evidence <evidence.json> --report <report.md>
@@ -163,7 +162,7 @@ python -X utf8 scripts/validate_bug_audit.py --evidence <evidence.json> --report
 
 | 結束代碼 | 意義 |
 | ---: | --- |
-| `0` | 這組產出通過所有結構與政策檢查 |
+| `0` | 報告與佐證通過所有結構與政策檢查 |
 | `1` | 存在內容違規，必須修正 |
 | `2` | 引數或檔案無法讀取 |
 

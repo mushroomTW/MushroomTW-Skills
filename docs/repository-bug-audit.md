@@ -12,12 +12,11 @@ Ships as a plain skill folder for any skills-compatible host (Claude Code, Codex
 
 ## What It Produces
 
-Every run creates exactly two paired files in the audited repository:
+Every run leaves exactly one file in the audited repository:
 
-- a concise **Markdown report** for humans, and
-- a **machine-readable evidence JSON** file holding the full audit record — inventory, traced flows, executed checks, findings, limitations, and (in Comprehensive mode) dimension scores.
+- a concise **Markdown report** for humans — the only delivered artifact.
 
-The report is the summary; the JSON is the record. The Markdown never duplicates the JSON as an appendix, and the two are cross-validated against each other before delivery.
+Behind it, the skill builds a machine-readable evidence record — inventory, traced flows, executed checks, findings, limitations, and (in Comprehensive mode) dimension scores — and the validator cross-checks the report against it before delivery. That evidence file is a validation input, not an output: it is deleted when the run ends, and the Markdown never carries it as an appendix.
 
 ## Audit Modes
 
@@ -71,14 +70,14 @@ From there it maps the repository, traces core and high-risk flows, runs only ch
 
 ## Output Artifacts
 
-| Mode | Report | Evidence |
-| --- | --- | --- |
-| Rapid | `.docs/repository-bug-audit-rapid-report.md` | `.docs/repository-bug-audit-rapid-report.evidence.json` |
-| Comprehensive | `.docs/repository-bug-audit-report.md` | `.docs/repository-bug-audit-report.evidence.json` |
+| Mode | Report |
+| --- | --- |
+| Rapid | `.docs/repository-bug-audit-rapid-report.md` |
+| Comprehensive | `.docs/repository-bug-audit-report.md` |
 
-Both artifacts are written to the audited repository's `.docs/` directory, which is created when it does not exist.
+The report is written to the audited repository's `.docs/` directory, which is created when it does not exist. The evidence file lives beside it as `<report-stem>.evidence.json` only while the validator runs — that name and a `.docs/` parent are what the validator requires — and is removed once the run ends.
 
-If either default path already exists, both basenames get the same local timestamp — for example `repository-bug-audit-report-20260806-153000.md` and its matching `.evidence.json`. Existing files are never overwritten, so a re-audit cannot destroy the previous record.
+If the default path already exists, the report gets a local timestamp — for example `repository-bug-audit-report-20260806-153000.md`. Existing files are never overwritten, so a re-audit cannot destroy the previous report.
 
 Both report layouts use exactly four sections. Rapid uses Executive Summary, Review Coverage and Bug Surfaces, Prioritized Findings, and Limitations; Comprehensive replaces the second with Risk-Weighted Quality Scores. High and Medium findings get detail blocks; Low findings stay in the table. See [`audit-protocol.md`](../repository-bug-audit/references/audit-protocol.md).
 
@@ -153,7 +152,7 @@ Full rubric: [`audit-protocol.md`](../repository-bug-audit/references/audit-prot
 
 ## Validation
 
-The bundled validator checks the artifact pair before delivery. It reads and writes UTF-8 explicitly; `-X utf8` simply keeps non-ASCII text in its console output readable.
+The bundled validator checks the report against the evidence record before delivery. It reads and writes UTF-8 explicitly; `-X utf8` simply keeps non-ASCII text in its console output readable.
 
 ```bash
 python -X utf8 scripts/validate_bug_audit.py --evidence <evidence.json> --report <report.md>
@@ -161,7 +160,7 @@ python -X utf8 scripts/validate_bug_audit.py --evidence <evidence.json> --report
 
 | Exit code | Meaning |
 | ---: | --- |
-| `0` | The pair satisfies all structural and policy checks |
+| `0` | The report and evidence satisfy all structural and policy checks |
 | `1` | Content violations must be corrected |
 | `2` | Arguments or files could not be read |
 
