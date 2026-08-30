@@ -1,6 +1,6 @@
 ---
 name: library-first
-description: Use before hand-rolling a general mechanism such as retry, backoff, validation, date/time handling, state management, authentication/authorization, caching, serialization, CLI argument parsing, or cryptographic hashing, to evaluate existing library solutions before deciding to write it yourself. Triggers on hand-roll retry, custom validation, date handling, state management, auth, caching, serialization, CLI parsing, hashing, or any general mechanism someone else has already solved. Does not apply to domain-specific business logic.
+description: Use before hand-rolling a general mechanism such as retry, backoff, validation, date/time handling, state management, authentication/authorization, caching, serialization, CLI argument parsing, or cryptographic hashing, to evaluate existing library solutions before deciding to write it yourself. Does not apply to domain-specific business logic.
 ---
 
 # Library-First
@@ -56,10 +56,7 @@ Decision: deferred because gate #<n> depends on <缺少的專案事實>; immedia
 
 ## 四種應手寫
 
-- **領域邏輯** — 折扣、保費、遊戲規則。
-- **效能關鍵** — 有實測數據證明抽象開銷不可接受。
-- **安全敏感** — 需完全可審計。
-- **已評估不足** — *evaluated* 非假設。
+領域邏輯（折扣、保費、遊戲規則）、效能關鍵（有實測數據）、安全敏感（需完全可審計）、已評估不足（*evaluated* 非假設）。
 
 ## 不要手寫這些
 
@@ -90,12 +87,8 @@ Decision: deferred because gate #<n> depends on <缺少的專案事實>; immedia
 ## Never Do
 
 1. 用變數名檢索 — 搜 `callApiAgain` 找不到 `exponential backoff`。
-2. 靜默決策 — 無 `Decision: ... because ...` 視為未完成。
-3. 猜測 — 「應該/大概」改為查 commit/License/體積。
-4. 因有名就採用 — 未過 gate 高星也不用。
-5. 為三行 helper 引套件。
-6. 用軟化措辭 — 禁「可以考慮/視情況/靈活把握」，必須 pass/fail。
-7. 用「如果條件成立就採用」冒充決策 — 資訊不足時輸出 `deferred`，目前動作固定為 `do not implement`。
+2. 因有名就採用 — 未過 gate 高星也不用。
+3. 為三行 helper 引套件。
 
 ## Examples
 
@@ -103,9 +96,7 @@ Decision: deferred because gate #<n> depends on <缺少的專案事實>; immedia
 |---|---|---|---|---|
 | 指數退避重試 (Node) | `exponential backoff retry` | `cockatiel`/`p-retry` + 標準庫 | `cockatiel` 1-5 pass | `Decision: used cockatiel@<ver> because gate 1-5 pass, API不侵入且依賴輕` |
 | 訂單滿千折百 | `order discount rule (domain)` | 不適用（業務規則） | 不需搜尋 | `Decision: wrote manually because domain-specific business logic` |
-| Schema 驗證 | `schema validation` | `Zod` vs 手寫 regex | Zod 1-5 pass | `Decision: used zod@<ver> because gate 1-5 pass, License MIT、體積可接受、API可組合` |
 
 ## References
 
-- 來源：`npm` / `PyPI` / `NuGet` / `pkg.go.dev` / `crates.io` + 標準庫
 - 代理：`agents/openai.yaml`（與 SKILL.md 同目錄）

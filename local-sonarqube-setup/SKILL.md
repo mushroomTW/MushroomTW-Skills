@@ -17,13 +17,6 @@ shallow clone? → git fetch --unshallow before scan
 Java <21 and auto-provisioning OFF? → upgrade or enable auto
 ```
 
-Canonical behavior: https://docs.sonarsource.com/sonarqube-community-build/analyzing-source-code
-
-## Assumptions
-
-- Windows PowerShell; SonarQube `127.0.0.1:9000` default; host has `sonar-scanner` (JVM→plugin), no install.
-- `SONAR_TOKEN` env only; .NET scanner cannot consume it, so stop instead of exposing a token in args/files. Infer language/build/coverage; require a full clone (`is-shallow`→`fetch --unshallow`) and Java 21+ (11+ if auto-provisioning).
-
 ## Invariants
 
 1. Token only in process memory — never in args/URL/log/file; describe only as set/not set; if leaked → tell user to revoke; read once and do all steps in same process, no `setx`, clear only after verify.
@@ -68,11 +61,7 @@ Execution is one process; PowerShell dot values need quotes.
 | Never | Tell | Instead |
 |---|---|---|
 | Token in CLI/URL/log/file | Args contain token | Inherit `SONAR_TOKEN` unchanged; Docker uses `--env SONAR_TOKEN` with no `=value` |
-| CLI for Maven/Gradle/.NET | `pom.xml` exists + `sonar-scanner` | `mvn sonar:sonar` / `gradle sonar` / `dotnet sonarscanner` |
 | Guess coverage key | Not in `coverage.md` | Lookup exact `sonar.*` |
-| Exclude `src/**` / `tests/**` | Exclusion over-broad | Only confirmed artifacts |
-| Fake Gate | Gate `ERROR`→server edit | List conditions, fix source |
-| Overwrite properties | Diff removes keys | Minimal merge + checkpoint |
 | Treat `NONE` as error | No prior analysis | Confirm CE `SUCCESS`, re-query |
 
 ## References

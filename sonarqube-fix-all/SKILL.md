@@ -41,7 +41,7 @@ For monorepos, resolve per module and do not mix modules in a batch.
 
 ## 3. Resolve the environment
 
-Resolve workspace root, MCP connection, server URL, and project key from the conversation and repository configuration. Ask only when deterministic discovery fails; never guess a project key.
+Resolve workspace root, MCP connection, server URL, and project key from the conversation and repository configuration; never guess a project key.
 
 ## 4. Fetch and triage
 
@@ -101,18 +101,11 @@ Checkpoint-commit each passing batch; never commit red verification.
 
 After all batches, run the full build and test suite once, then the toolchain-appropriate SonarScanner.
 
-Use `SONAR_TOKEN` only from the system environment. Pass it by reference so its value never appears in commands or output:
-
-| Shell | Reference |
-|---|---|
-| PowerShell | `-Dsonar.token=$env:SONAR_TOKEN` |
-| POSIX shell | `-Dsonar.token=$SONAR_TOKEN` |
-
-If the scanner reads `SONAR_TOKEN` itself, pass no token argument.
+Use `SONAR_TOKEN` only from the system environment, passed by reference (`-Dsonar.token=$env:SONAR_TOKEN` in PowerShell, `-Dsonar.token=$SONAR_TOKEN` in a POSIX shell) so its value never appears in commands or output. If the scanner reads `SONAR_TOKEN` itself, pass no token argument.
 
 If unset/empty, skip rescanning but continue source fixes from the MCP report. State that confirmation awaits external analysis; do not request or search elsewhere for a token.
 
-If the scanner exits non-zero, report the failing line and keep locally verified results. Never retry rejected authentication or ask for credentials.
+If the scanner exits non-zero, report the failing line and keep locally verified results; never retry rejected authentication.
 
 After a successful scan, poll every 15 seconds for at most 5 minutes. On timeout, report submitted-but-unconfirmed and retain local *source-fixed* results. On success, compare unresolved/new issues by **issue-key set difference**, never total count.
 

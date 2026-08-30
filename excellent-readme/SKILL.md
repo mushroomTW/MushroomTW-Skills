@@ -68,13 +68,7 @@ Completion criterion: the section list is written down before drafting, and ever
 
 ### 4. Draft the README
 
-Follow the cognitive funnel and section rules in [readme-framework](references/readme-framework.md):
-
-1. Identify — title, concrete purpose, target reader, use case.
-2. Evaluate — smallest complete example, capabilities, compatibility, limitations, license status.
-3. Try — prerequisites, installation, configuration, startup, real result.
-4. Integrate — important API/CLI details and only actionable architecture or structure.
-5. Participate — confirmed security, contribution, roadmap, license, and credits.
+Follow the cognitive funnel, section rules, and anti-patterns in [readme-framework](references/readme-framework.md), and calibrate tone, density, and section rhythm against [exemplars](references/exemplars.md).
 
 Keep the first screen independently useful. Put a real example before abstract internals; link deeper material instead of copying it. Never imply `.env`, configuration, or deployment behavior that code does not implement. Use GFM, sparse admonitions for must-not-miss facts, sparse emoji, and shallow lists. A badge, logo, demo, or screenshot must answer a reader question and cannot carry the only copy of a fact; use repository assets only and follow the framework's badge rules.
 
@@ -96,12 +90,7 @@ Completion criterion: every retained command and link passes a traceability chec
 
 ### 6. Perform a final reader review
 
-Read once from the reader's perspective and apply [quality-checklist](references/quality-checklist.md), then confirm:
-
-- first screen identifies purpose and reader;
-- installation and smallest example are easy to find and precede internals;
-- prerequisites, limitations, security, compatibility, and license status appear before adoption;
-- no repetition, manual-sized detail, or certainty without evidence.
+Read once from the reader's perspective and apply [quality-checklist](references/quality-checklist.md).
 
 For an audit or a delivery, write the report in this shape:
 
@@ -146,16 +135,7 @@ Checks fail routinely. Apply the first-line fix, then the fallback; never stall 
 
 Reject a draft that does any of these:
 
-- markets with generic adjectives (`fast`, `powerful`, `modern`) instead of an observable capability and limit;
 - presents planned work as shipped behavior;
-- invents expected output instead of using real output or clearly labeled illustration;
 - deletes existing content it did not understand instead of preserving and reporting it;
-- borrows commands or sections unsupported by this repository;
-- duplicates dates, “latest”, or pinned versions that already live in a source of truth;
 - trusts an inherited claim without re-verifying it, especially a license claim without a LICENSE file.
 
-## References
-
-- Read [references/readme-framework.md](references/readme-framework.md) when choosing sections, applying the cognitive funnel, or planning the reader journey.
-- Read [references/quality-checklist.md](references/quality-checklist.md) for a full audit or delivery review.
-- Read [references/exemplars.md](references/exemplars.md) when calibrating tone, density, and section rhythm against real, well-regarded READMEs.
