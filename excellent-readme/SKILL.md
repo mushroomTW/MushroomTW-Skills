@@ -5,42 +5,42 @@ description: Create, improve, audit, or synchronize a software project's README.
 
 # Excellent README
 
-A README is a project's entry point, not its complete manual. Help the right reader quickly answer: “What is this, is it relevant to me, how do I start, and what should I know before adopting it?” The reader should be able to reach a first successful result without reading the source code. Order information by how quickly it lets the wrong reader bail out: a reader who discovers early that the project does not fit their needs has been served, not lost.
+A README is an entry point, not a complete manual. Help the reader decide “Is this for me?” and reach a first success without reading source code. Put disqualifying prerequisites and limitations early; helping a non-fit reader leave quickly is success.
 
 ## Work modes
 
 First identify the requested outcome:
 
 - **Create**: no README exists; build a first draft from repository facts.
-- **Improve**: preserve correct content while fixing structure, clarity, gaps, and stale information. Prefer in-place edits; replacing an existing README wholesale discards content. 🔴 **STOP** before a full rewrite: list what the current README uniquely holds, then wait for the user's explicit go-ahead. No confirmation means keep editing in place.
+- **Improve**: preserve correct content while fixing structure, clarity, gaps, and drift. Prefer in-place edits. 🔴 **STOP** before a full rewrite: inventory the current README's unique content and wait for explicit approval; without it, edit in place.
 - **Audit**: do not edit first; report evidence, problems, risks, and priority-ordered recommendations.
-- **Synchronize**: update README content affected by code or configuration changes. An outdated README misleads more actively than a missing one, so treat drift as damage rather than cosmetics.
+- **Synchronize**: update README facts affected by code or configuration changes; treat drift as functional damage.
 
 If the user does not specify a mode, default to “improve and verify.” Unless explicitly requested, do not turn the README into a complete documentation website.
 
-When the repository keeps translated variants of the README (`README_ZH.md`, `README.fr.md`, files under `docs/` or `translations/`), treat them as one document in several languages: apply content changes to every variant you can write well, and report any variant left out of sync instead of letting it drift silently. Name a new translation with a BCP 47 language tag (`README.zh-TW.md`, `README.de.md`) and keep `README.md` for English when several languages coexist; when the repository already uses another naming scheme, follow it.
+Treat translated variants as one document: update every variant you can write accurately and report any divergence. For new variants use BCP 47 names (`README.zh-TW.md`) with English in `README.md`; preserve an established repository naming scheme.
 
 ## Invariants
 
 1. **Evidence first**: gather facts from the repository before writing. Never invent features, commands, versions, environment variables, deployment methods, performance numbers, badges, screenshots, or license details.
 2. **Reader-led**: order information around the reader's decisions, not the author's implementation order. The top of the README must independently explain the project's purpose and smallest useful path.
 3. **Cognitive funnel**: move from broad to specific: one-line purpose → minimal runnable example → installation → configuration and limitations → API or architecture details → contribution, license, and acknowledgements.
-4. **Runnable**: README installation, startup, test, and usage examples must correspond to files, scripts, CLI help, or tests that exist in the repository. Run every example that needs no network, credentials, paid services, or data changes; for the rest, 🔴 **STOP** and obtain authorization first, or report the check as unrun. Installing dependencies counts as a network action. When no one is available to grant authorization, treat it as not granted — report the check as unrun rather than running it anyway.
+4. **Runnable**: commands must trace to repository files, scripts, CLI help, or tests. Run examples that need no network, credentials, paid services, dependency installation, or data changes. Otherwise 🔴 **STOP** for authorization; absent approval means `unrun`, never passed.
 5. **Single source of truth**: do not copy information that readers can directly inspect in the environment and that is likely to drift. Use the README for background, rationale, limitations, and workflows that the files do not reveal.
 6. **Right-sized**: the 15 sections from the reference article are candidates, not mandatory headings. Keep small projects short; add architecture, project structure, security, API, contribution, and roadmap sections only when they help.
-7. **Honest gaps**: information only the user can decide — license choice, contribution channels, contact points, roadmap — is asked, not written around. 🔴 **STOP** and ask rather than choosing one of these on the user's behalf. When nobody can answer, omit the section and list the open question in the delivery report; the README never ships `TODO:` placeholders. When an absence itself affects adoption (no license file, no support channel), state the absence as a plain fact in the appropriate section — a fact, not a placeholder. Never fill missing facts with plausible guesses, and never write a sentence just so a candidate section can exist — omitting a section is always better than inventing its content.
+7. **Honest gaps**: 🔴 **STOP** and ask before choosing a license, contribution channel, contact, or roadmap. If nobody can answer, omit the section and report the question; never ship `TODO:`. State adoption-relevant absences (for example, no LICENSE) as facts, not placeholders. Omit rather than invent.
 
 ## Workflow
 
 ### 1. Establish the goal and audience
 
-Identify the README language, audience, purpose, and output path. At minimum, identify whether the primary reader is an end user, package integrator, CLI user, deployer, contributor, or maintainer. The audience decision gates everything downstream — the section set, how much implementation depth is allowed, and the tone — so when repository evidence leaves it genuinely ambiguous and the user can answer, 🔴 **STOP** and ask them, offering the plausible reader types, instead of guessing. Only when nobody can answer, make the smallest reasonable assumption from the repository and state it in the delivery report. Do not ask when the evidence already settles it: a published library implies integrators, a CLI manifest implies CLI users.
+Identify language, audience, purpose, and output path. Audience gates section choice, depth, and tone. If evidence is ambiguous and the user can answer, 🔴 **STOP** and offer plausible reader types. If nobody can answer, make the smallest evidence-based assumption and disclose it. Do not ask when evidence settles it: a published library implies integrators; a CLI manifest implies CLI users.
 
 Completion criterion: state in one sentence who the README helps and what decision or task it supports — confirmed by the user when the choice was ambiguous.
 
 ### 2. Build an evidence inventory
 
-Inspect the repository directly:
+Inspect directly:
 
 - `package.json`, `pyproject.toml`, `Cargo.toml`, `*.csproj`, `go.mod`, and other manifests
 - `Makefile`, Taskfile, CI workflows, Dockerfiles, compose files, and deployment configuration
@@ -48,13 +48,13 @@ Inspect the repository directly:
 - `LICENSE`, `CONTRIBUTING`, `SECURITY`, `docs/`, images, and demo assets
 - the existing README and recent changes, to identify likely drift
 
-Classify each candidate fact as **verified**, **plausible but unverified**, or **missing**. Do not write the latter two as unqualified facts.
+Classify facts as **verified**, **plausible but unverified**, or **missing**; only verified facts may be unqualified.
 
 Completion criterion: every command, path, environment variable, feature, and link retained in the README has a traceable source.
 
 ### 3. Choose the README shape
 
-Adapt the structure to the project type:
+Choose sections from evidence, using these project-type emphases:
 
 - **CLI / application**: quick start, usage examples, configuration, output, limitations, deployment.
 - **Library / SDK**: one-line purpose, minimal API example, installation, API, compatibility, license.
@@ -62,44 +62,32 @@ Adapt the structure to the project type:
 - **Frontend / full-stack product**: demo or screenshots, features, stack, architecture, local development, deployment.
 - **Tool / research project**: problem context, method, reproduction steps, inputs and outputs, limitations, citations.
 
-Do not add empty sections just to fill a template. Omit sections without useful evidence and report the gap in the delivery report.
+Never add empty template sections. Omit unsupported sections and report consequential gaps.
 
 Completion criterion: the section list is written down before drafting, and every section on it names the evidence that justifies its presence.
 
 ### 4. Draft the README
 
-Usually use this order, adapting it to the project:
+Follow the cognitive funnel and section rules in [readme-framework](references/readme-framework.md):
 
-1. Title and one-line description; add a badge, demo, or screenshot only when it answers a question the reader would otherwise open another file to answer. Follow the badge rules in `references/readme-framework.md`. If the repository already contains a logo or icon asset, use it in the header; do not source or generate one.
-2. Table of contents; include it only when the README is long enough to benefit from navigation.
-3. About, context, and use cases: explain the problem, scope, and non-goals.
-4. Minimal runnable example: show real input, output, or screen state.
-5. Installation and Getting Started: provide the complete path from clone or installation to the first successful run.
-6. Features: describe user-visible capabilities without unnecessary implementation detail.
-7. Tech Stack, Architecture, and Project Structure: include them when they help understanding, integration, or contribution. Keep implementation internals — wire protocols, internal data structures, module walkthroughs — out of a README whose reader is an end user; keep an internal fact only when it carries a consequence the reader acts on (a port to change in two places, a file that must not be committed), phrased as that consequence, and link to code or separate docs for the rest.
-8. Configuration: document required settings, defaults, formats, and handling of sensitive information. Describe how settings are actually loaded — never imply a `.env` file or an environment variable takes effect when no code reads it.
-9. API or CLI Reference: document important parameters, types, optionality, defaults, return values, and examples.
-10. Security, limitations, compatibility, and common issues: disclose adoption risks early.
-11. Contribution, roadmap, license, acknowledgements, and author: include only confirmed, useful information.
+1. Identify — title, concrete purpose, target reader, use case.
+2. Evaluate — smallest complete example, capabilities, compatibility, limitations, license status.
+3. Try — prerequisites, installation, configuration, startup, real result.
+4. Integrate — important API/CLI details and only actionable architecture or structure.
+5. Participate — confirmed security, contribution, roadmap, license, and credits.
 
-Apply these formatting rules while drafting:
-
-- Write GitHub Flavored Markdown. Use [GitHub admonitions](https://github.com/orgs/community/discussions/16925) — `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]` — to lift prerequisites, breaking changes, security warnings, and known limitations out of the surrounding prose. Reserve them for facts a reader must not miss; a page full of them stops working.
-- Keep emoji sparse. At most use them as stable section markers, never inside body prose, and never as the only carrier of meaning.
-- Prefer a short paragraph or a table over a deeply nested list.
-
-Link unfamiliar terms, important background, and external projects to reliable sources. Never make an important fact available only through an image or badge.
+Keep the first screen independently useful. Put a real example before abstract internals; link deeper material instead of copying it. Never imply `.env`, configuration, or deployment behavior that code does not implement. Use GFM, sparse admonitions for must-not-miss facts, sparse emoji, and shallow lists. A badge, logo, demo, or screenshot must answer a reader question and cannot carry the only copy of a fact; use repository assets only and follow the framework's badge rules.
 
 Completion criterion: a reader can understand the project's purpose and complete the smallest useful path without reading the source code.
 
 ### 5. Verify content and examples
 
-Run checks proportional to the task and available authorization:
+Run proportional checks:
 
 - Check Markdown headings, table-of-contents anchors, external links, and local links.
 - Confirm that local images, GIFs, videos, and example files exist.
 - Compare commands against manifests, Makefiles, or `--help`; do not merely check that the text appears somewhere.
-- Run the minimal installation, startup, and usage examples. 🔴 **STOP** at any of them that needs a network, credentials, a paid service, or a data change: invariant 4 governs that case and it applies at every step, not only this one. A command you were not authorized to run is an unrun check, not a verified one — name it in the delivery report rather than letting it pass as confirmed.
+- Run minimal installation, startup, and usage examples subject to invariant 4. Unauthorized commands are `unrun`, never verified.
 - Re-evaluate the section set against the current repository; do not add filler merely to satisfy a checklist.
 
 Run the checker that ships with this skill before delivering any create, improve, or synchronize result. It lives at `scripts/validate_readme.py` in the same directory as this SKILL.md file, so resolve the path from wherever you read this file: `python <that directory>/scripts/validate_readme.py <readme-path> --project <repository-root>`. It ignores code blocks, and its warnings are heuristic leads: read each flagged line and judge it before editing. If a check cannot run, do not stall — follow the matching row in [Failure recovery](#failure-recovery) and continue.
@@ -108,14 +96,12 @@ Completion criterion: every retained command and link passes a traceability chec
 
 ### 6. Perform a final reader review
 
-Read the result once from the reader's perspective, then check the draft against [Never do these](#never-do-these):
+Read once from the reader's perspective and apply [quality-checklist](references/quality-checklist.md), then confirm:
 
-- Does the first screen clearly explain what the project is and who it is for?
-- Can a reader quickly find installation and the smallest example?
-- Does the example appear before abstract implementation detail?
-- Are limitations, prerequisites, security notes, and license information disclosed early enough?
-- Is the README too long, repetitive, or trying to become a complete manual?
-- Does any sentence sound certain despite having no repository evidence?
+- first screen identifies purpose and reader;
+- installation and smallest example are easy to find and precede internals;
+- prerequisites, limitations, security, compatibility, and license status appear before adoption;
+- no repetition, manual-sized detail, or certainty without evidence.
 
 For an audit or a delivery, write the report in this shape:
 
@@ -145,7 +131,7 @@ Completion criterion: the report exists in the shape above, and every line in it
 
 ## Failure recovery
 
-Checks fail routinely; none of these failures is a reason to stall or to ship a guess. Read the trigger, apply the first-line fix, and if that also fails, take the fallback and keep going.
+Checks fail routinely. Apply the first-line fix, then the fallback; never stall or replace evidence with a guess.
 
 | Trigger | First-line fix | Fallback if that also fails |
 |---|---|---|
@@ -158,17 +144,15 @@ Checks fail routinely; none of these failures is a reason to stall or to ship a 
 
 ## Never do these
 
-These are the failure patterns a README writer falls into by habit, not by ignoring the rules above. Each one produces text that looks finished and reads as confident, which is exactly why it survives review. Step 6 checks the draft against this list.
+Reject a draft that does any of these:
 
-| Never do this | How to catch yourself | Do this instead |
-|---|---|---|
-| Describe a capability with an adjective | The sentence survives if you paste it into an unrelated project's README — "fast", "powerful", "seamless", "modern", "robust" | Name the capability and its observable consequence: what it does, to what, with what limit |
-| Write a planned feature in the present tense | The claim traces to a roadmap entry, an open issue, a TODO comment, or a branch — not to shipped code | Describe only what the current default branch does; put the rest under a roadmap heading marked as planned, or leave it out |
-| Fabricate an "expected output" block | You wrote the output block without having run the command | Paste real output, or label the block as illustrative and say so in the surrounding sentence |
-| Drop content you did not understand while improving | A section present before your edit is absent after it, and you cannot say what replaced it | Keep it and flag it for the user in the delivery report; unexplained content is a question, not garbage |
-| Borrow a command, section, or structure from another project | The command references a file, script, or tool that this repository does not contain | Re-derive every command from this repository's own manifests, scripts, and CLI help |
-| Write prose that starts aging on delivery | The sentence contains a date, a release year, "currently", "recently", "the latest", or a pinned version that also lives in a manifest | State the durable fact, or point at the file that carries the version so the two cannot disagree |
-| Keep a claim because the previous README already made it | The fact reached your draft without ever entering the evidence inventory — you carried it forward, you never checked it | Re-verify an inherited claim exactly like a new one. A license named with no `LICENSE` file in the repository is the most common case |
+- markets with generic adjectives (`fast`, `powerful`, `modern`) instead of an observable capability and limit;
+- presents planned work as shipped behavior;
+- invents expected output instead of using real output or clearly labeled illustration;
+- deletes existing content it did not understand instead of preserving and reporting it;
+- borrows commands or sections unsupported by this repository;
+- duplicates dates, “latest”, or pinned versions that already live in a source of truth;
+- trusts an inherited claim without re-verifying it, especially a license claim without a LICENSE file.
 
 ## References
 
