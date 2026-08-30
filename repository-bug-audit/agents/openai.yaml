@@ -1,4 +1,4 @@
 interface:
   display_name: "Repository Bug Audit"
   short_description: "Find repository bugs and score engineering risk"
-  default_prompt: "Use $repository-bug-audit to inspect this whole repository for bugs, ask me to choose Rapid or Comprehensive, run with Multi-agent partitioned execution, then produce a validated report and evidence JSON."
+  default_prompt: "Use $repository-bug-audit to inspect this whole repository for bugs, ask me to choose Rapid or Comprehensive, run with Multi-agent partitioned execution, then produce a validated report."
