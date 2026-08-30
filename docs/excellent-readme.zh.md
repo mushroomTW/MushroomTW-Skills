@@ -95,29 +95,16 @@ excellent-readme/
 
 ## 安裝
 
-本目錄即 skill 本體，複製到 host 的 skills 目錄：
+請在倉庫根目錄讓 `skills` CLI 自動偵測相容 agent，並安裝此 skill：
 
-| 平台 | 個人層級 | 專案層級 |
-| --- | --- | --- |
-| Claude Code | `~/.claude/skills/` | `<repo>/.claude/skills/` |
-| Codex | `~/.codex/skills/` | — |
-
-```powershell
-$dest = "$HOME/.claude/skills/excellent-readme"
-Remove-Item -Recurse -Force $dest -ErrorAction SilentlyContinue
-Copy-Item -Recurse excellent-readme $dest
+```bash
+npx skills add . --skill excellent-readme
 ```
 
-```powershell
-$dest = "$HOME/.codex/skills/excellent-readme"
-Remove-Item -Recurse -Force $dest -ErrorAction SilentlyContinue
-Copy-Item -Recurse excellent-readme $dest
-```
-
-先 `Remove-Item` 是為了讓重新安裝也能使用同一組命令；若不先刪除，`Copy-Item` 會把新版本嵌到現有 skill 目錄裡面。若只想安裝在單一 repository 而非整個帳號，請改用該 repository 的 `.claude/skills/`（Claude Code）作為目的地。
+若要安裝到個人層級，請加上 `--global`；未加時為專案層級。若採手動安裝，請把 `excellent-readme/` 複製到 host 文件指定的 skills 目錄，不要假設特定 runtime 路徑。
 
 > [!NOTE]
-> 兩個產品在 session 啟動時讀取 skill 目錄，複製後請開啟新的 session。
+> 第一次執行 `npx` 可能會下載 CLI。若 host 只在 session 啟動時偵測 skill，安裝後請重新載入或重啟。
 
 ## 開發與貢獻
 

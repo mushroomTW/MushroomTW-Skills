@@ -60,16 +60,13 @@ The canonical case is cognitive complexity on a single linear narrative — an i
 
 ## Install
 
-This directory is the skill itself. Copy it into the host's skills directory:
-
-| Host | Personal scope | Project scope |
-| --- | --- | --- |
-| Claude Code | `~/.claude/skills/` | `<repo>/.claude/skills/` |
-| Codex | `~/.codex/skills/` | — |
+From the repository root, let the `skills` CLI discover supported agents and install this skill:
 
 ```bash
-cp -r sonarqube-fix-all ~/.claude/skills/sonarqube-fix-all
+npx skills add . --skill sonarqube-fix-all
 ```
 
+Add `--global` for personal scope; without it, the CLI installs at project scope. For a manual installation, copy `sonarqube-fix-all/` to a skills directory documented by the host instead of assuming a runtime-specific path.
+
 > [!NOTE]
-> Both hosts read their skills directories when a session starts, so start a new session after copying. Requires an already-configured SonarQube MCP connection.
+> The first `npx` invocation may download the CLI. Reload or restart the host when it only discovers skills at session start. This skill requires an already-configured SonarQube MCP connection.

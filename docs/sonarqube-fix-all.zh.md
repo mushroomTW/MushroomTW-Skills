@@ -60,16 +60,13 @@
 
 ## 安裝
 
-本目錄即 skill 本體，複製到 host 的 skills 目錄：
-
-| 平台 | 個人層級 | 專案層級 |
-| --- | --- | --- |
-| Claude Code | `~/.claude/skills/` | `<repo>/.claude/skills/` |
-| Codex | `~/.codex/skills/` | — |
+請在倉庫根目錄讓 `skills` CLI 自動偵測相容 agent，並安裝此 skill：
 
 ```bash
-cp -r sonarqube-fix-all ~/.claude/skills/sonarqube-fix-all
+npx skills add . --skill sonarqube-fix-all
 ```
 
+若要安裝到個人層級，請加上 `--global`；未加時為專案層級。若採手動安裝，請把 `sonarqube-fix-all/` 複製到 host 文件指定的 skills 目錄，不要假設特定 runtime 路徑。
+
 > [!NOTE]
-> 兩個 host 都在 session 啟動時讀取 skills 目錄，複製後請開啟新的 session 才會載入。需要一個已設定好的 SonarQube MCP 連線。
+> 第一次執行 `npx` 可能會下載 CLI。若 host 只在 session 啟動時偵測 skill，安裝後請重新載入或重啟。此 skill 需要已設定好的 SonarQube MCP 連線。

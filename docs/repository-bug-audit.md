@@ -42,23 +42,18 @@ Multi-agent mode does not relax coverage, privacy, validation, or read-only requ
 
 ## Install
 
-Install as a plain skill folder — this repository is the skill itself. Copy the repository root into the host's skills directory:
-
-| Host | Personal scope | Project scope |
-| --- | --- | --- |
-| Claude Code | `~/.claude/skills/` | `<repo>/.claude/skills/` |
-| Codex | `~/.codex/skills/` | — |
+From the repository root, let the `skills` CLI discover supported agents and install this skill:
 
 ```bash
-# 從本倉庫根目錄執行，依平台擇一
-cp -r . ~/.claude/skills/repository-bug-audit  # Claude Code
-cp -r . ~/.codex/skills/repository-bug-audit  # Codex
+npx skills add . --skill repository-bug-audit
 ```
+
+Add `--global` for personal scope; without it, the CLI installs at project scope. For a manual installation, copy `repository-bug-audit/` to a skills directory documented by the host instead of assuming a runtime-specific path.
 
 For Claude Apps, upload this repository (or zip) as the skill. Claude Apps has no subagent mechanism, so Multi-agent partitioned execution is unavailable and the skill will ask you to choose Standard.
 
 > [!NOTE]
-> Both hosts read their skills directories when a session starts, so start a new session after copying.
+> The first `npx` invocation may download the CLI. Reload or restart the host when it only discovers skills at session start.
 
 ## Usage
 

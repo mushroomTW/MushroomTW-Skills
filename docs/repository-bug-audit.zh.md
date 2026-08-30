@@ -42,23 +42,18 @@ Comprehensive 模式會依納入範圍的檔案數與執行預算估算閱讀成
 
 ## 安裝
 
-以一般 skill 資料夾安裝 — 本倉庫即 skill 本體，將倉庫根目錄複製到 host 的 skills 目錄：
-
-| 平台 | 個人層級 | 專案層級 |
-| --- | --- | --- |
-| Claude Code | `~/.claude/skills/` | `<repo>/.claude/skills/` |
-| Codex | `~/.codex/skills/` | — |
+請在倉庫根目錄讓 `skills` CLI 自動偵測相容 agent，並安裝此 skill：
 
 ```bash
-# 從本倉庫根目錄執行，依平台擇一
-cp -r . ~/.claude/skills/repository-bug-audit  # Claude Code
-cp -r . ~/.codex/skills/repository-bug-audit  # Codex
+npx skills add . --skill repository-bug-audit
 ```
+
+若要安裝到個人層級，請加上 `--global`；未加時為專案層級。若採手動安裝，請把 `repository-bug-audit/` 複製到 host 文件指定的 skills 目錄，不要假設特定 runtime 路徑。
 
 Claude Apps：上傳本倉庫（或壓縮檔）作為 skill。Claude Apps 無子代理機制，Multi-agent 分工不可用，skill 會請你改選 Standard。
 
 > [!NOTE]
-> 兩個 host 都在 session 啟動時讀取 skills 目錄，複製後請開啟新的 session 才會載入。
+> 第一次執行 `npx` 可能會下載 CLI。若 host 只在 session 啟動時偵測 skill，安裝後請重新載入或重啟。
 
 ## 使用方式
 

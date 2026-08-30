@@ -95,29 +95,16 @@ excellent-readme/
 
 ## Install
 
-This directory is the skill itself. Copy it into the host's skills directory:
+From the repository root, let the `skills` CLI discover supported agents and install this skill:
 
-| Host | Personal scope | Project scope |
-| --- | --- | --- |
-| Claude Code | `~/.claude/skills/` | `<repo>/.claude/skills/` |
-| Codex | `~/.codex/skills/` | — |
-
-```powershell
-$dest = "$HOME/.claude/skills/excellent-readme"
-Remove-Item -Recurse -Force $dest -ErrorAction SilentlyContinue
-Copy-Item -Recurse excellent-readme $dest
+```bash
+npx skills add . --skill excellent-readme
 ```
 
-```powershell
-$dest = "$HOME/.codex/skills/excellent-readme"
-Remove-Item -Recurse -Force $dest -ErrorAction SilentlyContinue
-Copy-Item -Recurse excellent-readme $dest
-```
-
-The `Remove-Item` line makes the same commands work for a reinstall: without it, `Copy-Item` nests a second copy inside the existing skill directory. To install the skill for one repository instead of the whole account, use that repository's `.claude/skills/` as the destination (Claude Code).
+Add `--global` for personal scope; without it, the CLI installs at project scope. For a manual installation, copy `excellent-readme/` to a skills directory documented by the host instead of assuming a runtime-specific path.
 
 > [!NOTE]
-> Both hosts read their skills directories when a session starts, so start a new session after copying.
+> The first `npx` invocation may download the CLI. Reload or restart the host when it only discovers skills at session start.
 
 ## Development and Contributions
 

@@ -44,16 +44,13 @@ When unsure whether a package meets these, **look it up — do not guess**.
 
 ## Install
 
-This directory is the skill itself. Copy it into the host's skills directory:
-
-| Host | Personal scope | Project scope |
-| --- | --- | --- |
-| Claude Code | `~/.claude/skills/` | `<repo>/.claude/skills/` |
-| Codex | `~/.codex/skills/` | — |
+From the repository root, let the `skills` CLI discover supported agents and install this skill:
 
 ```bash
-cp -r library-first ~/.claude/skills/library-first
+npx skills add . --skill library-first
 ```
 
+Add `--global` for personal scope; without it, the CLI installs at project scope. For a manual installation, copy `library-first/` to a skills directory documented by the host instead of assuming a runtime-specific path.
+
 > [!NOTE]
-> Both hosts read their skills directories when a session starts, so start a new session after copying.
+> The first `npx` invocation may download the CLI. Reload or restart the host when it only discovers skills at session start.
