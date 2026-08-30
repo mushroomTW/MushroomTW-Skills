@@ -136,6 +136,7 @@ Checks fail routinely. Apply the first-line fix, then the fallback; never stall 
 Reject a draft that does any of these:
 
 - presents planned work as shipped behavior;
+- invents expected output instead of using real output or clearly labeled illustration;
 - deletes existing content it did not understand instead of preserving and reporting it;
 - trusts an inherited claim without re-verifying it, especially a license claim without a LICENSE file.
 

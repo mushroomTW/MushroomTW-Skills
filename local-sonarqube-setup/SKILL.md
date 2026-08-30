@@ -20,7 +20,7 @@ Java <21 and auto-provisioning OFF? → upgrade or enable auto
 ## Invariants
 
 1. Token only in process memory — never in args/URL/log/file; describe only as set/not set; if leaked → tell user to revoke; read once and do all steps in same process, no `setx`, clear only after verify.
-2. Never fake Gate with `Accepted`/`False positive`/disabling rules; never change production code/build semantics to pass.
+2. Never fake Gate with `Accepted`/`False positive`/disabling rules/server-side threshold edits; never change production code/build semantics to pass.
 3. Do not add services, modify CI/compose, commit or push unless explicitly asked; preserve uncommitted changes; do not overwrite unrelated files.
 4. Output only non-sensitive summaries (status, key, CE, Gate, URL), never full logs; query issues/measures only on failure or request.
 5. Discover language/build/coverage from repo, not defaults; Community Build loads only supported languages.

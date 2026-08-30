@@ -71,7 +71,7 @@ Decision: deferred because gate #<n> depends on <缺少的專案事實>; immedia
 
 > 三行 helper 例外：只用一次、沒有邊界案例或狀態、且不會成長的三行 helper 可直接手寫。
 
-🔴 CHECKPOINT 2 — Step 4 提交前自檢：只存在一個 `used`/`wrote manually`/`deferred` 終局狀態；決策語含 because；對應評估結果或手寫理由；`deferred` 明列 `do not implement` 與所需證據；無軟化措辭。
+🔴 CHECKPOINT 2 — Step 4 提交前自檢：只存在一個 `used`/`wrote manually`/`deferred` 終局狀態；決策語含 because；對應評估結果或手寫理由；`deferred` 明列 `do not implement` 與所需證據；無軟化措辭（禁「可以考慮/視情況/靈活把握」，必須 pass/fail）。
 
 ## Failure Handling
 
@@ -88,7 +88,6 @@ Decision: deferred because gate #<n> depends on <缺少的專案事實>; immedia
 
 1. 用變數名檢索 — 搜 `callApiAgain` 找不到 `exponential backoff`。
 2. 因有名就採用 — 未過 gate 高星也不用。
-3. 為三行 helper 引套件。
 
 ## Examples
 

@@ -9,9 +9,9 @@ Audit the current working tree by finding material bugs first, then assess broad
 
 ## Required startup choices
 
-🔴 **CHECKPOINT — Obtain confirmation for the choice before entering Workflow**: Ask in one interaction (skip what the user already stated). Follow [platform-adapters](references/platform-adapters.md) for the host's choice UI. If Multi-agent is unavailable, explain and 🛑 STOP — never silently fall back or downgrade to a single-agent run.
-
 The one choice is **audit mode** — **Rapid** (map whole repo, read core/high-risk paths, only `defect`/`risk`, no score) or **Comprehensive** (read every in-scope file, all three finding types, 0–100 score). Execution mode is fixed: **Multi-agent partitioned** (one subagent per partition, cross-reviews High findings; see [platform-adapters](references/platform-adapters.md)).
+
+🔴 **CHECKPOINT — Obtain confirmation for the choice before entering Workflow**: Ask in one interaction (skip what the user already stated). Follow [platform-adapters](references/platform-adapters.md) for the host's choice UI. If Multi-agent is unavailable, explain and 🛑 STOP — never silently fall back or downgrade to a single-agent run.
 
 ## Workflow
 
@@ -79,4 +79,4 @@ python -X utf8 <skill-directory>/scripts/validate_bug_audit.py --evidence <evide
 # --repo-root <path> when artifacts are outside the audited tree
 ```
 
-Requires a preinstalled `jsonschema`. Resolve `<skill-directory>` per [platform-adapters](references/platform-adapters.md); quote paths. Validator checks coverage recomputation, caps, ordering, and that every `inventory`/`location` path exists. Exit 0 = pass, 1 = content violation, 2 = I/O. Follow the failure matrix for nonzero exits or a missing prerequisite. After exit 0 return clickable links + a short summary, not pasted artifacts.
+Requires a preinstalled `jsonschema`. Resolve `<skill-directory>` per [platform-adapters](references/platform-adapters.md); quote paths. Validator checks coverage recomputation, caps, ordering, and that every `inventory`/`location` path exists. Exit 0 = pass, 1 = content violation, 2 = I/O. Follow the failure matrix for nonzero exits or a missing prerequisite. 🛑 STOP: do not deliver unvalidated artifacts; after exit 0 return clickable links + a short summary, not pasted artifacts.
