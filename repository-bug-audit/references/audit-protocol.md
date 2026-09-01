@@ -32,7 +32,9 @@ Scanner hits, TODOs, complexity, search results, and code smells are candidate s
 | `observed` | Directly confirmed from code and data flow in the current working tree |
 | `reproduced` | Confirmed by actually executing a repository-configured test/build/lint/analyzer |
 | `inferred` | Multiple facts agree but a named runtime condition remains unverified; never valid for `defect` |
-| `cross-confirmed` | Confirmed by two independent sources; independent review may raise confidence by at most +1 |
+| `cross-confirmed` | Confirmed by two independent sources, at least one of them outside the reviewing agents — an executed check, a test, or an external specification. Two agents reading the same tree share the same priors and are not independent sources: their agreement holds confidence where it is. Only a source of the first kind may raise confidence, by at most +1 |
+
+`cross-confirmed` is a `status` value, not an `evidence_kind`; the schema keeps `evidence_kind` to `observed` / `reproduced` / `inferred`.
 
 | Confidence | Handling |
 | --- | --- |
@@ -139,6 +141,7 @@ Confidence requirements (Comprehensive):
 
 - Both modes have **exactly four level-two headings**; when `execution.provisional == true`, place `**Provisional report**` directly below the title.
 - Executive Summary must include `Core-path coverage`: `critical_read_files / critical_in_scope_files` and percentage.
+- Executive Summary must include `Evidence mix`: how many public findings carry each `evidence_kind`, written as `reproduced <n> / observed <n> / inferred <n>`.
 - Finding severity is stored as `High/Medium/Low`, report renders as `🔴 High / 🟡 Medium / 🟢 Low`; validator checks consistency.
 - No per-file inventory, fingerprints, full evidence, raw command output, or appendices; do not copy evidence JSON as appendix.
 - Local Markdown links must resolve; report lives in `.docs/`, link to root files with `../`, e.g. `[src/main.py](../src/main.py:1)`.
@@ -148,9 +151,11 @@ Confidence requirements (Comprehensive):
 Section 3 starts with a single table:
 
 ```markdown
-| ID | Type | Severity / confidence | Location | Problem and impact | Recommendation |
+| ID | Type | Severity / confidence | Evidence | Location | Problem and impact | Recommendation |
 | --- | --- | --- | --- | --- | --- |
 ```
+
+The `Evidence` cell carries the finding's `evidence_kind` verbatim, so a reader can separate a finding an executed check confirmed from one derived by reading alone; the validator checks it against the evidence file.
 
 Order per §1.2. **Each public finding appears exactly once**; High/Medium add `### FINDING-ID: Summary` detail block (Location, ≤3 Evidence, Impact, Recommendation, Verification), Low is table-only. If no public findings: `No reportable findings were identified within the reviewed scope.`
 
@@ -165,6 +170,7 @@ Order per §1.2. **Each public finding appears exactly once**; High/Medium add `
 | Assessment confidence | Medium / Low + rationale |
 | Review coverage | Read / non-excluded, % and boundary |
 | Core-path coverage | Core+high read / in-scope, % |
+| Evidence mix | Public findings by evidence kind: reproduced / observed / inferred |
 | Verification summary | Main passed/failed/not_run/unavailable |
 State explicitly that Rapid does not assign a score.
 ## 2. Review Coverage and Bug Surfaces
@@ -184,6 +190,7 @@ State explicitly that Rapid does not assign a score.
 | Assessment confidence | High / Medium / Low + rationale |
 | File coverage | Read / in-scope, % |
 | Core-path coverage | Core+high read / in-scope, % |
+| Evidence mix | Public findings by evidence kind: reproduced / observed / inferred |
 | Verification summary | Main passed/failed/not_run/unavailable |
 ## 2. Risk-Weighted Quality Scores
 | Dimension | Weight | Level | Score | Primary rationale |

@@ -79,7 +79,7 @@ Claude Apps：上傳本倉庫（或壓縮檔）作為 skill。Claude Apps 無子
 
 若預設路徑已存在，報告會加上本地時間戳記，例如 `repository-bug-audit-report-20260806-153000.md`。既有檔案永遠不會被覆寫，因此重新稽核不會摧毀先前的報告。
 
-兩種報告版型都固定四個章節。Rapid 為：執行摘要、審查覆蓋與缺陷面、優先發現、限制；Comprehensive 則把第二節換成「風險加權品質分數」。High 與 Medium 發現會有詳細區塊，Low 發現只留在表格中。詳見 [`audit-protocol.md`](../repository-bug-audit/references/audit-protocol.md)。
+兩種報告版型都固定四個章節。Rapid 為：執行摘要、審查覆蓋與缺陷面、優先發現、限制；Comprehensive 則把第二節換成「風險加權品質分數」。High 與 Medium 發現會有詳細區塊，Low 發現只留在表格中。每一列都標示佐證種類，執行摘要另外列出佐證組成，讓讀者能分辨哪些發現有實際執行的檢查背書、哪些只是讀出來的。詳見 [`audit-protocol.md`](../repository-bug-audit/references/audit-protocol.md)。
 
 ## 佐證模型
 
@@ -96,7 +96,7 @@ Claude Apps：上傳本倉庫（或壓縮檔）作為 skill。Claude Apps 無子
 - `observed` —— 直接由目前工作目錄中的程式碼與資料流確認。
 - `reproduced` —— 由儲存庫既有設定的檢查**實際執行**後確認。
 - `inferred` —— 多項事實彼此吻合，但仍有一個具名的執行期條件未經驗證。`defect` 永不適用。
-- `cross-confirmed` —— 由兩個獨立來源確認。獨立審查最多只能將信心度提高一分。
+- `cross-confirmed` —— 這是 `status` 值而非佐證種類：由兩個獨立來源確認，其中至少一個必須來自審查代理之外（實際執行的檢查、測試、外部規格）。兩個代理讀同一棵原始碼樹共用同一組先驗，不算獨立來源；只有前一類來源才能把信心度提高，且最多一分。
 
 ### 信心度分級
 

@@ -79,7 +79,7 @@ The report is written to the audited repository's `.docs/` directory, which is c
 
 If the default path already exists, the report gets a local timestamp — for example `repository-bug-audit-report-20260806-153000.md`. Existing files are never overwritten, so a re-audit cannot destroy the previous report.
 
-Both report layouts use exactly four sections. Rapid uses Executive Summary, Review Coverage and Bug Surfaces, Prioritized Findings, and Limitations; Comprehensive replaces the second with Risk-Weighted Quality Scores. High and Medium findings get detail blocks; Low findings stay in the table. See [`audit-protocol.md`](../repository-bug-audit/references/audit-protocol.md).
+Both report layouts use exactly four sections. Rapid uses Executive Summary, Review Coverage and Bug Surfaces, Prioritized Findings, and Limitations; Comprehensive replaces the second with Risk-Weighted Quality Scores. High and Medium findings get detail blocks; Low findings stay in the table. Every row carries its evidence kind, and the executive summary states the evidence mix, so a reader can tell findings an executed check confirmed from findings derived by reading alone. See [`audit-protocol.md`](../repository-bug-audit/references/audit-protocol.md).
 
 ## The Evidence Model
 
@@ -96,7 +96,7 @@ Both report layouts use exactly four sections. Rapid uses Executive Summary, Rev
 - `observed` — directly confirmed from code and data flow in the current working tree.
 - `reproduced` — confirmed by a repository-configured check that was actually executed.
 - `inferred` — multiple facts agree while a named runtime condition stays unverified. Never valid for a `defect`.
-- `cross-confirmed` — two independent sources. Independent review may raise confidence by at most one point.
+- `cross-confirmed` — a `status` value rather than an evidence kind: two independent sources, at least one of them outside the reviewing agents (an executed check, a test, an external specification). Two agents reading the same tree share the same priors and do not count as independent; only a source of the first kind may raise confidence, by at most one point.
 
 ### Confidence Bands
 

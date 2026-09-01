@@ -538,6 +538,8 @@ def validate_report(text: str, data: dict[str, Any], report_path: Path) -> list[
         errors.append("report: Comprehensive executive summary must include Total score")
     if "| Core-path coverage |" not in text:
         errors.append("report: the executive summary must state core-path coverage")
+    if "| Evidence mix |" not in text:
+        errors.append("report: the executive summary must state the evidence mix")
 
     public_findings = sorted(
         [finding for finding in data["findings"] if finding["confidence"] >= 5],
@@ -552,25 +554,34 @@ def validate_report(text: str, data: dict[str, Any], report_path: Path) -> list[
     findings_section = findings_section_match.group(1) if findings_section_match else ""
     table_pairs = re.findall(
         r"^\|\s*([A-Z][A-Z0-9_-]*-[0-9]{3})\s*\|\s*(defect|risk|quality-debt)\s*"
-        r"\|\s*(\S+ (?:High|Medium|Low))\s*/",
+        r"\|\s*(\S+ (?:High|Medium|Low))\s*/[^|]*"
+        r"\|\s*(observed|reproduced|inferred)\s*\|",
         findings_section,
         flags=re.MULTILINE,
     )
     detail_ids = set(re.findall(r"^### ([A-Z][A-Z0-9_-]*-[0-9]{3}):", text, flags=re.MULTILINE))
     expected_pairs = [
-        (finding["finding_id"], finding["finding_type"], SEVERITY_LABELS[finding["severity"]])
+        (
+            finding["finding_id"],
+            finding["finding_type"],
+            SEVERITY_LABELS[finding["severity"]],
+            finding["evidence_kind"],
+        )
         for finding in public_findings
     ]
     empty_message = "No reportable findings were identified within the reviewed scope."
 
     if public_findings:
-        canonical_header = "| ID | Type | Severity / confidence | Location | Problem and impact | Recommendation |"
+        canonical_header = (
+            "| ID | Type | Severity / confidence | Evidence | Location | "
+            "Problem and impact | Recommendation |"
+        )
         if canonical_header not in findings_section:
             errors.append("report: public findings require the canonical findings table")
         if table_pairs != expected_pairs:
             errors.append(
                 "report: findings table rows must exactly match public evidence findings, "
-                "in canonical order and with the emoji severity label"
+                "in canonical order, with the emoji severity label and the recorded evidence kind"
             )
         if empty_message in findings_section:
             errors.append("report: non-empty findings must not use the empty-findings message")
