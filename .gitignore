@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
+.pytest_cache/
 .omc/
 
 # skill 安裝副本與鎖檔
