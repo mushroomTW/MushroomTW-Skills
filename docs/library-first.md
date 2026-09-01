@@ -27,6 +27,7 @@ It does **not** apply to domain-specific business logic — order discount rules
 
 To replace custom code, a package must meet **all** of these:
 
+- **Actually exists**: the exact name resolves in that language's registry, and the version cited in the decision comes from that lookup. A name recalled from memory is a search term, not a package — plausible-looking names that resolve nowhere are what supply-chain attackers register against
 - **Still maintained**: commits within the last 12 months; not marked deprecated or unmaintained
 - **Reasonable dependency tree**: pulling in dozens of transitive dependencies for one small feature is usually a bad trade
 - **License compatible**: no conflict with the project's license (GPL in a closed-source project is a hard stop)
