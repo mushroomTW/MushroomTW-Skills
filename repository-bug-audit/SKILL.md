@@ -21,7 +21,7 @@ The one choice is **audit mode** — **Rapid** (map whole repo, read core/high-r
 4. **Run checks** — In: configured commands; Out: `verification_checks[]` (`status=passed|failed|not_run|unavailable`); Never install tools/write probes; `reproduced` only from executed configured checks.
 5. **Write evidence** — In: `schema.json`+`audit-protocol.md §1,2,5`; Out: `.docs/<report-stem>.evidence.json` (12 required fields), a validation input only; Never include secrets/full sources.
 6. **Write report** — In: evidence; Out: `.docs/<report>.md` exactly 4 sections (§4), render severity as `🔴/🟡/🟢`, do not copy JSON.
-7. **Validate & fix** — In: the validator command in [Validate and deliver](#validate-and-deliver); Out: exit 0/1/2; Fix, delete the evidence file, then return the report link + summary, never paste full artifacts.
+7. **Validate & fix** — In: the validator command in **Validate and deliver**; Out: exit 0/1/2; Fix, delete the evidence file, then return the report link + summary, never paste full artifacts.
 
 Rules: validator checks structure/policy, not truth — rule out alternatives by reading implementation, major callers/callees, config, and tests.
 

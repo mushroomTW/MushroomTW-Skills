@@ -84,7 +84,7 @@ Run proportional checks:
 - Run minimal installation, startup, and usage examples subject to invariant 4. Unauthorized commands are `unrun`, never verified.
 - Re-evaluate the section set against the current repository; do not add filler merely to satisfy a checklist.
 
-Run the checker that ships with this skill before delivering any create, improve, or synchronize result. It lives at `scripts/validate_readme.py` in the same directory as this SKILL.md file, so resolve the path from wherever you read this file: `python <that directory>/scripts/validate_readme.py <readme-path> --project <repository-root>`. It ignores code blocks, and its warnings are heuristic leads: read each flagged line and judge it before editing. If a check cannot run, do not stall — follow the matching row in [Failure recovery](#failure-recovery) and continue.
+Run the checker that ships with this skill before delivering any create, improve, or synchronize result. It lives at `scripts/validate_readme.py` in the same directory as this SKILL.md file, so resolve the path from wherever you read this file: `python <that directory>/scripts/validate_readme.py <readme-path> --project <repository-root>`. It ignores code blocks, and its warnings are heuristic leads: read each flagged line and judge it before editing. If a check cannot run, do not stall — follow the matching row in **Failure recovery** and continue.
 
 Completion criterion: every retained command and link passes a traceability check, and every unverified item is either qualified in plain wording or listed in the delivery report — never left as a placeholder.
 
