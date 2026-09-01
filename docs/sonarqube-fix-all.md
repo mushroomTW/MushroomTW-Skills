@@ -34,7 +34,7 @@ When the user asks to fix, clear, triage, or work through SonarQube issues, or m
 | 6 | Fix, or justify | Fix at the source by default. Suppressing in place and leaving open each have explicit conditions |
 | 7 | Verify each batch | Run that module's formatter, linter, and build; run tests where they exist, otherwise require a clean build with no new warnings and no sensitive region touched. Commit a checkpoint after each passing batch |
 | 8 | Rescan | Full build and test suite, then SonarScanner; compare by **issue key set difference**, not totals. At most three automatic scan rounds |
-| 9 | Report | Separate sections for: files changed, source-fixed issues, pending manual smoke tests, suppressed issues with justification, left-open issues with reasons, verification commands and Quality Gate status |
+| 9 | Report | Separate sections for: files changed, source-fixed issues, pending manual smoke tests, suppressed issues with justification, left-open issues with reasons, verification commands and Quality Gate status. Closure is never reported as a defect reduction |
 
 ## Sensitive Regions — Do Not Rewrite
 

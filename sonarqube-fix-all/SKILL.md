@@ -129,4 +129,6 @@ Report, each as its own section:
 - Left-open issues, each with its reason
 - Verification commands run, scan status, Quality Gate status
 
+Never present a closed issue, a cleared warning, or a green Quality Gate as a defect reduction or a quality improvement. Closure evidences that a rule stopped triggering, not that the code has fewer faults — the two are weakly related, and analyzer severity is not a fault forecast. Report what was actually verified (build, tests, scan status) and let it stand on its own.
+
 Do not print complete issue lists or logs unless asked.
