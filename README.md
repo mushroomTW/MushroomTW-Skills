@@ -18,6 +18,16 @@ Each skill is a self-contained skill folder at the root; its documentation lives
 
 `local-sonarqube-setup` and `sonarqube-fix-all` are meant to run in that order: the first connects a project and produces a first analysis, the second batch-fixes what it reports.
 
+## Design rationale
+
+The references below back three design decisions, not the effectiveness of the skills themselves — no published study evaluates them.
+
+| Design decision | Skills | Evidence |
+| --- | --- | --- |
+| Never state a fact the repository cannot back | `excellent-readme`, `repository-bug-audit` | F. Liu et al., [Exploring and Evaluating Hallucinations in LLM-Powered Code Generation](https://arxiv.org/abs/2404.00971), preprint 2024 — taxonomy of code-generation hallucinations and the HalluCode benchmark |
+| Search the ecosystem instead of recalling a package name | `library-first` | Spracklen et al., [We Have a Package for You!](https://www.usenix.org/conference/usenixsecurity25/presentation/spracklen), USENIX Security 2025 — 19.7% of packages referenced across 576,000 generated samples do not exist |
+| Partition the repository, one context per subagent | `repository-bug-audit` | N. F. Liu et al., [Lost in the Middle](https://aclanthology.org/2024.tacl-1.9/), TACL 2024 — retrieval degrades sharply for material in the middle of a long context |
+
 ## Install
 
 Every directory here is a plain skill folder. From the repository root, the [`skills` CLI](https://github.com/vercel-labs/skills) can discover supported agents and install all five. The first invocation of `npx` may use the network to download the CLI:
@@ -73,14 +83,6 @@ MushroomTW-Skills/
 ├── repository-bug-audit/         SKILL.md + agents/ references/ scripts/
 └── sonarqube-fix-all/            SKILL.md + agents/
 ```
-
-Each skill directory holds only the skill itself. Development assets kept on disk — the `test-prompts.json` next to three of the skills, and `repository-bug-audit/tests/` — are excluded from version control by the single `.gitignore` at the root; a `cp -r` install still copies them along with the skill.
-
-## Version control
-
-The whole collection lives in a single git repository at the root; no skill directory carries a `.git` of its own any more. Each skill used to be a separate local repository, and those histories were merged in with `git subtree`, so every original commit is still reachable from `git log`. Note that the pre-merge commits recorded their paths at their own repository root, so `git log -- <skill>/` shows only the merge point — read the full `git log` to follow one skill's evolution.
-
-The repository has no remote — this is a local-only copy.
 
 No subproject contains a `README.md`; all documentation was consolidated into `docs/`.
 

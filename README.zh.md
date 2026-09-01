@@ -18,6 +18,16 @@
 
 `local-sonarqube-setup` 與 `sonarqube-fix-all` 設計上是接續使用：前者把專案接上並跑出第一份分析，後者批次修掉它回報的問題。
 
+## 設計依據
+
+下列文獻支撐的是三項設計決策，不是這五個 skill 的效果——後者沒有任何已發表的研究評估過。
+
+| 設計決策 | 對應 Skill | 依據 |
+| --- | --- | --- |
+| 不寫任何無法由倉庫佐證的事實 | `excellent-readme`、`repository-bug-audit` | F. Liu et al.，[Exploring and Evaluating Hallucinations in LLM-Powered Code Generation](https://arxiv.org/abs/2404.00971)，2024 preprint — 程式碼生成幻覺的分類法與 HalluCode 基準 |
+| 實際搜尋生態系，而不是憑印象講出套件名 | `library-first` | Spracklen et al.，[We Have a Package for You!](https://www.usenix.org/conference/usenixsecurity25/presentation/spracklen)，USENIX Security 2025 — 57.6 萬份生成樣本中，19.7% 被引用的套件根本不存在 |
+| 切分倉庫，每個 subagent 一份獨立 context | `repository-bug-audit` | N. F. Liu et al.，[Lost in the Middle](https://aclanthology.org/2024.tacl-1.9/)，TACL 2024 — 位於長 context 中段的資訊，擷取效果顯著衰退 |
+
 ## 安裝
 
 這裡每個目錄都是標準的 skill 資料夾。在倉庫根目錄可用 [`skills` CLI](https://github.com/vercel-labs/skills) 自動偵測相容 agent 並安裝全部五個 skill。第一次執行 `npx` 時可能需要連網下載 CLI：
@@ -73,14 +83,6 @@ MushroomTW-Skills/
 ├── repository-bug-audit/         SKILL.md + agents/ references/ scripts/
 └── sonarqube-fix-all/            SKILL.md + agents/
 ```
-
-各 skill 目錄只放 skill 本體。留在磁碟上的開發資產——三個 skill 旁的 `test-prompts.json` 與 `repository-bug-audit/tests/`——由根目錄唯一的 `.gitignore` 統一排除，不進版控；用 `cp -r` 安裝時它們仍會跟著 skill 一起被複製過去。
-
-## 版控狀態
-
-整個技能集由根目錄的單一 git repository 統一管理，各 skill 目錄不再各自帶 `.git`。原本每個 skill 都是獨立的本機 repository，這些歷史已用 `git subtree` 併入根倉庫，原始 commit 全數保留、仍可從 `git log` 查到。要注意併入前的 commit 記錄的是各子倉庫根目錄的路徑，所以 `git log -- <skill>/` 只會看到併入那一筆，要追某個 skill 的完整演進請看完整的 `git log`。
-
-倉庫沒有設定 remote——這是只存在本機的副本。
 
 各子專案內都沒有 `README.md`，說明文件已全數集中到 `docs/`。
 
