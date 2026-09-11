@@ -56,13 +56,13 @@ Claude Apps：上傳本倉庫（或壓縮檔）作為 skill。Claude Apps 無子
 
 ## 使用方式
 
-請明確叫用它 —— 這個 skill 是為整個儲存庫設計的，不適用於單一檔案、PR diff 或某個已知缺陷：
+請以名稱明確叫用 —— 此 skill 僅限手動觸發，即使請求聽起來相似也不會自動觸發。它在 frontmatter 聲明 `disable-model-invocation: true`，host 不會自行啟動它：
 
 ```text
 /repository-bug-audit
 ```
 
-或用自己的話描述任務，例如：*「幫我稽核整個儲存庫的缺陷，並給我工程品質分數。」*
+這個 skill 是為整個儲存庫設計的，不適用於單一檔案、PR diff 或某個已知缺陷：
 
 接著 skill 會請你選擇稽核模式與執行模式。在 Claude Code 上，兩個問題會合併在同一次選擇介面中提出。若你在需求裡已經先講明其中一項，它就會跳過該問題。
 

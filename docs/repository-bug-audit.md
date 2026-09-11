@@ -56,13 +56,13 @@ For Claude Apps, upload this repository (or zip) as the skill. Claude Apps has n
 
 ## Usage
 
-Invoke it explicitly — this skill is for whole-repository work, not for a single file, a PR diff, or one known bug:
+Invoke it explicitly by name — this skill is manual-trigger-only and never auto-triggers, even on similar-sounding requests. Its frontmatter declares `disable-model-invocation: true`, so the host never fires it on its own:
 
 ```text
 /repository-bug-audit
 ```
 
-Or describe the task in your own words: *"audit this whole repository for bugs and give me an engineering quality score."*
+This skill is for whole-repository work, not for a single file, a PR diff, or one known bug.
 
 The skill then asks you to choose an audit mode and an execution mode. On Claude Code both questions arrive in a single choice prompt. Answer either of them up front in your request and it skips that question.
 
