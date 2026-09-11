@@ -18,6 +18,8 @@
 
 `local-sonarqube-setup` 與 `sonarqube-fix-all` 設計上是接續使用：前者把專案接上並跑出第一份分析，後者批次修掉它回報的問題。
 
+`repository-bug-audit` 與 `sonarqube-fix-all` 僅限手動觸發：兩者都在 frontmatter 聲明 `disable-model-invocation: true`，host 不會自行啟動。請以名稱叫用（`/repository-bug-audit`、`/sonarqube-fix-all`）。其餘三個依各自的 `description` 自動觸發。
+
 ## 設計依據
 
 下列文獻支撐的是三項設計決策，不是這五個 skill 的效果——後者沒有任何已發表的研究評估過。

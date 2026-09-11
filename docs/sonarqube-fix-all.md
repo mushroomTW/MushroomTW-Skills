@@ -12,7 +12,11 @@ To connect a project to a local SonarQube first, use [local-sonarqube-setup](loc
 
 ## When It Applies
 
-When the user asks to fix, clear, triage, or work through SonarQube issues, or mentions their quality gate failing.
+Invoke it explicitly by name — this skill is manual-trigger-only and never auto-triggers, even when a request mentions SonarQube issues or a failing quality gate. Its frontmatter declares `disable-model-invocation: true`, so the host never fires it on its own:
+
+```text
+/sonarqube-fix-all
+```
 
 ## Constraints
 

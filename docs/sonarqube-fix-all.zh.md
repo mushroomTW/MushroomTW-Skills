@@ -12,7 +12,11 @@
 
 ## 觸發時機
 
-要求修正、清空、分類或逐一處理 SonarQube 問題時，或提到 quality gate 沒過時。
+請以名稱明確叫用 —— 此 skill 僅限手動觸發，即使請求提到 SonarQube 問題或 quality gate 沒過也不會自動觸發。它在 frontmatter 聲明 `disable-model-invocation: true`，host 不會自行啟動它：
+
+```text
+/sonarqube-fix-all
+```
 
 ## 限制
 

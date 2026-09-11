@@ -1,11 +1,14 @@
 ---
 name: sonarqube-fix-all
-description: Batch-fix code quality and security issues reported by a self-hosted SonarQube instance via an already-configured SonarQube MCP connection, then verify and rescan. Use whenever the user asks to fix, clear, triage, or work through SonarQube issues, or mentions their Sonar quality gate failing. Language-agnostic; handles projects with no automated test suite, and protects semantically sensitive code such as bytecode/IL manipulation, runtime patching, and reflection-driven code from unsafe rewrites.
+disable-model-invocation: true
+description: Batch-fix issues reported by a self-hosted SonarQube instance through the configured SonarQube MCP connection, then verify and rescan.
 ---
 
 # Fix All SonarQube Issues
 
 Resolve SonarQube findings at the source, verify each batch, and distinguish fixed, suppressed, and left-open results.
+
+This skill runs only when invoked by name.
 
 ## Constraints
 

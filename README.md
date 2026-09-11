@@ -18,6 +18,8 @@ Each skill is a self-contained skill folder at the root; its documentation lives
 
 `local-sonarqube-setup` and `sonarqube-fix-all` are meant to run in that order: the first connects a project and produces a first analysis, the second batch-fixes what it reports.
 
+`repository-bug-audit` and `sonarqube-fix-all` are manual-trigger-only: both declare `disable-model-invocation: true`, so the host never fires them on its own. Invoke them by name (`/repository-bug-audit`, `/sonarqube-fix-all`). The other three trigger from their `description`.
+
 ## Design rationale
 
 The references below back three design decisions, not the effectiveness of the skills themselves — no published study evaluates them.
