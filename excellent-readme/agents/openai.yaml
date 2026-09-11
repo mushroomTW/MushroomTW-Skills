@@ -1,4 +1,0 @@
-interface:
-  display_name: "Excellent README"
-  short_description: "Build verified READMEs from repository facts"
-  default_prompt: "Analyze this repository's real features, commands, and usage flow before creating or improving its README. Keep every claim traceable to evidence and mark unverified information explicitly."

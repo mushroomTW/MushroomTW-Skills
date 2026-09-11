@@ -1,6 +1,6 @@
-# Reference READMEs
+# Reference Documents
 
-Rules describe what a good README contains; they do not convey tone, density, or rhythm. Read one or two of these when you need a concrete sense of how a well-regarded README actually reads.
+Rules describe what a good README or companion document contains; they do not convey tone, density, or rhythm. Read one or two of these when you need a concrete sense of how a well-regarded document actually reads.
 
 > [!NOTE]
 > These are external files that can change or disappear. They are calibration material, not a source of facts. If a link is unreachable, skip it and continue — never block the task on fetching one, and never cite one without having read it.
@@ -18,6 +18,15 @@ Useful when the project is a CLI, a library, or a single-purpose utility. Observ
 
 - <https://raw.githubusercontent.com/sinedied/run-on-output/refs/heads/main/README.md>
 - <https://raw.githubusercontent.com/sinedied/smoke/refs/heads/main/README.md>
+
+## Companion documents
+
+Useful when a companion document is justified. Observe how each stays on its one topic, how it addresses a reader who arrived from GitHub's UI rather than from the README, and how much it leaves to a link.
+
+- `CONTRIBUTING.md`: <https://raw.githubusercontent.com/github/docs/main/.github/CONTRIBUTING.md> — a short guide that routes to deeper documents instead of containing them.
+- `SECURITY.md`: <https://raw.githubusercontent.com/nodejs/node/main/SECURITY.md> — a concrete reporting path, a disclosure timeline, and a stated threat model.
+- `CHANGELOG.md`: <https://raw.githubusercontent.com/sinedied/smoke/main/CHANGELOG.md> — one dated entry per version, grouped by change type.
+- Architecture: <https://raw.githubusercontent.com/rust-lang/rust-analyzer/master/docs/book/src/contributing/architecture.md> — a bird's-eye map that names modules and invariants, not files in order.
 
 ## What to take from them
 

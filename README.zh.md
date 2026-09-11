@@ -2,7 +2,7 @@
 
 [English](README.md) | **繁體中文**
 
-五個可攜式 Agent Skill，涵蓋 README 撰寫、相依決策、儲存庫稽核與 SonarQube 品質流程。它們遵循開放的 Agent Skills 格式，可安裝到 Claude Code、Codex、Cursor、OpenCode 與其他相容的 agent；需要 SonarQube 的流程，仍要求 host 提供對應能力。
+五個可攜式 Agent Skill，涵蓋專案文件撰寫、相依決策、儲存庫稽核與 SonarQube 品質流程。它們遵循開放的 Agent Skills 格式，可安裝到 Claude Code、Codex、Cursor、OpenCode 與其他相容的 agent；需要 SonarQube 的流程，仍要求 host 提供對應能力。
 
 每個 skill 都是根目錄下一個獨立的 skill 資料夾，說明文件放在 `docs/`。
 
@@ -10,7 +10,7 @@
 
 | Skill | 做什麼 | 說明文件 | 目錄 |
 | --- | --- | --- | --- |
-| `excellent-readme` | 依照 repository 的實際內容撰寫、改善、稽核或同步 `README.md`。無法追溯到檔案的敘述會被列為待補資訊，而不是寫成事實。 | [繁中](docs/excellent-readme.zh.md) ・ [EN](docs/excellent-readme.md) | `excellent-readme/` |
+| `excellent-project-docs` | 依照 repository 的實際內容撰寫、改善、稽核或同步 `README.md` 與 GitHub 會讀取的隨附文件（`CONTRIBUTING`、`SECURITY`、`ARCHITECTURE`、`CHANGELOG`……）。隨附文件先提案再建立；無法追溯到檔案的敘述會被列為待補資訊，而不是寫成事實。 | [繁中](docs/excellent-project-docs.zh.md) ・ [EN](docs/excellent-project-docs.md) | `excellent-project-docs/` |
 | `library-first` | 在你動手寫重試、驗證、快取、認證或日期處理之前，先強制搜尋該語言自己的生態系，並要求把「用套件還是自己寫」的理由講出來。 | [繁中](docs/library-first.zh.md) ・ [EN](docs/library-first.md) | `library-first/` |
 | `local-sonarqube-setup` | 把專案指向本機 Docker SonarQube（`127.0.0.1:9000`），用專案原生工具產生 coverage、執行掃描並檢查 Quality Gate。token 讀自 `SONAR_TOKEN`，不進入檔案、參數、log 或任何回覆。 | [繁中](docs/local-sonarqube-setup.zh.md) ・ [EN](docs/local-sonarqube-setup.md) | `local-sonarqube-setup/` |
 | `repository-bug-audit` | 在把任何東西稱為缺陷之前，先讀過實作、它的呼叫端、設定與測試。交付一份經機器驗證的 Markdown 報告，Comprehensive 模式另有 0–100 風險分數。 | [繁中](docs/repository-bug-audit.zh.md) ・ [EN](docs/repository-bug-audit.md) | `repository-bug-audit/` |
@@ -24,7 +24,7 @@
 
 | 設計決策 | 對應 Skill | 依據 |
 | --- | --- | --- |
-| 不寫任何無法由倉庫佐證的事實 | `excellent-readme`、`repository-bug-audit` | F. Liu et al.，[Exploring and Evaluating Hallucinations in LLM-Powered Code Generation](https://arxiv.org/abs/2404.00971)，2024 preprint — 程式碼生成幻覺的分類法與 HalluCode 基準 |
+| 不寫任何無法由倉庫佐證的事實 | `excellent-project-docs`、`repository-bug-audit` | F. Liu et al.，[Exploring and Evaluating Hallucinations in LLM-Powered Code Generation](https://arxiv.org/abs/2404.00971)，2024 preprint — 程式碼生成幻覺的分類法與 HalluCode 基準 |
 | 實際搜尋生態系，而不是憑印象講出套件名 | `library-first` | Spracklen et al.，[We Have a Package for You!](https://www.usenix.org/conference/usenixsecurity25/presentation/spracklen)，USENIX Security 2025 — 57.6 萬份生成樣本中，19.7% 被引用的套件根本不存在 |
 | 切分倉庫，每個 subagent 一份獨立 context | `repository-bug-audit` | N. F. Liu et al.，[Lost in the Middle](https://aclanthology.org/2024.tacl-1.9/)，TACL 2024 — 位於長 context 中段的資訊，擷取效果顯著衰退 |
 
@@ -71,13 +71,13 @@ MushroomTW-Skills/
 ├── LICENSE                       （MIT）
 │
 ├── docs/                         ← 各 skill 說明文件（英文預設，.zh.md 為繁中）
-│   ├── excellent-readme.md / .zh.md
+│   ├── excellent-project-docs.md / .zh.md
 │   ├── library-first.md / .zh.md
 │   ├── local-sonarqube-setup.md / .zh.md
 │   ├── repository-bug-audit.md / .zh.md
 │   └── sonarqube-fix-all.md / .zh.md
 │
-├── excellent-readme/             SKILL.md + agents/ references/ scripts/
+├── excellent-project-docs/       SKILL.md + agents/ references/ scripts/
 ├── library-first/                SKILL.md + agents/
 ├── local-sonarqube-setup/        SKILL.md + agents/ reference/
 ├── repository-bug-audit/         SKILL.md + agents/ references/ scripts/

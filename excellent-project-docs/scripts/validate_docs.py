@@ -1,11 +1,14 @@
-"""Perform low-dependency checks for common README issues.
+"""Perform low-dependency checks for common project-documentation issues.
+
+Accepts one or more Markdown documents (README.md, CONTRIBUTING.md,
+SECURITY.md, ARCHITECTURE.md, ...) and runs the same checks on each.
 
 Scope is deliberately narrow: only checks whose result is a verifiable fact.
-Judging whether a section is present and useful belongs to
-`references/quality-checklist.md`, not to keyword matching.
+Judging whether a section or a companion document is present and useful
+belongs to `references/quality-checklist.md`, not to keyword matching.
 
 Every warning is a heuristic lead, not a verdict: read the flagged line and
-decide whether it is a real problem before editing the README.
+decide whether it is a real problem before editing the document.
 """
 
 from __future__ import annotations
@@ -34,8 +37,8 @@ LINK = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
 LICENSE_FILE_WORD = re.compile(r"\b(?:LICENSE|LICENCE|COPYING)\b")
 
 # A License section that names a license but has no file to back it. Scoped to
-# the README's own License heading so a dependency's license mentioned elsewhere
-# in the prose stays out of range.
+# the document's own License heading so a dependency's license mentioned
+# elsewhere in the prose stays out of range.
 LICENSE_HEADING = re.compile(r"(?i)\blicen[sc]e\b")
 HEADING_LINE = re.compile(r"^ {0,3}#{1,6}\s")
 SPDX_ID = re.compile(
@@ -97,7 +100,7 @@ def local_targets(text: str) -> list[str]:
 
 
 def license_section_lines(text: str) -> list[str]:
-    """Return the body lines under the README's own License heading."""
+    """Return the body lines under the document's own License heading."""
     body: list[str] = []
     inside = False
     for line in text.splitlines():
@@ -109,22 +112,16 @@ def license_section_lines(text: str) -> list[str]:
     return body
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Check README unfinished markers and local links")
-    parser.add_argument("readme", type=Path)
-    parser.add_argument("--project", type=Path, default=None)
-    args = parser.parse_args()
-
-    readme = args.readme.resolve()
-    project = (args.project or readme.parent).resolve()
-    prose = strip_code(readme.read_text(encoding="utf-8"))
+def check_document(document: Path, project: Path) -> list[str]:
+    """Run every static check on one document and return its warnings."""
+    prose = strip_code(document.read_text(encoding="utf-8"))
     warnings: list[str] = []
 
     markers = sorted({match.group(0).strip() for match in UNFINISHED_MARKERS.finditer(prose)})
     if markers:
         warnings.append(
             "Contains unfinished markers ({}): resolve them -- ask the user or report the gap"
-            " in the delivery summary; a README ships no placeholders".format(", ".join(markers))
+            " in the delivery summary; a document ships no placeholders".format(", ".join(markers))
         )
 
     if EMPTY_LINK.search(prose):
@@ -160,7 +157,7 @@ def main() -> int:
             break
 
     for target in local_targets(prose):
-        candidate = (readme.parent / target).resolve()
+        candidate = (document.parent / target).resolve()
         try:
             candidate.relative_to(project)
         except ValueError:
@@ -169,14 +166,36 @@ def main() -> int:
         if not candidate.exists():
             warnings.append(f"Local link does not exist: {target}")
 
-    if warnings:
-        print("README checks completed with warnings:")
-        for warning in warnings:
-            print(f"- {warning}")
-        return 1
+    return warnings
 
-    print("README static checks passed.")
-    return 0
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Check project documents for unfinished markers and local links"
+    )
+    parser.add_argument("documents", type=Path, nargs="+", metavar="document")
+    parser.add_argument("--project", type=Path, default=None)
+    args = parser.parse_args()
+
+    documents = [document.resolve() for document in args.documents]
+    project = (args.project or documents[0].parent).resolve()
+
+    failed = False
+    for document in documents:
+        warnings = check_document(document, project)
+        try:
+            label = document.relative_to(project).as_posix()
+        except ValueError:
+            label = str(document)
+        if warnings:
+            failed = True
+            print(f"{label}: checks completed with warnings:")
+            for warning in warnings:
+                print(f"- {warning}")
+        else:
+            print(f"{label}: static checks passed.")
+
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

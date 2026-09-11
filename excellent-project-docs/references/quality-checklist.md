@@ -1,4 +1,6 @@
-# README Quality Checklist
+# Project Docs Quality Checklist
+
+Apply **Reader and content** through **Writing quality** to every document you touched, reading each one as its own reader; apply **Document set** once to the whole set.
 
 ## Reader and content
 
@@ -48,3 +50,14 @@
 - [ ] Important content is not hidden in images or network-only badges.
 - [ ] Emoji are sparse and never carry meaning on their own.
 - [ ] Prerequisites, warnings, and limitations a reader must not miss use GitHub admonition syntax rather than plain paragraphs.
+
+## Document set
+
+- [ ] Every companion document that exists is linked from the README, and links back to it.
+- [ ] Every companion document the evidence justified was either created with approval, or listed as proposed in the delivery report.
+- [ ] No fact (version, command, contact, supported platform) is owned by two documents.
+- [ ] Companion documents sit where GitHub reads them: `.github/`, the root, or `docs/`; templates sit under `.github/`.
+- [ ] `SECURITY.md`, `CONTRIBUTING.md`, and `CODE_OF_CONDUCT.md` name a channel or standard the evidence or the user confirmed.
+- [ ] `CHANGELOG.md` entries trace to tags or commit ranges, and the file says whether it or GitHub Releases is canonical.
+- [ ] `ARCHITECTURE.md` names components that exist and describes flow, not a file-by-file tour.
+- [ ] Translated variants of companion documents follow the README's language set, or the asymmetry is reported.

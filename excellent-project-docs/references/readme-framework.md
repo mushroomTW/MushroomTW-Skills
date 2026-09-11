@@ -36,6 +36,10 @@ Order the top of the page by how quickly each element lets a non-fit reader shor
 
 These are candidate sections, not a completeness score. A short, accurate README is better than a long README full of filler.
 
+## When a section becomes its own file
+
+Architecture, Security, How to Contribute, and What's Next each have a companion-document form (`ARCHITECTURE.md`, `SECURITY.md`, `CONTRIBUTING.md`, `ROADMAP.md`). Keep the README section while it fits in a few lines; once it needs its own headings, or GitHub would surface it from a dedicated file (the community profile, the Security tab, the new-issue flow), move the body to the companion document and leave a one- or two-line summary with a relative link. The thresholds and minimum content for each file are in [companion-documents](companion-documents.md); the README never restates what the companion file owns.
+
 ## Usage-example rules
 
 - Lead with the smallest complete, copyable success case.
