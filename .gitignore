@@ -1,7 +1,7 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-.omc/
+CLAUDE.md
 
 # skill 安裝副本與鎖檔
 .agents/skills/
