@@ -6,15 +6,19 @@ Apply **Reader and content** through **Writing quality** to every document you t
 
 - [ ] The opening sentence explains the project's purpose and target reader.
 - [ ] The target audience was confirmed with the user when the evidence left it ambiguous.
+- [ ] In create mode, the opening sentence is one the user picked or rewrote from the offered options.
+- [ ] Translated variants exist only for languages the repository already had or the user chose.
 - [ ] A reader can quickly decide whether the project fits their needs.
 - [ ] Important context, terminology, and external dependencies have reliable links.
 - [ ] The content is an entry point, not an unstructured complete manual.
 - [ ] The section set matches the project size; there are no empty or repetitive sections.
+- [ ] In improve mode, no existing section was removed outright without approval; rejected or pending removals are listed in the report.
 
 ## Smallest successful path
 
 - [ ] Prerequisites are clear.
 - [ ] Installation and startup commands have evidence in the repository.
+- [ ] When several install or run channels exist, Getting Started leads with the one the user chose, or the assumption is disclosed.
 - [ ] There is at least one minimal usage example.
 - [ ] The example includes input, execution, and expected output or result.
 - [ ] Required environment variables, external services, and database setup are documented.
@@ -35,6 +39,7 @@ Apply **Reader and content** through **Writing quality** to every document you t
 - [ ] Limitations, compatibility, known issues, and security notes are disclosed early.
 - [ ] A dormant or archived project discloses its maintenance status near the top.
 - [ ] There is no License section or license badge unless the licensing needs explaining; when one exists, it is a single line whose SPDX identifier matches the LICENSE file.
+- [ ] The user confirmed whether the README carries badges, logos, screenshots, or demos and which badge style; none were added or restyled without that answer.
 - [ ] Badges and screenshots have actual value and do not carry the only copy of important information.
 - [ ] Badges use a dynamic source where one exists; any hard-coded value records where it came from.
 - [ ] Author details, contact information, contribution instructions, and roadmap items are confirmed.

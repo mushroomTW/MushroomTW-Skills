@@ -12,13 +12,13 @@ A repository's documentation is a hub and its satellites. The README is the hub:
 First identify the requested outcome:
 
 - **Create**: the target document does not exist; build a first draft from repository facts.
-- **Improve**: preserve correct content while fixing structure, clarity, gaps, and drift. Prefer in-place edits. 🔴 **CHECKPOINT** before a full rewrite of any existing document: inventory its unique content and wait for explicit approval; without it, edit in place.
+- **Improve**: preserve correct content while fixing structure, clarity, gaps, and drift. Prefer in-place edits. 🔴 **CHECKPOINT** before a full rewrite of any existing document, and before removing an entire existing section rather than rewording it: inventory the unique content that would go and wait for explicit approval; without it, edit in place and list the proposed removal in the report.
 - **Audit**: do not edit first; report evidence, problems, risks, and priority-ordered recommendations across the whole document set.
 - **Synchronize**: update facts affected by code or configuration changes in every document that states them; treat drift as functional damage.
 
 If the user does not specify a mode, default to “improve and verify.” If the user names no document, the README is the target and companion documents enter only through the proposal checkpoint in step 3. Unless explicitly requested, do not turn any document into a complete documentation website.
 
-Treat translated variants as one document: update every variant you can write accurately and report any divergence. For new variants use BCP 47 names (`README.zh-TW.md`, `CONTRIBUTING.zh-TW.md`) with English in the base file; preserve an established repository naming scheme.
+Treat translated variants as one document: update every variant you can write accurately and report any divergence. A new variant is added only when the user chose that language at the step 1 checkpoint; name it with a BCP 47 tag (`README.zh-TW.md`, `CONTRIBUTING.zh-TW.md`) with English in the base file, and preserve an established repository naming scheme.
 
 ## Invariants
 
@@ -29,7 +29,7 @@ Treat translated variants as one document: update every variant you can write ac
 5. **Single source of truth**: one fact lives in one file. The README does not restate a companion document, a companion document does not restate the README's quick start, and neither copies information that readers can directly inspect in the environment and that is likely to drift. Use prose for background, rationale, limitations, and workflows that the files do not reveal.
 6. **Right-sized**: candidate sections and candidate companion documents are options, not a completeness score. Keep small projects to a README; add companion documents only when the evidence in [companion-documents](references/companion-documents.md) justifies each one.
 7. **Propose, then create**: a companion document the user did not name is created only after the user approves it at the step 3 checkpoint. A document the user named is handled directly.
-8. **Honest gaps**: 🔴 **CHECKPOINT** and ask before choosing a license, contribution channel, security contact, code-of-conduct standard, or roadmap. If nobody can answer, omit the section or document and report the question; never ship `TODO:`. State adoption-relevant absences (for example, no LICENSE) as facts, not placeholders. Omit rather than invent.
+8. **Honest gaps**: 🔴 **CHECKPOINT** and ask before choosing a license, contribution channel, security contact, code-of-conduct standard, roadmap, which languages the document set carries, or whether the README carries badges and images and in which style. If nobody can answer, omit the section or document and report the question; never ship `TODO:`. State adoption-relevant absences (for example, no LICENSE) as facts, not placeholders. Omit rather than invent.
 
 ## Workflow
 
@@ -37,7 +37,9 @@ Treat translated variants as one document: update every variant you can write ac
 
 Identify language, audience, purpose, target documents, and output paths. Audience gates section choice, depth, and tone; a companion document may serve a different reader than the README (contributors rather than users). If evidence is ambiguous and the user can answer, 🔴 **CHECKPOINT** and offer plausible reader types. If nobody can answer, make the smallest evidence-based assumption and disclose it. Do not ask when evidence settles it: a published library implies integrators; a CLI manifest implies CLI users; an open `CONTRIBUTING.md` implies external contributors.
 
-Completion criterion: state in one sentence per target document who it helps and what decision or task it supports — confirmed by the user when the choice was ambiguous.
+Languages are the user's decision. When creating a README, or when the existing document set is in one language and the user writes in another, 🔴 **CHECKPOINT**: ask which languages the set should carry. Never add a translated variant the user did not choose; an existing variant is maintained as it stands.
+
+Completion criterion: state in one sentence per target document who it helps and what decision or task it supports — confirmed by the user when the choice was ambiguous — and the language set is either inherited from the repository or chosen by the user.
 
 ### 2. Build an evidence inventory
 
@@ -64,6 +66,14 @@ Choose README sections from evidence, using these project-type emphases:
 - **Frontend / full-stack product**: demo or screenshots, features, stack, architecture, local development, deployment.
 - **Tool / research project**: problem context, method, reproduction steps, inputs and outputs, limitations, citations.
 
+Some README choices are the user's, not the evidence's. Collect the ones below and put them to the user in one 🔴 **CHECKPOINT**, folded into the companion-document checkpoint further down when both apply:
+
+- **Visual elements**: the badges the evidence supports (each with its dynamic endpoint or recorded source, per the badge rules in [readme-framework](references/readme-framework.md)) and the logo, screenshots, or demo assets that exist in the repository. Ask whether to include any, which ones, and which shields.io style; when the README already has badges, offer to keep their existing style.
+- **Primary path**: when the project installs or runs through several channels — registry package, container image, source build, installer — ask which one leads Getting Started; the others follow it.
+- **Tagline** (create mode): offer two or three one-line descriptions drawn from the evidence for the user to pick or rewrite.
+
+Without an answer: no badges or images; lead with the channel the manifests and CI document most completely and disclose that assumption; keep the tagline and mark it assumed in the report. A user who says no badges or images gets none, even when the evidence supports them.
+
 Then decide the companion documents. Read [companion-documents](references/companion-documents.md) and, for each candidate, record one of: **exists** (keep, improve, or synchronize), **justified** (the evidence threshold is met and the document is missing), or **not justified**. A README section that has outgrown the funnel — a contribution guide longer than the quick start, an architecture walkthrough before the first example — is evidence for a companion document.
 
 🔴 **CHECKPOINT** when any candidate is **justified** and the user did not name it: present the proposed files, the evidence behind each, and the questions only the user can answer (security contact, contribution policy, conduct standard), then wait. Create only the files the user approves; report the rest as recommendations. Skip the checkpoint when the user already named the documents or when nothing new is justified.
@@ -76,7 +86,7 @@ Completion criterion: the document set and every document's section list are wri
 
 For the README follow the cognitive funnel, section rules, and anti-patterns in [readme-framework](references/readme-framework.md); for each companion document follow its row in [companion-documents](references/companion-documents.md). Calibrate tone, density, and section rhythm against [exemplars](references/exemplars.md).
 
-Keep the first screen of every document independently useful. Put a real example before abstract internals; link deeper material instead of copying it. Where a fact moves from the README into a companion document, leave a one-line summary and a relative link in the README, and open the companion document with a link back. Never imply `.env`, configuration, deployment, review, or release behavior that code, CI, or history does not implement. Use GFM, sparse admonitions for must-not-miss facts, sparse emoji, and shallow lists. A badge, logo, demo, or screenshot must answer a reader question and cannot carry the only copy of a fact; use repository assets only and follow the framework's badge rules.
+Keep the first screen of every document independently useful. Put a real example before abstract internals; link deeper material instead of copying it. Where a fact moves from the README into a companion document, leave a one-line summary and a relative link in the README, and open the companion document with a link back. Never imply `.env`, configuration, deployment, review, or release behavior that code, CI, or history does not implement. Use GFM, sparse admonitions for must-not-miss facts, sparse emoji, and shallow lists. A badge, logo, demo, or screenshot appears only if the user chose it at the step 3 checkpoint, must answer a reader question, and cannot carry the only copy of a fact; use repository assets only and follow the framework's badge rules.
 
 Completion criterion: a reader can understand the project's purpose and complete the smallest useful path from the README alone, and can reach every companion document from it in one click.
 
@@ -158,6 +168,9 @@ Reject a draft that does any of these:
 - deletes existing content it did not understand instead of preserving and reporting it;
 - trusts an inherited claim without re-verifying it, especially a license claim without a LICENSE file;
 - adds a License section or license badge that only repeats the LICENSE file;
+- adds badges or images, or changes their style, without the user's answer at the step 3 checkpoint;
+- adds a translated variant the user did not choose;
+- removes an entire existing section without the approval the improve-mode checkpoint requires;
 - creates a companion document the user neither named nor approved;
 - leaves a companion document unreachable from the README, or lets two documents own the same fact;
 - fills `SECURITY.md`, `CONTRIBUTING.md`, or `CODE_OF_CONDUCT.md` with a contact, policy, or standard that no evidence and no user confirmed.

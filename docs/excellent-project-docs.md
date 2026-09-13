@@ -31,6 +31,7 @@ Both products may also load the skill automatically when a request matches its d
 - Organizes content around the reader's adoption decisions instead of the implementation order.
 - Decides which companion documents the evidence justifies, proposes them, and creates only the ones you approve; a document you name is handled directly.
 - Keeps one owner per fact: the README summarizes and links, satellites do not restate the README, and contradictions between documents are resolved or reported.
+- Treats presentation as your decision: asks which languages the document set carries, which badges, logo, or screenshots to include and in which style, which install channel leads Getting Started when several exist, and — when creating — which of two or three taglines opens the README.
 - Leaves the license to the `LICENSE` file, which GitHub shows in the repository sidebar: no License section or badge in the README unless the licensing needs explaining (dual licensing, a non-OSI license, terms that differ by version), and then only a one-line SPDX identifier with a link.
 - Verifies installation, startup, test, example, path, and local-link claims in every document it touches.
 - Adapts the README structure to CLIs, libraries, services, frontends, and research tools.
@@ -41,7 +42,7 @@ Both products may also load the skill automatically when a request matches its d
 
 1. Identify the language, audience, purpose, target documents, and output paths.
 2. Build an evidence inventory from source code, manifests, tests, configuration, examples, release history, and every existing companion document.
-3. Select the README sections and the companion documents the evidence justifies; propose any new companion file and wait for approval.
+3. Select the README sections and the companion documents the evidence justifies; propose any new companion file, ask the presentation questions (badges and images, badge style, leading install channel, tagline), and wait for approval.
 4. Draft each document from purpose and a minimal example toward installation, configuration, limitations, and maintenance details, with the README linking to every satellite.
 5. Check that commands, links, headings, assets, and examples are traceable and runnable, and that no fact is owned by two documents.
 6. Review each document as its first-time reader and report validation results, proposed-but-not-created files, and information gaps.

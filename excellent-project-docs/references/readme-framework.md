@@ -18,14 +18,14 @@ Order the top of the page by how quickly each element lets a non-fit reader shor
 
 | Section | Keep it when | Minimum content |
 | --- | --- | --- |
-| Title and introduction | Always | One sentence explaining what the project does and who it helps |
+| Title and introduction | Always | One sentence explaining what the project does and who it helps; when creating, chosen by the user from two or three evidence-based options |
 | Table of contents | The README is long | Working anchor links; do not list empty sections |
 | About | There is meaningful context or a use case | Problem, purpose, and scope |
 | Features | There are multiple user-facing capabilities | Outcomes rather than internal implementation |
 | Tech Stack | Technology choices affect use or contribution | The main technologies actually used |
 | Architecture | The system spans multiple components | Components and data or control flow; add a diagram when useful |
 | Project Structure | Contributors need repository orientation | The purpose of important directories and files |
-| Getting Started | Almost always | The path from installation to first successful result |
+| Getting Started | Almost always | The path from installation to first successful result, led by the channel the user chose when several exist |
 | Configuration | There are environment variables, config files, or external services | Name, purpose, requiredness, default, and secret-handling rules |
 | Security | There are credentials, user data, networks, or deployment risks | Security boundaries, prohibited practices, and reporting path |
 | API or CLI | It is a library, SDK, or CLI | Copyable calls or commands and their output |
@@ -51,10 +51,11 @@ Architecture, Security, How to Contribute, and What's Next each have a companion
 - For an API, show the input, call, and return value; document optional parameters, defaults, and types.
 - If an example needs extra files, keep an executable example in the repository and link to it.
 - Do not make critical information available only through a screenshot, animation, badge, or external video.
+- When the project installs or runs through several channels, lead with the one the user chose at the step 3 checkpoint and list the others after it; do not give every channel equal weight.
 
 ## Badge rules
 
-A badge is a compact status line, not decoration. Add one only when it answers a question the reader would otherwise have to open another file to answer.
+A badge is a compact status line, not decoration. Add one only when it answers a question the reader would otherwise have to open another file to answer — and only after the user has said yes: the evidence decides which badges are *possible*, the user decides whether the README carries any and in which style (the step 3 checkpoint in SKILL.md). The same applies to a logo, screenshot, or demo asset: offer what exists in the repository, add only what the user picked.
 
 Choose the badge type in this order:
 
@@ -78,7 +79,7 @@ Apply these rules to every badge:
 
 ### Choosing a style
 
-Shields.io accepts `flat` (the default), `flat-square`, `plastic`, `for-the-badge`, and `social`. Pick one and apply it to every badge in the file; a mixed set reads as a collage rather than a status line.
+Shields.io accepts `flat` (the default), `flat-square`, `plastic`, `for-the-badge`, and `social`. The style is part of the badge question put to the user: offer the table below, propose `flat` when they have no preference, and keep an existing README's style unless they ask for a change. Apply the chosen style to every badge in the file; a mixed set reads as a collage rather than a status line.
 
 | Style | Renders as | Reach for it when |
 | --- | --- | --- |
