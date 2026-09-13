@@ -34,7 +34,7 @@ Apply **Reader and content** through **Writing quality** to every document you t
 
 - [ ] Limitations, compatibility, known issues, and security notes are disclosed early.
 - [ ] A dormant or archived project discloses its maintenance status near the top.
-- [ ] The license type matches the LICENSE file and is written as an SPDX identifier.
+- [ ] There is no License section or license badge unless the licensing needs explaining; when one exists, it is a single line whose SPDX identifier matches the LICENSE file.
 - [ ] Badges and screenshots have actual value and do not carry the only copy of important information.
 - [ ] Badges use a dynamic source where one exists; any hard-coded value records where it came from.
 - [ ] Author details, contact information, contribution instructions, and roadmap items are confirmed.

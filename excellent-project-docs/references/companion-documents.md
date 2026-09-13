@@ -24,7 +24,7 @@ Keep an existing file where it is. For a new file prefer the root, or `.github/`
 | `.github/PULL_REQUEST_TEMPLATE.md` | Contributor | External PRs are accepted and a checklist would shorten review | The checks a reviewer will apply, mirroring `CONTRIBUTING.md` rather than restating it | Review expectations |
 | `.github/FUNDING.yml` | Sponsor | The user names a funding platform | Only platforms the user confirmed | The platforms and handles |
 
-`LICENSE` is not a document this skill writes. Choosing a license is the user's decision; the skill states its presence, absence, or mismatch as a fact.
+`LICENSE` is not a document this skill writes. Choosing a license is the user's decision; the skill states its presence, absence, or mismatch as a fact. It is also the sole owner of the license: the README does not restate it (see [readme-framework](readme-framework.md)).
 
 ## Hub-and-satellite rules
 

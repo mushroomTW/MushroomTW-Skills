@@ -24,7 +24,7 @@ Treat translated variants as one document: update every variant you can write ac
 
 1. **Evidence first**: gather facts from the repository before writing. Never invent features, commands, versions, environment variables, deployment methods, performance numbers, badges, screenshots, license details, contribution rules, security contacts, or release history.
 2. **Reader-led**: order information around the reader's decisions, not the author's implementation order. The top of the README must independently explain the project's purpose and smallest useful path; the top of each companion document must state its one topic and who it is for.
-3. **Cognitive funnel**: move from broad to specific: one-line purpose → minimal runnable example → installation → configuration and limitations → API or architecture details → contribution, license, and acknowledgements. Once a stage outgrows the README, it moves to a companion document and the README keeps a summary plus a link.
+3. **Cognitive funnel**: move from broad to specific: one-line purpose → minimal runnable example → installation → configuration and limitations → API or architecture details → contribution and acknowledgements. The license stays in the LICENSE file, which GitHub surfaces itself; the README gets a one-line License section only when the licensing needs explaining (see [readme-framework](references/readme-framework.md)). Once a stage outgrows the README, it moves to a companion document and the README keeps a summary plus a link.
 4. **Runnable**: commands must trace to repository files, scripts, CLI help, or tests. Run examples that need no network, credentials, paid services, dependency installation, or data changes. Otherwise 🔴 **CHECKPOINT** for authorization; absent approval means `unrun`, never passed.
 5. **Single source of truth**: one fact lives in one file. The README does not restate a companion document, a companion document does not restate the README's quick start, and neither copies information that readers can directly inspect in the environment and that is likely to drift. Use prose for background, rationale, limitations, and workflows that the files do not reveal.
 6. **Right-sized**: candidate sections and candidate companion documents are options, not a completeness score. Keep small projects to a README; add companion documents only when the evidence in [companion-documents](references/companion-documents.md) justifies each one.
@@ -59,7 +59,7 @@ Completion criterion: every command, path, environment variable, feature, and li
 Choose README sections from evidence, using these project-type emphases:
 
 - **CLI / application**: quick start, usage examples, configuration, output, limitations, deployment.
-- **Library / SDK**: one-line purpose, minimal API example, installation, API, compatibility, license.
+- **Library / SDK**: one-line purpose, minimal API example, installation, API, compatibility.
 - **Service / API**: architecture, startup, environment variables, health checks, API entry points, security, deployment.
 - **Frontend / full-stack product**: demo or screenshots, features, stack, architecture, local development, deployment.
 - **Tool / research project**: problem context, method, reproduction steps, inputs and outputs, limitations, citations.
@@ -157,6 +157,7 @@ Reject a draft that does any of these:
 - invents expected output instead of using real output or clearly labeled illustration;
 - deletes existing content it did not understand instead of preserving and reporting it;
 - trusts an inherited claim without re-verifying it, especially a license claim without a LICENSE file;
+- adds a License section or license badge that only repeats the LICENSE file;
 - creates a companion document the user neither named nor approved;
 - leaves a companion document unreachable from the README, or lets two documents own the same fact;
 - fills `SECURITY.md`, `CONTRIBUTING.md`, or `CODE_OF_CONDUCT.md` with a contact, policy, or standard that no evidence and no user confirmed.

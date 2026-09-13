@@ -31,6 +31,7 @@ Both products may also load the skill automatically when a request matches its d
 - Organizes content around the reader's adoption decisions instead of the implementation order.
 - Decides which companion documents the evidence justifies, proposes them, and creates only the ones you approve; a document you name is handled directly.
 - Keeps one owner per fact: the README summarizes and links, satellites do not restate the README, and contradictions between documents are resolved or reported.
+- Leaves the license to the `LICENSE` file, which GitHub shows in the repository sidebar: no License section or badge in the README unless the licensing needs explaining (dual licensing, a non-OSI license, terms that differ by version), and then only a one-line SPDX identifier with a link.
 - Verifies installation, startup, test, example, path, and local-link claims in every document it touches.
 - Adapts the README structure to CLIs, libraries, services, frontends, and research tools.
 - Keeps translated variants aligned, or reports the divergence when it cannot.

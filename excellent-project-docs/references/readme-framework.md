@@ -7,7 +7,7 @@ This framework combines CodeLove's “15 Essential Sections Every README Needs�
 Order information around the reader's adoption decision:
 
 1. **Identify**: title, one-line description, use case, and necessary context.
-2. **Evaluate**: minimal usage example, main features, compatibility, limitations, and license.
+2. **Evaluate**: minimal usage example, main features, compatibility, and limitations.
 3. **Try**: installation, prerequisites, configuration, startup, and expected output.
 4. **Integrate**: API or CLI reference, tech stack, architecture, and project structure.
 5. **Participate**: security, contribution, roadmap, acknowledgements, and author information.
@@ -31,10 +31,14 @@ Order the top of the page by how quickly each element lets a non-fit reader shor
 | API or CLI | It is a library, SDK, or CLI | Copyable calls or commands and their output |
 | How to Contribute | External contributions are welcome | Where to ask questions, whether PRs are accepted, and the development, testing, submission, and conduct entry points |
 | What's Next | There is a confirmed public roadmap | Short-term direction without invented commitments |
-| License | The repository contains license information | License type as an [SPDX identifier](https://spdx.org/licenses/) (`MIT`, `Apache-2.0`) and a link to the license file |
+| License | Only when the licensing needs explaining: dual or multi-licensing, a non-OSI license, terms that differ by version or subdirectory, or the user asks for it | One line at the end of the README: the [SPDX identifier](https://spdx.org/licenses/) (`MIT`, `Apache-2.0`) and a link to the license file; never the license text or a paragraph about it |
 | Acknowledgements / Author | It helps readers use or trust the project | Confirmed credits and contact information |
 
 These are candidate sections, not a completeness score. A short, accurate README is better than a long README full of filler.
+
+### The license lives in the LICENSE file
+
+GitHub reads `LICENSE` and shows the license in the repository sidebar, so a README section that repeats it is a second owner for the same fact. Half of the most-starred repositories carry no License section at all; the rest keep it to a single line such as `[MIT](LICENSE)`. Follow that: when a LICENSE file exists and the licensing is plain, write no License section and no license badge. Write the one-line form only for the exceptions in the table above. When auditing, a License section that merely restates the LICENSE file is reported as removable redundancy; a section that contradicts the file, or names a license with no file behind it, stays an error.
 
 ## When a section becomes its own file
 
@@ -67,9 +71,9 @@ A static value and its recorded source look like this:
 
 Apply these rules to every badge:
 
-- Link it to something the reader can verify: the license file, the registry page, the CI run, or the project's own documentation.
-- Write alt text that carries the same fact as the image, because the image may fail to load. `[![License: MIT]` works; `[![badge]` does not.
-- Add a license badge only when a LICENSE file exists and its type matches.
+- Link it to something the reader can verify: the registry page, the CI run, or the project's own documentation.
+- Write alt text that carries the same fact as the image, because the image may fail to load. `[![npm version]` works; `[![badge]` does not.
+- Do not add a license badge; the LICENSE file already puts the license in GitHub's sidebar. A License section, when one is justified, is a one-line link, not a badge.
 - Keep the set small enough to read at a glance; each extra badge lowers the value of the others.
 
 ### Choosing a style
@@ -87,9 +91,9 @@ Shields.io accepts `flat` (the default), `flat-square`, `plastic`, `for-the-badg
 The same badge in three styles, so the difference is visible before choosing:
 
 ```markdown
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![npm version](https://img.shields.io/npm/v/example.svg)](https://www.npmjs.com/package/example)
+[![npm version](https://img.shields.io/npm/v/example.svg?style=flat-square)](https://www.npmjs.com/package/example)
+[![npm version](https://img.shields.io/npm/v/example.svg?style=for-the-badge)](https://www.npmjs.com/package/example)
 ```
 
 Add `logo=` with a [simple-icons](https://simpleicons.org/) slug, plus `logoColor=`, when the icon speeds recognition rather than merely decorating:
@@ -107,7 +111,7 @@ When the evidence shows the project is dormant, archived, or in maintenance mode
 - A slogan with no use case.
 - Architecture and technology details before installation and examples.
 - Commands, environment variables, paths, or deployment steps that do not exist.
-- A sentence written only so its section can exist — a license paragraph pointing at a missing LICENSE file, a contribution section with no real channel behind it.
+- A sentence written only so its section can exist — a License section that repeats what the LICENSE file and GitHub's sidebar already say, a contribution section with no real channel behind it.
 - Installation steps that assume the reader already lives in the project's ecosystem: `make install` with no word about prerequisites, build tools, or supported platforms.
 - A large badge wall used as a substitute for limitations, maintenance status, or evidence.
 - Every API, design decision, and tutorial forced into the README until it loses focus.
