@@ -1,6 +1,6 @@
 # Showcase README
 
-Two presentation levels exist. **Plain** is the default: text, tables, code blocks, and the badges or images the user picked. **Showcase** turns the same facts into a designed page — a header block with a poster-style banner and a facts line, themed diagrams, feature cards, and collapsed reference tables — in the style of highly visual open-source pages. Read this file only when the user chose showcase at the step 3 checkpoint; never apply it on your own initiative.
+Two presentation levels exist. **Plain** is the default: text, tables, code blocks, and the badges or images the user picked. **Showcase** turns the same facts into a designed page — a header block with a banner designed for the project and a facts line, one figure per concept (themed Mermaid or hand-drawn SVG), feature cards, and collapsed reference tables — in the style of highly visual open-source pages. Read this file only when the user chose showcase at the step 3 checkpoint; never apply it on your own initiative.
 
 Everything else in [readme-framework](readme-framework.md) still holds. Showcase changes how facts are presented, not which facts exist: every node in a diagram, every fact in the banner, every card in the grid is a component, command, number, or step the evidence inventory recorded; the license stays in the LICENSE file with no badge or section; no image or diagram carries the only copy of a fact, because renderers outside GitHub (npm, PyPI, crates.io, editor previews) may show nothing in its place.
 
@@ -13,17 +13,17 @@ The style is derived from the project and then chosen by the user — never gues
 | Dimension | Read it from | Proposal |
 | --- | --- | --- |
 | Accent | Logo, existing assets, a site's CSS, a favicon; failing those, the palette rule below | The brand colour, or the rule's pick with the reason ("emerald, since the stack's own colours are purple and blue") |
-| Mood | The existing README, docs site, or screenshots: dark terminal-style projects and CLIs read as dark posters; design-system, education, and documentation-heavy projects read as light editorial | Dark poster by default; light editorial when the evidence leans that way |
-| Motif | The concept the first diagram shows | One of the four motifs, named with the real labels it would carry |
+| Mood | The existing README, docs site, or screenshots: terminal-style projects and CLIs read dark; design-system, education, and documentation-heavy projects read light | Dark by default; light when the evidence leans that way |
+| Direction | What the project is: a library, a CLI or server with a session, a pipeline or architecture, a project with a brand asset | One of the four banner directions below, with the figure or mockup it would carry named in the project's own terms |
 
-Put the proposal and one alternative to the user in the same checkpoint message as the other presentation questions ("dark poster, emerald accent, stacked-tiers motif — or light editorial with the same accent"), and take whatever they answer, including a colour or mood of their own. After drafting, the render check produces a PNG; attach it to the delivery so the user judges the banner as an image, not as SVG source.
+Put the proposal and one alternative to the user in the same checkpoint message as the other presentation questions ("dark, emerald accent, terminal mockup of `rimworld_status` → `rebuild_index` — or figure-first with the three index tiers"), and take whatever they answer, including a colour or mood of their own. After drafting, the render check produces a PNG; attach it to the delivery so the user judges the banner as an image, not as SVG source.
 
 ## Palette
 
 Choose once, reuse everywhere — banner, diagrams, cards:
 
 - **Accent**: the project's existing brand colour when its assets, site, or logo have one. Otherwise pick one of `#f97316` (orange), `#10b981` (emerald), `#0ea5e9` (sky), `#8b5cf6` (violet) — whichever is furthest from the colours of the technologies the README names, so the accent reads as the project rather than as a framework logo.
-- **Ground**, by mood. Dark poster: `#0f0f0f` ground, `#ffffff` wordmark, `#c8c8c8` body, `#7a7a7a` captions, `#2a2a2a` rules, motif greys `#3d3d3d` → `#242424`. Light editorial: `#fafafa` ground, `#111111` wordmark, `#444444` body, `#8a8a8a` captions, `#e0e0e0` rules, motif greys `#c4c4c4` → `#e6e6e6`. One accent on a flat ground is the whole scheme; gradients, grids, and a second hue make it a dashboard, not a poster.
+- **Ground**, by mood. Dark: `#0f0f0f` ground, `#ffffff` wordmark, `#c8c8c8` body, `#7a7a7a` captions, `#2a2a2a` rules, motif greys `#3d3d3d` → `#242424`. Light editorial: `#fafafa` ground, `#111111` wordmark, `#444444` body, `#8a8a8a` captions, `#e0e0e0` rules, motif greys `#c4c4c4` → `#e6e6e6`. One accent and one ground are the scheme; a second hue only where it carries meaning (success, error, a second party in a diagram). Depth — a gradient ground, a glow behind a card, layered panels — is a taste decision for the direction chosen below, kept subtle enough that every text still passes contrast against what is directly behind it.
 - **Theme adaptation** is opt-in: the fixed ground already reads the same in GitHub's light and dark modes. When the user wants the banner to follow the viewer's theme, write both moods as two SVG files and reference them with `<picture>` and `prefers-color-scheme` sources — the mechanism GitHub documents — rather than a media query inside one SVG, which some renderers ignore.
 - **Animation** is out: a README banner is read, not watched, and a moving banner says nothing a static one does not.
 - **Diagrams** render on GitHub's light and dark backgrounds alike, so node fills are light tints of the accent with dark text (`#0b1220`) and the accent as border; never white text on a light fill or dark text on the ground colour.
@@ -80,60 +80,47 @@ Rules for the block:
 
 When the repository has no banner, write one as an SVG so the user can replace it later with their own artwork. Put it where the repository already keeps images (`assets/`, `docs/images/`, `.github/`); create `assets/` only when no such directory exists. List the file under **Documents** in the delivery report as created.
 
-The banner is a **poster, not a dashboard**: a flat dark ground, one accent, a typographic hierarchy that runs from a small uppercase eyebrow to a heavy display wordmark, and a single data motif on the right. Rounded pills, gradients, grid overlays, and boxes with text inside are the marks of a UI mockup; leave them out.
+Design it the way a front-end designer would: choose a direction that fits what the project *is*, then compose for this project. This recipe fixes what must be true of the result and how to check it — not what it looks like. Two banners made with it for two different projects should not share a layout.
 
-### Design floor
+### Directions
 
-A banner ships with all six of these, or it is not finished:
+| Direction | Fits | What carries the design |
+| --- | --- | --- |
+| Editorial poster | A library, a tool with one clear concept, a project with a strong name | Typographic hierarchy — a small letter-spaced eyebrow, the name as a heavy display wordmark, the tagline — with one figure of the core concept beside it |
+| Product or terminal mockup | A CLI, a server, an agent tool: anything with a session a reader would recognise | A window or terminal card showing a real invocation and the text the program actually prints, with the name and tagline set beside it |
+| Figure-first | A pipeline, an architecture, a protocol: anything whose shape *is* the pitch | The figure fills the banner — real stages, ports, limits, boundaries — and the wordmark sits in a corner of it |
+| Split panel | A project with a brand colour or a logo asset in the repository | One panel in the brand colour carrying the mark, the other carrying name, tagline, and facts |
 
-1. **Eyebrow**: one uppercase line, letter-spaced, in the accent, naming the category the project belongs to (`MCP SERVER FOR RIMWORLD MODDING`, `CLI FOR POSTGRES MIGRATIONS`).
-2. **Wordmark**: the project name at the largest size that fits the text column, weight 900, tight letter-spacing. It is the heaviest thing on the banner.
-3. **Tagline**: the one the user chose, in one line under the wordmark.
-4. **Flow line**: the core call or command sequence in monospace, three or four steps joined by accent-coloured arrows (`init → build → deploy`). A project with no sequence uses three nouns for what it does instead.
-5. **Caption**: one uppercase letter-spaced line of three facts in grey — platforms, count, guarantee — each traced to the repository.
-6. **Motif**: a data figure on the right, chosen from the table below and drawn for this project, with its own eyebrow above and caption beneath.
+Pick by fit, not by habit; when two directions fit, the one that shows more of the project's own concept wins. Depth (gradient, glow, cards), flat, dark, or light are taste decisions inside the direction, made for the mood chosen at the checkpoint.
 
-### Composition
+### What every banner carries
 
-There is no template to fill in. Compose the banner for this project, inside a `viewBox="0 0 1200 400"`, from these proportions:
+- The project name as the heaviest element on the canvas.
+- The tagline the user chose.
+- At least one figure, mockup, or fact set drawn from this project's own concepts — the thing that makes the swap test fail: swap in another project's name, tagline, and facts, and the banner should look wrong.
+- Facts on the banner — counts, platforms, ports, limits, versions — traced to the repository and recorded in the report with their source. A count is computed from the repository at writing time (`counted from <path>`).
 
-- Margins of at least 80 units on every side; the design breathes or it looks cramped at README width.
-- The text stack owns the left three fifths, the motif the right quarter, separated by a hairline divider or by empty space — one or the other, never a box around the motif.
-- Reading order top to bottom in the text stack: eyebrow, wordmark, tagline, flow line, caption. Vertical spacing grows with the size of the element above it: the wordmark gets the most air, the caption the least.
-- A thin accent rule runs along the left of the text stack, the only decorative element on the banner.
-- The wordmark's size follows from the name's length (the fitting rules below); a short name goes huge, a long name goes as large as the column allows. The tagline is never more than a third of the wordmark's size.
-- Left-align everything in the text stack; centre nothing.
+### What a mockup may show
 
-The check for a finished composition: swap in another project's name, tagline, and facts, and the banner should look wrong — the motif's shapes, labels, and proportions belong to this project's concept and numbers.
+A terminal or window card shows only what the program actually emits: commands that exist in the CLI or manifest, and output text that exists as a string in the source, in a test fixture, or was captured from a run the user authorised. Sample identifiers, sample error messages, and "typical" results the repository does not contain are invented content, and the credibility they cost outweighs any design they add. When the real output is dull, show the command alone with a cursor, or choose another direction.
 
 ### Fitting text
 
-Widths below were measured in Chrome with Segoe UI; they hold within a few percent for the other system fonts. With `W` the text column's width (about 680 units when the motif takes the right quarter), compute every size before writing, because an overflowing wordmark or tagline is the most common way a banner fails:
+Widths below were measured in Chrome with Segoe UI; they hold within a few percent for the other system fonts. With `W` the width available to a line of text (the column it sits in, or the card it sits in), compute every size before writing, because an overflowing wordmark, tagline, or command line is the most common way a banner fails:
 
 | Text | Per-character width | Rule |
 | --- | --- | --- |
-| Wordmark, weight 900 | 0.58 × font-size | `font-size = min(110, floor(W / (0.58 × chars)))` — with `W` 680, 16 characters gives 70 and 8 gives 110 |
-| Tagline, regular | 0.48 × font-size | `font-size = min(24, floor(W / (0.48 × chars)))`; below 18, wrap to a second line or ask the user for a shorter tagline |
-| Flow line, monospace bold 20 | 12 per character + 32 per arrow | Total ≤ `W`; otherwise drop to 18 or cut to three steps |
-| Eyebrow and caption, 14 with `letter-spacing` 3–4 | 0.65 × font-size + letter-spacing | ≤ 60 characters |
-| Motif labels, 14 | 0.5 × font-size | A label inside a shape fits with 16 units to spare on each side, or it moves beneath the shape |
+| Display wordmark, weight 800–900 | 0.58 × font-size | `font-size = min(110, floor(W / (0.58 × chars)))`; a name too long for 48 breaks at a hyphen or word boundary onto a second line |
+| Body and tagline, regular | 0.48 × font-size | `font-size = min(24, floor(W / (0.48 × chars)))`; below 18, wrap to a second line or ask the user for a shorter tagline |
+| Monospace (commands, output, flow lines) | 0.6 × font-size per character | Total ≤ `W` of the card or column it sits in, arrows and prompts included |
+| Uppercase letter-spaced labels | 0.65 × font-size + letter-spacing | ≤ 60 characters |
+| Labels inside a shape | 0.5 × font-size | Fits with 16 units to spare on each side, or it moves beneath the shape |
 
-### Motifs
-
-The motif is a figure, not decoration: it shows one ordered fact about the project — tiers, steps, or measured quantities — in shapes of grey that ramp toward the accent. Draw it from the concept, the way a chart is drawn from its data: decide what the shapes stand for, size them by the values or the order, then place the labels.
-
-| Motif | Draw it when | Shape |
-| --- | --- | --- |
-| Stacked tiers | The first diagram shows layers, tiers, or a cache hierarchy | Three or four full-width bars, the first in the accent, the rest in greys darkening downward; each bar carries its name left and its cost right |
-| Bar ramp | The repository records measured numbers in order — build times, scores, sizes — in docs, CI output, or benchmarks | Four bars rising left to right from grey to the accent, the value above each, a dashed accent trend line from bar top to bar top |
-| Step chain | The project is a pipeline or a loop | Four small squares joined by accent arrows, the last square filled in the accent; a curved return arrow when it loops |
-| Node pair | The project is a client and a server, or a bridge between two things | Two outlined boxes with the real names, a labelled arrow each way |
-
-Numbers in a motif come from the evidence inventory and are recorded in the report with their source; a bar ramp without recorded numbers is the wrong motif — use stacked tiers or a step chain.
+Nothing on the banner is set below 12 units; at README width the canvas renders at roughly 900 pixels, and smaller text is decoration that cannot be read.
 
 ### Constraints that keep the banner rendering everywhere
 
-- Text in the banner is limited to the eyebrow, the project name, the tagline, the flow line, the caption, and the motif labels. No slogans, statistics, or claims that are not already in the README.
+- Every string on the banner is the name, the tagline, a fact with a source, a real command or output line, or a label on a figure. No slogans, statistics, or claims that are not already in the README.
 - A fixed `viewBox="0 0 1200 400"` and no `width`/`height` attributes, so it scales with the page.
 - A `font-family` stack of system fonts. No `@import`, no `<image href>`, no external URL of any kind: GitHub serves SVGs through a proxy that blocks outbound requests, so an imported font fails silently and the text falls back anyway.
 - A fixed ground so the banner reads the same in light and dark themes.
@@ -141,23 +128,30 @@ Numbers in a motif come from the evidence inventory and are recorded in the repo
 
 ### Render check
 
-After writing the SVG, look at it before delivering. Wrap it in a page and screenshot it headlessly — Chrome and Edge both take `--headless=new --disable-gpu --hide-scrollbars --window-size=1200,400 --screenshot=<out.png> <file.html>` — or open it in the browser preview when the host provides one, and read the image. Check that no text crosses the divider or the right margin, the wordmark is the heaviest element, and the motif labels sit inside their bars. Fix and render again until it passes; two or three rounds are normal. When no renderer is available, verify every line against the fitting table by arithmetic and say so in the report under **Unrun checks**.
+After writing the SVG, look at it before delivering. Wrap it in a page and screenshot it headlessly — Chrome and Edge both take `--headless=new --disable-gpu --hide-scrollbars --window-size=1200,400 --screenshot=<out.png> <file.html>` — or open it in the browser preview when the host provides one, and read the image. Check that no text crosses the edge of its card, column, or the canvas; that the name is the heaviest element; that every label is legible; and that the composition is not mostly empty ground — a banner whose canvas is a quarter empty is unfinished. Fix and render again until it passes; two or three rounds are normal. When no renderer is available, verify every line against the fitting table by arithmetic and say so in the report under **Unrun checks**.
 
-## One diagram per concept
+## One figure per concept
 
-Each major concept section — how the tool works, how the components fit, what the lifecycle is — opens with a Mermaid diagram followed by prose that states the same facts. GitHub renders Mermaid natively, the diagram lives in the Markdown and diffs with it, and no image file is needed.
+Each major concept section — how the tool works, how the components fit, what the lifecycle is — opens with a figure followed by prose that states the same facts. Two ways to draw one; a page may mix them under one palette:
 
-| Concept | Diagram | Shape |
+| Way | Reach for it when | Cost and reach |
 | --- | --- | --- |
-| Pipeline, loop, or workflow | `flowchart LR` | Numbered steps left to right; a decision as a diamond; a loop as an edge back to the start |
-| Tiers, layers, or a timeline | `flowchart LR` with `subgraph` per tier | Left to right in the order they complete; the cost or duration in the subgraph title |
-| Components and their boundaries | `flowchart TB` with `subgraph` | One subgraph per service, package, or layer; edges labelled with what flows |
-| Request or message exchange | `sequenceDiagram` | One participant per real process; messages named after the actual call or event |
-| Lifecycle or mode transitions | `stateDiagram-v2` | States named as the code names them |
+| Mermaid in the Markdown | The concept is a flow, a sequence, or a state machine, and a themed default rendering says it well | Cheapest; diffs with the text; renders on GitHub and GitLab, not on npm, PyPI, or crates.io pages |
+| Hand-drawn SVG in `assets/` | The concept deserves a designed panel — an architecture with boundaries and labelled flows, a tiered index with its costs, a request path across processes — in the banner's own palette | More work; same render check and fitting rules as the banner; renders everywhere an image does |
 
-### Theme every diagram
+Either way the shape follows the concept:
 
-Open each diagram with an init directive carrying the palette, and give nodes a class by role, so every diagram on the page reads as one set and matches the banner:
+| Concept | Shape |
+| --- | --- |
+| Pipeline, loop, or workflow | Steps left to right; a decision as a diamond; a loop as an edge back to the start |
+| Tiers, layers, or a timeline | Left to right in the order they complete, each with its cost or duration |
+| Components and their boundaries | One region per service, package, or layer; edges labelled with what flows |
+| Request or message exchange | One lane per real process; messages named after the actual call or event |
+| Lifecycle or mode transitions | States named as the code names them |
+
+### Theme Mermaid to the palette
+
+Open each Mermaid diagram with an init directive carrying the palette, and give nodes a class by role, so every diagram on the page reads as one set and matches the banner:
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {
@@ -185,17 +179,17 @@ flowchart LR
 
 ### Richness floor
 
-A diagram earns its place when it shows something the prose beside it cannot show as quickly. The floor: **at least four nodes, and at least one edge label or subgraph.** Three boxes in a row, or three boxes stacked, is a list wearing a diagram's clothes — either enrich it with what the evidence contains (what flows on each edge, which boundary each node sits in, the cost of each tier) or drop it and keep the table.
+A figure earns its place when it shows something the prose beside it cannot show as quickly. The floor: **at least four nodes, and at least one edge label or region.** Three boxes in a row, or three boxes stacked, is a list wearing a diagram's clothes — either enrich it with what the evidence contains (what flows on each edge, which boundary each node sits in, the cost of each tier) or drop it and keep the table.
 
-### Rules for every diagram
+### Rules for every figure
 
-- Every node, participant, subgraph, and state maps to something recorded in the evidence inventory: a directory, module, service, command, CI job, or documented step. A box that exists only to balance the picture is invented content.
+- Every node, lane, region, and state maps to something recorded in the evidence inventory: a directory, module, service, command, CI job, or documented step. A box that exists only to balance the picture is invented content.
 - Edges say what flows: a call name, a file type, a message, a token. A bare arrow between two named boxes is the minimum, not the norm.
-- Eight nodes or fewer. When a concept needs more, it belongs in `ARCHITECTURE.md`, and the README diagram shows only the top level.
+- Eight nodes or fewer. When a concept needs more, it belongs in `ARCHITECTURE.md`, and the README figure shows only the top level.
 - Labels in the README's language; identifiers (`src/cli/`, `POST /jobs`) stay as written in code.
-- The prose beside the diagram is complete on its own, so a renderer that drops the diagram still tells the reader the same thing.
-- A chart or figure that already exists in the repository is used instead of a new diagram when it matches the current code; when it has drifted, report the drift and draw the Mermaid version.
-- Designed infographics (rendered PNG charts) are outside what this skill produces; when the user wants them, list each as a recommendation with the concept it would illustrate.
+- The prose beside the figure is complete on its own, so a renderer that drops the figure still tells the reader the same thing.
+- A chart or figure that already exists in the repository is used instead of a new one when it matches the current code; when it has drifted, report the drift and draw the current version.
+- A hand-drawn SVG passes the banner's render check before delivery; raster images are not produced.
 
 ## Feature cards
 
@@ -257,7 +251,7 @@ Long reference tables — a tool or command catalogue, environment variables, co
 ## What showcase never does
 
 - Adds a banner, hero, diagram, or card grid when the user chose plain, or did not answer.
-- Draws a component, step, or flow the code does not contain, or puts a number in the banner or a card that was not counted from the repository.
+- Draws a component, step, or flow the code does not contain, puts a number in the banner or a card that was not counted from the repository, or shows output in a mockup that the program does not print.
 - Replaces the Getting Started commands with a picture of them.
 - Restores a license badge or License section.
 - Imports fonts, scripts, or images from outside the repository into the banner.
