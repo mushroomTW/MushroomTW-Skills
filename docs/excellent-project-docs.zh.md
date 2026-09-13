@@ -32,6 +32,7 @@ $excellent-project-docs 請根據這個 repository 的實際內容改善 README�
 - 依證據判斷哪些隨附文件值得存在，先提案、經你同意才建立；你點名的文件則直接處理。
 - 每個事實只有一個擁有者：README 摘要並連結，衛星文件不重述 README，文件之間的矛盾會被解決或回報。
 - 呈現方式由你決定：詢問文件集要涵蓋哪些語言、要放哪些徽章／logo／截圖與採用哪種風格、多種安裝管道時以哪一條為主，以及建立新 README 時從兩三個標語中挑選開頭那一句。
+- 提供兩種呈現層級：plain（預設）或 showcase——後者加上置中標頭區、由 skill 撰寫的 SVG banner，以及每個概念章節一張 Mermaid 圖，圖中只畫證據裡存在的元件與步驟。
 - 授權交給 `LICENSE` 檔，GitHub 會在側欄自動顯示：README 不放 License 章節或徽章，除非授權需要說明（雙授權、非 OSI 授權、依版本不同），且只寫一行 SPDX 識別碼加連結。
 - 驗證每份經手文件中的安裝、啟動、測試、範例、目錄與本機連結。
 - 依 CLI、函式庫、服務、前端或研究工具調整 README 結構。
@@ -42,12 +43,12 @@ $excellent-project-docs 請根據這個 repository 的實際內容改善 README�
 
 1. 確認語言、讀者、目的、目標文件與輸出位置。
 2. 從原始碼、manifest、測試、設定、範例、發布歷史及每一份現有隨附文件建立證據清單。
-3. 選擇 README 章節與證據支持的隨附文件；對任何新的隨附文件先提案，並詢問呈現方式（徽章與圖片、徽章風格、主要安裝管道、標語），等待同意。
+3. 選擇 README 章節與證據支持的隨附文件；對任何新的隨附文件先提案，並詢問呈現方式（plain 或 showcase 層級、徽章與圖片、徽章風格、主要安裝管道、標語），等待同意。
 4. 逐份起草：由用途與最小範例開始，逐步補上安裝、設定、限制與維護資訊，並讓 README 連到每個衛星文件。
 5. 檢查命令、連結、標題、資產與範例是否可追溯且可執行，並確認沒有任何事實同時由兩份文件擁有。
 6. 以各文件的首次閱讀者角度進行最後複核，回報驗證結果、已提案但未建立的檔案與資訊缺口。
 
-詳細規則位於 [`SKILL.md`](../excellent-project-docs/SKILL.md)。README 的設計原則、隨附文件規則、品質檢核表與風格範例位於同一個 skill 的 [`references/`](../excellent-project-docs/references/) 目錄。
+詳細規則位於 [`SKILL.md`](../excellent-project-docs/SKILL.md)。README 的設計原則、showcase 食譜、隨附文件規則、品質檢核表與風格範例位於同一個 skill 的 [`references/`](../excellent-project-docs/references/) 目錄。
 
 ## 範圍
 
@@ -94,7 +95,7 @@ SECURITY.md: static checks passed.
 excellent-project-docs/
 ├── SKILL.md                         # 核心指示與觸發範圍
 ├── agents/openai.yaml               # Codex 顯示資料與預設提示
-├── references/                      # README 設計框架、隨附文件規則、檢核表與範例
+├── references/                      # README 設計框架、showcase 食譜、隨附文件規則、檢核表與範例
 └── scripts/                         # 可一次檢查多份文件的靜態檢查器
 ```
 

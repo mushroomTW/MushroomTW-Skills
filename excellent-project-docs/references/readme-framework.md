@@ -36,6 +36,8 @@ Order the top of the page by how quickly each element lets a non-fit reader shor
 
 These are candidate sections, not a completeness score. A short, accurate README is better than a long README full of filler.
 
+The sections are the same at both presentation levels. Plain is the default; when the user chose showcase at the step 3 checkpoint, [visual-readme](visual-readme.md) adds a header block, a banner, and one diagram per concept on top of the same section set and the same evidence.
+
 ### The license lives in the LICENSE file
 
 GitHub reads `LICENSE` and shows the license in the repository sidebar, so a README section that repeats it is a second owner for the same fact. Half of the most-starred repositories carry no License section at all; the rest keep it to a single line such as `[MIT](LICENSE)`. Follow that: when a LICENSE file exists and the licensing is plain, write no License section and no license badge. Write the one-line form only for the exceptions in the table above. When auditing, a License section that merely restates the LICENSE file is reported as removable redundancy; a section that contradicts the file, or names a license with no file behind it, stays an error.

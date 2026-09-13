@@ -1,6 +1,6 @@
 ---
 name: excellent-project-docs
-description: Create, improve, audit, or synchronize a software project's repository-level documentation - the README.md plus the standard companion files GitHub reads from the repository root or .github/ (CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, SUPPORT, CHANGELOG, ARCHITECTURE, ROADMAP, GOVERNANCE, issue and pull request templates). Use when the user asks to write a README, set up or organize project documentation, improve a GitHub project homepage or community profile, add installation and usage instructions, add a contributing, security, or architecture document, update project docs after code or configuration changes, or check whether they are accurate, runnable, and consistent with each other; do not use for a complete API manual, a documentation website or the pages under docs/, or a general article unrelated to a repository.
+description: Write, improve, audit, or synchronize a repository's README.md and the companion files GitHub reads from the root or .github/ (CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, SUPPORT, CHANGELOG, ARCHITECTURE, ROADMAP, GOVERNANCE, issue and PR templates), with every claim traced to repository evidence. Use when the user asks for a README or project homepage, a contributing, security, or architecture file or a GitHub community profile, docs brought back in step after code or configuration changes, or a check that the docs are accurate, runnable, and consistent with each other. Not for an API manual, a documentation website or the pages under docs/, or writing unrelated to a repository.
 ---
 
 # Excellent Project Docs
@@ -68,11 +68,12 @@ Choose README sections from evidence, using these project-type emphases:
 
 Some README choices are the user's, not the evidence's. Collect the ones below and put them to the user in one 🔴 **CHECKPOINT**, folded into the companion-document checkpoint further down when both apply:
 
+- **Presentation level**: **plain** (the default: text, tables, code, and whatever badges or images the user picks below) or **showcase** (a centered header block with a banner, one Mermaid diagram per concept section, panel-style section breaks — the recipe in [visual-readme](references/visual-readme.md)). Offer showcase as an option; do not recommend it.
 - **Visual elements**: the badges the evidence supports (each with its dynamic endpoint or recorded source, per the badge rules in [readme-framework](references/readme-framework.md)) and the logo, screenshots, or demo assets that exist in the repository. Ask whether to include any, which ones, and which shields.io style; when the README already has badges, offer to keep their existing style.
 - **Primary path**: when the project installs or runs through several channels — registry package, container image, source build, installer — ask which one leads Getting Started; the others follow it.
 - **Tagline** (create mode): offer two or three one-line descriptions drawn from the evidence for the user to pick or rewrite.
 
-Without an answer: no badges or images; lead with the channel the manifests and CI document most completely and disclose that assumption; keep the tagline and mark it assumed in the report. A user who says no badges or images gets none, even when the evidence supports them.
+Without an answer: plain; no badges or images; lead with the channel the manifests and CI document most completely and disclose that assumption; keep the tagline and mark it assumed in the report. A user who says no badges or images gets none, even when the evidence supports them.
 
 Then decide the companion documents. Read [companion-documents](references/companion-documents.md) and, for each candidate, record one of: **exists** (keep, improve, or synchronize), **justified** (the evidence threshold is met and the document is missing), or **not justified**. A README section that has outgrown the funnel — a contribution guide longer than the quick start, an architecture walkthrough before the first example — is evidence for a companion document.
 
@@ -84,7 +85,7 @@ Completion criterion: the document set and every document's section list are wri
 
 ### 4. Draft the documents
 
-For the README follow the cognitive funnel, section rules, and anti-patterns in [readme-framework](references/readme-framework.md); for each companion document follow its row in [companion-documents](references/companion-documents.md). Calibrate tone, density, and section rhythm against [exemplars](references/exemplars.md).
+For the README follow the cognitive funnel, section rules, and anti-patterns in [readme-framework](references/readme-framework.md) — and, only when the user chose showcase, the header block, banner, and diagram rules in [visual-readme](references/visual-readme.md); for each companion document follow its row in [companion-documents](references/companion-documents.md). Calibrate tone, density, and section rhythm against [exemplars](references/exemplars.md).
 
 Keep the first screen of every document independently useful. Put a real example before abstract internals; link deeper material instead of copying it. Where a fact moves from the README into a companion document, leave a one-line summary and a relative link in the README, and open the companion document with a link back. Never imply `.env`, configuration, deployment, review, or release behavior that code, CI, or history does not implement. Use GFM, sparse admonitions for must-not-miss facts, sparse emoji, and shallow lists. A badge, logo, demo, or screenshot appears only if the user chose it at the step 3 checkpoint, must answer a reader question, and cannot carry the only copy of a fact; use repository assets only and follow the framework's badge rules.
 
@@ -169,6 +170,7 @@ Reject a draft that does any of these:
 - trusts an inherited claim without re-verifying it, especially a license claim without a LICENSE file;
 - adds a License section or license badge that only repeats the LICENSE file;
 - adds badges or images, or changes their style, without the user's answer at the step 3 checkpoint;
+- applies the showcase level, or draws a diagram of components the code does not contain, when the user did not choose showcase;
 - adds a translated variant the user did not choose;
 - removes an entire existing section without the approval the improve-mode checkpoint requires;
 - creates a companion document the user neither named nor approved;

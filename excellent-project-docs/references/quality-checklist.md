@@ -51,6 +51,7 @@ Apply **Reader and content** through **Writing quality** to every document you t
 - [ ] User-facing information appears before implementation detail.
 - [ ] Markdown headings, code blocks, tables, and lists are consistent.
 - [ ] All badges share one shields.io style and read as a single row.
+- [ ] Showcase elements (header block, banner, Mermaid diagrams, panel breaks) appear only when the user chose showcase; every diagram node maps to an evidence-inventory entry, the prose beside each diagram stands on its own, and the banner SVG loads nothing from outside the repository.
 - [ ] The same fact is not duplicated in multiple places where it can drift.
 - [ ] Important content is not hidden in images or network-only badges.
 - [ ] Emoji are sparse and never carry meaning on their own.
