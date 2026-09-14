@@ -72,7 +72,7 @@ excellent-project-docs/
 
 ## 驗證
 
-靜態檢查器僅依賴 Python 標準函式庫，可一次接受多份 Markdown 文件，逐份檢查未完成標記、空連結目標、本機連結，以及指向不存在授權檔的敘述，並略過程式碼區塊與行內程式碼。章節或隨附文件是否齊備、內容是否有用交由品質檢核表判斷，不以關鍵字比對代替：
+靜態檢查器僅依賴 Python 標準函式庫，可一次接受多份 Markdown 文件，逐份檢查未完成標記、空連結目標、本機連結（Markdown 與 `<img>`/`<source>` 皆含）、缺 alt 的圖片、授權徽章或 README 內的授權章節，以及指向不存在授權檔的敘述，並略過程式碼區塊與行內程式碼。文件引用的本機 SVG 也會被打開檢查——缺 `viewBox`、GitHub 會擋掉的外部 URL 或 `<script>`、小於畫布寬度百分之一的文字——Mermaid 區塊則檢查 init 指令是否為合法 JSON、`:::class` 是否都有對應的 `classDef`。章節或隨附文件是否齊備、內容是否有用交由品質檢核表判斷，不以關鍵字比對代替：
 
 ```powershell
 python scripts/validate_docs.py README.md CONTRIBUTING.md SECURITY.md --project .

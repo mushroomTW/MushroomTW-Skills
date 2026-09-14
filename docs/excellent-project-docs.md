@@ -72,7 +72,7 @@ Do not duplicate this skill elsewhere in the repository. Installation copies thi
 
 ## Validation
 
-The included static checker uses only the Python standard library. It accepts one or more Markdown documents and, for each, checks for unfinished markers, empty link targets, broken local links, and prose that points readers at a nonexistent license file, ignoring code blocks and inline code. Judging whether a section or a companion document is present and useful stays with the quality checklist, not with keyword matching:
+The included static checker uses only the Python standard library. It accepts one or more Markdown documents and, for each, checks for unfinished markers, empty link targets, broken local links (Markdown and `<img>`/`<source>` alike), images without alt text, a license badge or a README License section, and prose that points readers at a nonexistent license file, ignoring code blocks and inline code. It also opens every local SVG the document references — missing `viewBox`, external URLs or `<script>` that GitHub blocks, text under one hundredth of the canvas width — and checks Mermaid blocks for an init directive that is not valid JSON or a class with no `classDef`. Judging whether a section or a companion document is present and useful stays with the quality checklist, not with keyword matching:
 
 ```powershell
 python scripts/validate_docs.py README.md CONTRIBUTING.md SECURITY.md --project .
