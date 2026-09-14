@@ -43,7 +43,7 @@ Both products may also load the skill automatically when a request matches its d
 
 1. Identify the language, audience, purpose, target documents, and output paths.
 2. Build an evidence inventory from source code, manifests, tests, configuration, examples, release history, and every existing companion document.
-3. Select the README sections and the companion documents the evidence justifies; propose any new companion file, ask the presentation questions (plain or showcase level, badges and images, badge style, leading install channel, tagline), and wait for approval.
+3. Select the README sections and the companion documents the evidence justifies; propose any new companion file, ask the presentation questions (plain or showcase level with a style proposal derived from the project — accent, mood, domain cue, banner direction — badges and images, badge style, leading install channel, tagline), and wait for approval. In showcase the banner is drafted and rendered first, and its PNG is approved before the page is written.
 4. Draft each document from purpose and a minimal example toward installation, configuration, limitations, and maintenance details, with the README linking to every satellite.
 5. Check that commands, links, headings, assets, and examples are traceable and runnable, and that no fact is owned by two documents.
 6. Review each document as its first-time reader and report validation results, proposed-but-not-created files, and information gaps.
