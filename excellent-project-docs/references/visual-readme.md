@@ -23,7 +23,7 @@ Put the proposal and one alternative to the user in the same checkpoint message 
 Choose once, reuse everywhere — banner, diagrams, cards:
 
 - **Accent**: the project's existing brand colour when its assets, site, or logo have one. Otherwise pick one of `#f97316` (orange), `#10b981` (emerald), `#0ea5e9` (sky), `#8b5cf6` (violet) — whichever is furthest from the colours of the technologies the README names, so the accent reads as the project rather than as a framework logo.
-- **Ground**, by mood. Dark: `#0f0f0f` ground, `#ffffff` wordmark, `#c8c8c8` body, `#7a7a7a` captions, `#2a2a2a` rules, motif greys `#3d3d3d` → `#242424`. Light editorial: `#fafafa` ground, `#111111` wordmark, `#444444` body, `#8a8a8a` captions, `#e0e0e0` rules, motif greys `#c4c4c4` → `#e6e6e6`. One accent and one ground are the scheme; a second hue only where it carries meaning (success, error, a second party in a diagram). Depth — a gradient ground, a glow behind a card, layered panels — is a taste decision for the direction chosen below, kept subtle enough that every text still passes contrast against what is directly behind it.
+- **Ground**, by mood. Dark: `#0f0f0f` ground, `#ffffff` wordmark, `#c8c8c8` body, `#8a8a8a` captions, `#2a2a2a` rules, motif greys `#3d3d3d` → `#242424`. Light editorial: `#fafafa` ground, `#111111` wordmark, `#444444` body, `#6f6f6f` captions, `#e0e0e0` rules, motif greys `#c4c4c4` → `#e6e6e6`. One accent and one ground are the scheme; a second hue only where it carries meaning (success, error, a second party in a diagram). Depth — a gradient ground, a glow behind a card, layered panels — is a taste decision for the direction chosen below, kept subtle enough that every text still passes contrast against what is directly behind it.
 - **Theme adaptation** is opt-in: the fixed ground already reads the same in GitHub's light and dark modes. When the user wants the banner to follow the viewer's theme, write both moods as two SVG files and reference them with `<picture>` and `prefers-color-scheme` sources — the mechanism GitHub documents — rather than a media query inside one SVG, which some renderers ignore.
 - **Animation** is out: a README banner is read, not watched, and a moving banner says nothing a static one does not.
 - **Diagrams** render on GitHub's light and dark backgrounds alike, so node fills are light tints of the accent with dark text (`#0b1220`) and the accent as border; never white text on a light fill or dark text on the ground colour.
@@ -104,6 +104,8 @@ Pick by fit, not by habit; when two directions fit, the one that shows more of t
 
 A terminal or window card shows only what the program actually emits: commands that exist in the CLI or manifest, and output text that exists as a string in the source, in a test fixture, or was captured from a run the user authorised. Sample identifiers, sample error messages, and "typical" results the repository does not contain are invented content, and the credibility they cost outweighs any design they add. When the real output is dull, show the command alone with a cursor, or choose another direction.
 
+Each output line on a mockup is recorded in the delivery report under **Verified** with its provenance, the way counts are: `printed by <file>:<line>` for a string in the source or a fixture, `captured from <command>` for a run the user authorised. A line with neither is removed before delivery. Lines are shown in the order the program emits them for that command; a card that stitches lines from different commands into one session is a fabricated session even when every line is real.
+
 ### Fitting text
 
 Widths below were measured in Chrome with Segoe UI; they hold within a few percent for the other system fonts. With `W` the width available to a line of text (the column it sits in, or the card it sits in), compute every size before writing, because an overflowing wordmark, tagline, or command line is the most common way a banner fails:
@@ -116,7 +118,11 @@ Widths below were measured in Chrome with Segoe UI; they hold within a few perce
 | Uppercase letter-spaced labels | 0.65 × font-size + letter-spacing | ≤ 60 characters |
 | Labels inside a shape | 0.5 × font-size | Fits with 16 units to spare on each side, or it moves beneath the shape |
 
-Nothing on the banner is set below 12 units; at README width the canvas renders at roughly 900 pixels, and smaller text is decoration that cannot be read.
+Legibility thresholds, checked on every text on the banner and in every hand-drawn figure:
+
+- Size: nothing below 12 units; at README width a 1200-unit canvas renders at roughly 900 pixels, and smaller text is decoration that cannot be read.
+- Contrast: text against the colour directly behind it — for a gradient, the stop nearest the text; for a card, the card fill — reaches a WCAG contrast ratio of at least 4.5:1 below 24 units and 3:1 at 24 units or above. Compute it with the relative-luminance formula (a few lines of Python) for each text colour and its ground; adjust the ground, the text colour, or the glow until every pair passes. Grey captions are where this fails first: `#7a7a7a` on `#0f0f0f` is 4.47:1 and fails for 14-unit text; `#8a8a8a` passes at 5.55:1.
+- Margins: at least 60 units from any text or shape to the canvas edge, and at least 16 from text to the edge of the card or column it sits in.
 
 ### Constraints that keep the banner rendering everywhere
 
@@ -128,7 +134,7 @@ Nothing on the banner is set below 12 units; at README width the canvas renders 
 
 ### Render check
 
-After writing the SVG, look at it before delivering. Wrap it in a page and screenshot it headlessly — Chrome and Edge both take `--headless=new --disable-gpu --hide-scrollbars --window-size=1200,400 --screenshot=<out.png> <file.html>` — or open it in the browser preview when the host provides one, and read the image. Check that no text crosses the edge of its card, column, or the canvas; that the name is the heaviest element; that every label is legible; and that the composition is not mostly empty ground — a banner whose canvas is a quarter empty is unfinished. Fix and render again until it passes; two or three rounds are normal. When no renderer is available, verify every line against the fitting table by arithmetic and say so in the report under **Unrun checks**.
+After writing the SVG, look at it before delivering. Wrap it in a page and screenshot it headlessly — Chrome and Edge both take `--headless=new --disable-gpu --hide-scrollbars --window-size=1200,400 --screenshot=<out.png> <file.html>` — or open it in the browser preview when the host provides one, and read the image. Check that no text crosses the edge of its card, column, or the canvas; that the name is the heaviest element; that every text meets the legibility thresholds above (size, contrast, margins); and that the composition is not mostly empty ground — a banner whose canvas is a quarter empty is unfinished. Fix and render again until it passes; two or three rounds are normal. When no renderer is available, verify every line against the fitting table and every text pair against the contrast ratio by arithmetic, and say so in the report under **Unrun checks**.
 
 ## One figure per concept
 
@@ -189,7 +195,7 @@ A figure earns its place when it shows something the prose beside it cannot show
 - Labels in the README's language; identifiers (`src/cli/`, `POST /jobs`) stay as written in code.
 - The prose beside the figure is complete on its own, so a renderer that drops the figure still tells the reader the same thing.
 - A chart or figure that already exists in the repository is used instead of a new one when it matches the current code; when it has drifted, report the drift and draw the current version.
-- A hand-drawn SVG passes the banner's render check before delivery; raster images are not produced.
+- A hand-drawn SVG has its own budget: `viewBox` 1200 units wide, as tall as the content needs (300–600 is the usual range), the same margins, fitting rules, and legibility thresholds as the banner, the same node ceiling as any figure, and a render check at its own height (`--window-size=1200,<height>`) before delivery. Raster images are not produced.
 
 ## Feature cards
 
@@ -251,7 +257,7 @@ Long reference tables — a tool or command catalogue, environment variables, co
 ## What showcase never does
 
 - Adds a banner, hero, diagram, or card grid when the user chose plain, or did not answer.
-- Draws a component, step, or flow the code does not contain, puts a number in the banner or a card that was not counted from the repository, or shows output in a mockup that the program does not print.
+- Draws a component, step, or flow the code does not contain, puts a number in the banner or a card that was not counted from the repository, or shows output in a mockup that the program does not print, or stitches real lines from different commands into one session.
 - Replaces the Getting Started commands with a picture of them.
 - Restores a license badge or License section.
 - Imports fonts, scripts, or images from outside the repository into the banner.
