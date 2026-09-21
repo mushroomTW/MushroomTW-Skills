@@ -8,10 +8,17 @@
 
 ## Skill 一覽
 
+### 通用
+
 | Skill | 做什麼 | 說明文件 | 目錄 |
 | --- | --- | --- | --- |
 | `excellent-project-docs` | 依照 repository 的實際內容撰寫、改善、稽核或同步 `README.md` 與 GitHub 會讀取的隨附文件（`CONTRIBUTING`、`SECURITY`、`ARCHITECTURE`、`CHANGELOG`……）。隨附文件先提案再建立；無法追溯到檔案的敘述會被列為待補資訊，而不是寫成事實。 | [繁中](docs/excellent-project-docs.zh.md) ・ [EN](docs/excellent-project-docs.md) | `excellent-project-docs/` |
 | `library-first` | 在你動手寫重試、驗證、快取、認證或日期處理之前，先強制搜尋該語言自己的生態系，並要求把「用套件還是自己寫」的理由講出來。 | [繁中](docs/library-first.zh.md) ・ [EN](docs/library-first.md) | `library-first/` |
+
+### SonarQube 流程
+
+| Skill | 做什麼 | 說明文件 | 目錄 |
+| --- | --- | --- | --- |
 | `local-sonarqube-setup` | 把專案指向本機 Docker SonarQube（`127.0.0.1:9000`），用專案原生工具產生 coverage、執行掃描並檢查 Quality Gate。token 讀自 `SONAR_TOKEN`，不進入檔案、參數、log 或任何回覆。 | [繁中](docs/local-sonarqube-setup.zh.md) ・ [EN](docs/local-sonarqube-setup.md) | `local-sonarqube-setup/` |
 | `sonarqube-fix-all` | 分批處理 SonarQube 的發現，每批都先對建置驗證過才往下走。碰到 bytecode 操作、反射驅動與時序相依的程式碼會跳過並回報，而不是動手改寫。 | [繁中](docs/sonarqube-fix-all.zh.md) ・ [EN](docs/sonarqube-fix-all.md) | `sonarqube-fix-all/` |
 

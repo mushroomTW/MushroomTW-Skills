@@ -8,10 +8,17 @@ Each skill is a self-contained skill folder at the root; its documentation lives
 
 ## Skills
 
+### General
+
 | Skill | What it does | Docs | Directory |
 | --- | --- | --- | --- |
 | `excellent-project-docs` | Writes, improves, audits, or re-syncs a repository's `README.md` and the companion files GitHub reads (`CONTRIBUTING`, `SECURITY`, `ARCHITECTURE`, `CHANGELOG`, …) against what the repository actually contains. Proposes companion files before creating them; claims it cannot trace to a file are reported as gaps rather than written as facts. | [EN](docs/excellent-project-docs.md) ・ [繁中](docs/excellent-project-docs.zh.md) | `excellent-project-docs/` |
 | `library-first` | Before you hand-roll retry, validation, caching, auth, or date handling, forces one search of that language's own ecosystem and a stated reason for the build-or-adopt decision. | [EN](docs/library-first.md) ・ [繁中](docs/library-first.zh.md) | `library-first/` |
+
+### SonarQube workflow
+
+| Skill | What it does | Docs | Directory |
+| --- | --- | --- | --- |
 | `local-sonarqube-setup` | Points a project at a local Docker SonarQube (`127.0.0.1:9000`), generates coverage with the project's own tooling, scans, and checks the Quality Gate. Reads the token from `SONAR_TOKEN` and keeps it out of files, arguments, logs, and replies. | [EN](docs/local-sonarqube-setup.md) ・ [繁中](docs/local-sonarqube-setup.zh.md) | `local-sonarqube-setup/` |
 | `sonarqube-fix-all` | Works through SonarQube findings in batches, verifying each batch against the build before moving on. Skips and reports bytecode-manipulating, reflection-driven, and timing-dependent code instead of rewriting it. | [EN](docs/sonarqube-fix-all.md) ・ [繁中](docs/sonarqube-fix-all.zh.md) | `sonarqube-fix-all/` |
 
