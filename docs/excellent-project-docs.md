@@ -48,7 +48,7 @@ Both products may also load the skill automatically when a request matches its d
 5. Check that commands, links, headings, assets, and examples are traceable and runnable, and that no fact is owned by two documents.
 6. Review each document as its first-time reader and report validation results, proposed-but-not-created files, and information gaps.
 
-The complete workflow is in [`SKILL.md`](../excellent-project-docs/SKILL.md). Its README framework, showcase recipe, companion-document rules, delivery checklist, and style exemplars are in the skill's [`references/`](../excellent-project-docs/references/) directory.
+The complete workflow is in [`SKILL.md`](../excellent-project-docs/SKILL.md). Its README framework, showcase recipe, SVG text measurements, companion-document rules, delivery checklist, and style exemplars are in the skill's [`references/`](../excellent-project-docs/references/) directory.
 
 ## Scope
 
@@ -72,7 +72,7 @@ Do not duplicate this skill elsewhere in the repository. Installation copies thi
 
 ## Validation
 
-The included static checker uses only the Python standard library. It accepts one or more Markdown documents and, for each, checks for unfinished markers, empty link targets, broken local links (Markdown and `<img>`/`<source>` alike), images without alt text, a license badge or a README License section, and prose that points readers at a nonexistent license file, ignoring code blocks and inline code. It also opens every local SVG the document references — missing `viewBox`, external URLs or `<script>` that GitHub blocks, text under one hundredth of the canvas width — and checks Mermaid blocks for an init directive that is not valid JSON or a class with no `classDef`. Judging whether a section or a companion document is present and useful stays with the quality checklist, not with keyword matching:
+The included static checker uses only the Python standard library. It accepts one or more Markdown documents and, for each, checks for unfinished markers, empty link targets, broken local links (Markdown and `<img>`/`<source>` alike), images without alt text, a license badge or a README License section, and prose that points readers at a nonexistent license file, ignoring code blocks and inline code. It also opens every local SVG the document references — missing `viewBox`, external URLs or `<script>` that GitHub blocks, text under one hundredth of the canvas width, text shrunk below that floor inside a `transform="scale(...)"` group, a canvas that carries text with no rect covering it (the page background then shows through, which is what breaks a banner in GitHub's dark theme), space-aligned text with no `xml:space="preserve"`, CJK text pinned with `spacingAndGlyphs` (which squeezes the square glyphs) or pinned narrower than it measures, a CJK line wider than its canvas, an `<image>` or `<foreignObject>`, which an `<img>`-embedded SVG does not render reliably, and a repeated `id` — and checks Mermaid blocks for an init directive that is not valid JSON or a class with no `classDef`. Judging whether a section or a companion document is present and useful stays with the quality checklist, not with keyword matching:
 
 ```powershell
 python scripts/validate_docs.py README.md CONTRIBUTING.md SECURITY.md --project .
@@ -95,7 +95,7 @@ SECURITY.md: static checks passed.
 excellent-project-docs/
 ├── SKILL.md                         # Core instructions and trigger scope
 ├── agents/openai.yaml               # Codex UI metadata and default prompt
-├── references/                      # README framework, showcase recipe, companion-document rules, checklist, exemplars
+├── references/                      # README framework, showcase recipe, SVG text measurements, companion-document rules, checklist, exemplars
 └── scripts/                         # Static checker for one or more documents
 ```
 

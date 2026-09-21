@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+from collections import Counter
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
@@ -82,15 +83,52 @@ HTML_ALT = re.compile(r"""(?is)\balt\s*=\s*["'][^"']*\S[^"']*["']""")
 # image proxy and fails silently; `<script>` is stripped. A font-size under
 # one hundredth of the canvas width is under 12 units on a 1200-unit banner,
 # which is under 9 px at README width.
+#
+# The rest are the failures that only appear once GitHub renders the file,
+# never in a local preview: an SVG image has no background of its own, so a
+# canvas with no covering rect lets the dark theme through; `<text>` collapses
+# runs of whitespace the way HTML does, so an aligned mockup loses its columns
+# without `xml:space="preserve"`; an `<image>` with a file href is an external
+# resource the `<img>`-embedded SVG never fetches, and a `<foreignObject>` is
+# not drawn by every browser in that mode; a group scaled below 1 shrinks its
+# text under the canvas-relative floor; and CJK advances one em per glyph,
+# about twice the Latin coefficient the recipe uses.
 SVG_ROOT = re.compile(r"(?is)<svg\b[^>]*>")
 SVG_VIEWBOX = re.compile(
-    r"""(?i)\bviewBox\s*=\s*["']\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+[\d.]+\s*["']"""
+    r"""(?i)\bviewBox\s*=\s*["']\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)\s*["']"""
 )
 SVG_EXTERNAL = re.compile(
     r"""(?i)(?:href|src|srcset)\s*=\s*["']\s*(?:https?:)?//|@import\b|url\(\s*["']?\s*(?:https?:)?//"""
 )
 SVG_SCRIPT = re.compile(r"(?i)<script\b")
 SVG_FONT_SIZE = re.compile(r"""(?i)font-size\s*[=:]\s*["']?\s*(\d+(?:\.\d+)?)(?:px)?\b""")
+# Each quote style is matched on its own so a style="font-family:'Segoe UI';
+# font-size:20" keeps its whole value instead of stopping at the first '.
+SVG_ATTR = re.compile(r"""(?i)\b([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')""")
+SVG_RECT = re.compile(r"(?is)<rect\b[^>]*>")
+# Rects inside these containers define a resource, not the drawing.
+SVG_RESOURCE_BLOCK = re.compile(
+    r"(?is)<(defs|pattern|clipPath|mask|marker|symbol)\b.*?</\1\s*>"
+)
+SVG_TEXT = re.compile(r"(?is)<text\b([^>]*)>(.*?)</text>")
+SVG_TSPAN = re.compile(r"(?is)<tspan\b([^>]*)>(.*?)</tspan>")
+SVG_TAG = re.compile(r"(?is)<[^>]*>")
+SVG_ID = re.compile(r"""(?i)(?<![\w:-])id\s*=\s*["']([^"']+)["']""")
+SVG_SCALE = re.compile(r"(?i)\bscale\s*\(\s*([\d.]+)")
+SVG_FOREIGN_OBJECT = re.compile(r"(?i)<foreignObject\b")
+SVG_IMAGE_ELEMENT = re.compile(r"(?i)<image\b")
+SVG_XML_SPACE = re.compile(r"""(?i)xml:space\s*=\s*["']preserve["']""")
+STYLE_FONT_SIZE = re.compile(r"""(?i)font-size\s*:\s*([\d.]+)""")
+SPACE_RUN = re.compile(r"\S {2,}\S")
+CJK_TEXT = re.compile(
+    r"[\u1100-\u11ff\u3000-\u303f\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff"
+    r"\uac00-\ud7af\uf900-\ufaff\uff01-\uff60\uff66-\uff9f]"
+)
+
+# Below this canvas width an SVG is an icon or a badge, not a banner or a
+# figure; a transparent ground and a single short label are legitimate there,
+# so the ground and text checks stay out of its way.
+BANNER_CANVAS = 300
 
 MERMAID_BLOCK = re.compile(r"(?ms)^ {0,3}(`{3,}|~{3,})\s*mermaid[^\n]*\n(.*?)^ {0,3}\1[ \t]*$")
 MERMAID_INIT = re.compile(r"(?s)%%\{\s*init\s*:\s*(.*?)\}\s*%%")
@@ -198,6 +236,231 @@ def image_sources(prose: str) -> tuple[list[str], list[str]]:
     return local, missing_alt
 
 
+def _attribute(tag: str, name: str) -> str:
+    """Return the value of one attribute of a tag, or "" when absent.
+
+    SVG attribute names are case-sensitive in the file (`textLength`,
+    `lengthAdjust`, `viewBox`) but callers should not have to remember which
+    spelling each one uses, so the lookup is case-insensitive.
+    """
+    wanted = name.lower()
+    for key, double_quoted, single_quoted in SVG_ATTR.findall(tag):
+        if key.lower() == wanted:
+            return (double_quoted or single_quoted).strip()
+    return ""
+
+
+_LENGTH_RE = re.compile(
+    r"""(?i)^\s*([+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*([a-z%]*)\s*$"""
+)
+_LENGTH_UNIT_TO_PX = {
+    "": 1.0,
+    "px": 1.0,
+    "pt": 96.0 / 72.0,
+    "pc": 16.0,
+    "in": 96.0,
+    "cm": 96.0 / 2.54,
+    "mm": 96.0 / 25.4,
+    "q": 96.0 / 101.6,
+}
+
+
+def _length_in_px(value: str) -> float | None:
+    """Return an SVG length in user units (1px == 1 user unit), or None."""
+    match = _LENGTH_RE.match(value)
+    if not match:
+        return None
+    number, unit = float(match.group(1)), match.group(2).lower()
+    if unit == "%":
+        return None
+    factor = _LENGTH_UNIT_TO_PX.get(unit)
+    return number * factor if factor is not None else None
+
+
+def _resolved_size(value: str, canvas: float) -> float:
+    """Return an SVG length in user units, treating a percentage of the canvas."""
+    stripped = value.strip()
+    if stripped.endswith("%"):
+        try:
+            return float(stripped[:-1].strip()) / 100 * canvas
+        except ValueError:
+            return 0.0
+    parsed = _length_in_px(stripped)
+    return parsed if parsed is not None else 0.0
+
+
+def _covers_canvas(tag: str, canvas_width: float, canvas_height: float) -> bool:
+    """Whether one <rect> covers the whole canvas with a visible fill."""
+    if _attribute(tag, "fill").lower() in {"none", "transparent"}:
+        return False
+    for name in ("fill-opacity", "opacity"):
+        value = _attribute(tag, name)
+        if value and _length_in_px(value) == 0:
+            return False
+    width = _resolved_size(_attribute(tag, "width"), canvas_width)
+    height = _resolved_size(_attribute(tag, "height"), canvas_height)
+    x = _resolved_size(_attribute(tag, "x"), canvas_width)
+    y = _resolved_size(_attribute(tag, "y"), canvas_height)
+    return (
+        x <= 0
+        and y <= 0
+        and x + width >= canvas_width
+        and y + height >= canvas_height
+    )
+
+
+def _font_size(attributes: str) -> float | None:
+    """Return the font-size declared on a tag, inline attribute or style, or None."""
+    raw = _attribute(attributes, "font-size")
+    if raw:
+        return _length_in_px(raw)
+    style = STYLE_FONT_SIZE.search(_attribute(attributes, "style"))
+    if not style:
+        return None
+    try:
+        return float(style.group(1))
+    except ValueError:
+        return None
+
+
+_CONTAINER_TAG = re.compile(r"(?is)<\s*(/?)\s*(svg|g)\b([^>]*)>")
+
+
+def _ancestor_attributes(text: str, pos: int) -> list[str]:
+    """Return attribute strings of the <svg>/<g> elements enclosing pos."""
+    stack: list[str] = []
+    for match in _CONTAINER_TAG.finditer(text, 0, pos):
+        full, is_close, attrs = match.group(0), match.group(1), match.group(3) or ""
+        if full.endswith("/>"):
+            continue
+        if is_close:
+            if stack:
+                stack.pop()
+        else:
+            stack.append(attrs)
+    return stack
+
+
+def _inherited_font_size(
+    attributes: str, ancestors: list[str], body: str
+) -> float | None:
+    """Return the font-size for a <text>: own, else nearest ancestor, else None.
+
+    Sizes set via CSS class or external stylesheet are not resolved (no
+    stylesheet parsing), so those still return None and the caller skips the
+    arithmetic check rather than guessing. An inner <tspan> size overrides the
+    line size; the largest one is used so an overflowing run is not missed.
+    """
+    size = _font_size(attributes)
+    if size is None:
+        for ancestor in reversed(ancestors):
+            size = _font_size(ancestor)
+            if size is not None:
+                break
+    for tspan in re.finditer(r"(?is)<tspan\b([^>]*)>", body):
+        tspan_size = _font_size(tspan.group(1))
+        if tspan_size is not None and (size is None or tspan_size > size):
+            size = tspan_size
+    return size
+
+
+def _enclosing_scale(ancestors: list[str]) -> float:
+    """Return the product of scale() factors on enclosing <g> elements."""
+    scale = 1.0
+    for ancestor in ancestors:
+        factor = SVG_SCALE.search(ancestor)
+        if factor:
+            try:
+                scale *= float(factor.group(1))
+            except ValueError:
+                continue
+    return scale
+
+
+def _widest_cjk_line(body: str, size: float | None) -> tuple[int, float | None]:
+    """Return (CJK glyph count, font-size) of the widest rendered line in a <text>.
+
+    A <tspan> that repositions itself (`x`, `y`, or `dy`) starts a new line, so
+    a multi-line block written the way the recipe recommends is measured one
+    line at a time rather than as one run. Bare text and a <tspan> that only
+    restyles continue the current line at the largest size it carries.
+    """
+    lines: list[list[float | None | int]] = [[0, size]]
+    cursor = 0
+
+    def extend(text: str, run_size: float | None) -> None:
+        current = lines[-1]
+        current[0] += len(CJK_TEXT.findall(SVG_TAG.sub("", text)))
+        if run_size is not None and (current[1] is None or run_size > current[1]):
+            current[1] = run_size
+
+    for tspan in SVG_TSPAN.finditer(body):
+        extend(body[cursor : tspan.start()], None)
+        tspan_attrs, tspan_body = tspan.group(1), tspan.group(2)
+        if any(_attribute(tspan_attrs, name) for name in ("x", "y", "dy")):
+            lines.append([0, size])
+        extend(tspan_body, _font_size(tspan_attrs))
+        cursor = tspan.end()
+    extend(body[cursor:], None)
+
+    widest = max(lines, key=lambda line: (line[0] * (line[1] or 0), line[0]))
+    return int(widest[0]), widest[1]
+
+
+def _cjk_warnings(
+    attributes: str,
+    body: str,
+    width: float,
+    label: str,
+    fallback_size: float | None = None,
+) -> list[str]:
+    """Check one <text> holding CJK against the facts that are arithmetic.
+
+    A CJK glyph advances one em in every CJK font, so both the natural width
+    of the line and the effect of a `textLength` pin are computable rather
+    than estimated. `lengthAdjust="spacingAndGlyphs"` scales the glyphs along
+    the inline axis, which visibly stretches or squeezes a square glyph;
+    `lengthAdjust="spacing"` cannot compress below the natural width, so a pin
+    narrower than the string collapses its spaces and then overflows anyway.
+    """
+    warnings: list[str] = []
+    if not CJK_TEXT.search(body):
+        return warnings
+    glyphs, size = _widest_cjk_line(body, _font_size(attributes) or fallback_size)
+    if not glyphs:
+        return warnings
+    target = _attribute(attributes, "textLength")
+    adjust = _attribute(attributes, "lengthAdjust").lower() or "spacing"
+    natural = glyphs * size if size else None
+
+    if natural is not None and natural > width - 120:
+        warnings.append(
+            f"CJK line of {glyphs} glyphs at font-size {size:g} needs {natural:g} units"
+            f" on a {width:g}-unit canvas: {label}"
+            " -- wider than the canvas once its margins are kept, so it overflows"
+            " wherever it sits; lower the font-size or shorten the line"
+        )
+    if not target:
+        return warnings
+    if adjust == "spacingandglyphs":
+        warnings.append(
+            f"CJK text is pinned with lengthAdjust=\"spacingAndGlyphs\": {label}"
+            " -- that scales the glyphs along the inline axis, so square CJK glyphs"
+            " come out stretched or squeezed; size the line from the CJK coefficient"
+            " instead and pin it, if at all, with lengthAdjust=\"spacing\""
+        )
+    elif natural is not None:
+        pinned = _length_in_px(target)
+        if pinned is not None and pinned < natural:
+            warnings.append(
+                f"CJK text is pinned to {pinned:g} units but needs {natural:g}: {label}"
+                " -- lengthAdjust=\"spacing\" cannot compress below the natural width,"
+                " so the spaces collapse and the line overflows anyway; lower the"
+                " font-size instead"
+            )
+    return warnings
+
+
 def check_svg(path: Path, label: str) -> list[str]:
     """Static facts about one SVG that decide whether it renders on GitHub."""
     warnings: list[str] = []
@@ -209,9 +472,11 @@ def check_svg(path: Path, label: str) -> list[str]:
     if not root:
         return warnings
     width = None
+    height = 0.0
     viewbox = SVG_VIEWBOX.search(root.group(0))
     if viewbox:
         width = float(viewbox.group(1))
+        height = float(viewbox.group(2))
     else:
         warnings.append(f"SVG has no viewBox, so it cannot scale with the page: {label}")
     if SVG_EXTERNAL.search(text):
@@ -221,14 +486,94 @@ def check_svg(path: Path, label: str) -> list[str]:
         )
     if SVG_SCRIPT.search(text):
         warnings.append(f"SVG contains a <script> element, which GitHub strips: {label}")
+    if SVG_FOREIGN_OBJECT.search(text):
+        warnings.append(
+            f"SVG contains a <foreignObject>: {label} -- not every browser draws it"
+            " inside an SVG loaded through <img>, so some readers see a hole; draw the"
+            " content with SVG elements instead"
+        )
+    if SVG_IMAGE_ELEMENT.search(text):
+        warnings.append(
+            f"SVG contains an <image> element: {label} -- an SVG loaded through <img>"
+            " fetches no external file, so a file href draws nothing, and a data: URI"
+            " embeds a raster the recipe never produces; draw the shape with SVG"
+            " elements instead"
+        )
+
+    duplicated = sorted(name for name, count in Counter(SVG_ID.findall(text)).items() if count > 1)
+    if duplicated:
+        warnings.append(
+            f"SVG repeats an id ({', '.join(duplicated)}): {label}"
+            " -- a url(#id) reference resolves to the first match, so the wrong fill or"
+            " clip can be applied"
+        )
+
     if width:
         floor = width / 100
-        small = sorted({float(size) for size in SVG_FONT_SIZE.findall(text) if float(size) < floor})
+        sizes = {float(size) for size in SVG_FONT_SIZE.findall(text)}
+        small = sorted(size for size in sizes if size < floor)
         if small:
             warnings.append(
                 f"SVG sets text at {small[0]:g} units on a {width:g}-unit canvas: {label}"
                 f" -- below the {floor:g}-unit legibility floor at README width"
             )
+        shrunk: list[tuple[float, float, float]] = []
+        for text_match in SVG_TEXT.finditer(text):
+            text_attrs, text_body = text_match.group(1), text_match.group(2)
+            ancestors = _ancestor_attributes(text, text_match.start())
+            scale = _enclosing_scale(ancestors)
+            if scale >= 1:
+                continue
+            size = _inherited_font_size(text_attrs, ancestors, text_body)
+            if size is None:
+                continue
+            if size * scale < floor:
+                shrunk.append((size, scale, size * scale))
+        if shrunk:
+            size, scale, effective = sorted(shrunk, key=lambda item: item[2])[0]
+            warnings.append(
+                f"SVG scales a group to {scale:g} on a {width:g}-unit canvas: {label}"
+                f" -- text at {size:g} units inside it renders at {effective:g} units,"
+                f" under the {floor:g}-unit legibility floor, which the size above"
+                " does not show"
+            )
+
+    if width and width >= BANNER_CANVAS and SVG_TEXT.search(text):
+        drawing = SVG_RESOURCE_BLOCK.sub("", text)
+        if not any(_covers_canvas(tag, width, height) for tag in SVG_RECT.findall(drawing)):
+            warnings.append(
+                f"SVG carries text but no rect covers the whole canvas: {label}"
+                " -- an SVG image has no background of its own, so the page shows through"
+                " and a light-ground banner loses its ground in GitHub's dark theme"
+            )
+        text_matches = list(SVG_TEXT.finditer(text))
+        root_preserved = bool(SVG_XML_SPACE.search(root.group(0)))
+        if not root_preserved:
+            misaligned = False
+            for text_match in text_matches:
+                if SVG_XML_SPACE.search(text_match.group(1)):
+                    continue
+                plain = SVG_TAG.sub("", text_match.group(2))
+                if any(SPACE_RUN.search(line) for line in plain.splitlines()):
+                    misaligned = True
+                    break
+            if misaligned:
+                warnings.append(
+                    f"SVG aligns text with runs of spaces and has no xml:space=\"preserve\":"
+                    f" {label} -- the renderer collapses them the way HTML does, so the"
+                    " columns of a mockup misalign; add the attribute to that <text> or place"
+                    " one <tspan x=\"...\"> per line"
+                )
+        for text_match in text_matches:
+            attributes, body, start = (
+                text_match.group(1),
+                text_match.group(2),
+                text_match.start(),
+            )
+            ancestors = _ancestor_attributes(text, start)
+            # Per-line <tspan> sizes are resolved inside the CJK check itself.
+            fallback = _inherited_font_size(attributes, ancestors, "")
+            warnings.extend(_cjk_warnings(attributes, body, width, label, fallback))
     return warnings
 
 

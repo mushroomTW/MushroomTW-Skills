@@ -48,7 +48,7 @@ $excellent-project-docs 請根據這個 repository 的實際內容改善 README�
 5. 檢查命令、連結、標題、資產與範例是否可追溯且可執行，並確認沒有任何事實同時由兩份文件擁有。
 6. 以各文件的首次閱讀者角度進行最後複核，回報驗證結果、已提案但未建立的檔案與資訊缺口。
 
-詳細規則位於 [`SKILL.md`](../excellent-project-docs/SKILL.md)。README 的設計原則、showcase 食譜、隨附文件規則、品質檢核表與風格範例位於同一個 skill 的 [`references/`](../excellent-project-docs/references/) 目錄。
+詳細規則位於 [`SKILL.md`](../excellent-project-docs/SKILL.md)。README 的設計原則、showcase 食譜、SVG 文字量測、隨附文件規則、品質檢核表與風格範例位於同一個 skill 的 [`references/`](../excellent-project-docs/references/) 目錄。
 
 ## 範圍
 
@@ -72,7 +72,7 @@ excellent-project-docs/
 
 ## 驗證
 
-靜態檢查器僅依賴 Python 標準函式庫，可一次接受多份 Markdown 文件，逐份檢查未完成標記、空連結目標、本機連結（Markdown 與 `<img>`/`<source>` 皆含）、缺 alt 的圖片、授權徽章或 README 內的授權章節，以及指向不存在授權檔的敘述，並略過程式碼區塊與行內程式碼。文件引用的本機 SVG 也會被打開檢查——缺 `viewBox`、GitHub 會擋掉的外部 URL 或 `<script>`、小於畫布寬度百分之一的文字——Mermaid 區塊則檢查 init 指令是否為合法 JSON、`:::class` 是否都有對應的 `classDef`。章節或隨附文件是否齊備、內容是否有用交由品質檢核表判斷，不以關鍵字比對代替：
+靜態檢查器僅依賴 Python 標準函式庫，可一次接受多份 Markdown 文件，逐份檢查未完成標記、空連結目標、本機連結（Markdown 與 `<img>`/`<source>` 皆含）、缺 alt 的圖片、授權徽章或 README 內的授權章節，以及指向不存在授權檔的敘述，並略過程式碼區塊與行內程式碼。文件引用的本機 SVG 也會被打開檢查——缺 `viewBox`、GitHub 會擋掉的外部 URL 或 `<script>`、小於畫布寬度百分之一的文字、被 `transform="scale(...)"` 縮到門檻以下的文字、有文字卻沒有矩形覆蓋整張畫布（頁面底色會透出來，這正是深色主題下 banner 壞掉的原因）、靠空格對齊卻沒有 `xml:space="preserve"` 的文字、用 `spacingAndGlyphs` 固定（會把方塊字壓扁）或固定得比實際寬度還窄的 CJK 文字、寬度超過畫布的 CJK 行、以 `<img>` 內嵌時無法可靠繪製的 `<image>` 或 `<foreignObject>`，以及重複的 `id`——Mermaid 區塊則檢查 init 指令是否為合法 JSON、`:::class` 是否都有對應的 `classDef`。章節或隨附文件是否齊備、內容是否有用交由品質檢核表判斷，不以關鍵字比對代替：
 
 ```powershell
 python scripts/validate_docs.py README.md CONTRIBUTING.md SECURITY.md --project .
@@ -95,7 +95,7 @@ SECURITY.md: static checks passed.
 excellent-project-docs/
 ├── SKILL.md                         # 核心指示與觸發範圍
 ├── agents/openai.yaml               # Codex 顯示資料與預設提示
-├── references/                      # README 設計框架、showcase 食譜、隨附文件規則、檢核表與範例
+├── references/                      # README 設計框架、showcase 食譜、SVG 文字量測、隨附文件規則、檢核表與範例
 └── scripts/                         # 可一次檢查多份文件的靜態檢查器
 ```
 

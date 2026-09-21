@@ -112,33 +112,55 @@ Each output line on a mockup is recorded in the delivery report under **Verified
 
 ### Fitting text
 
-Widths below were measured in Chrome with Segoe UI; they hold within a few percent for the other system fonts. With `W` the width available to a line of text (the column it sits in, or the card it sits in), compute every size before writing, because an overflowing wordmark, tagline, or command line is the most common way a banner fails:
+With `W` the width available to a line — the column or card it sits in — compute every size before writing: an overflowing wordmark, tagline, or command line is the most common way a banner fails. The coefficients are Latin per-character advances measured in Chrome, and the reader's browser renders the banner with whatever font its system resolves the stack to, so read them as a floor:
 
 | Text | Per-character width | Rule |
 | --- | --- | --- |
 | Display wordmark, weight 800–900 | 0.58 × font-size | `font-size = min(110, floor(W / (0.58 × chars)))`; a name too long for 48 breaks at a hyphen or word boundary onto a second line |
-| Body and tagline, regular | 0.48 × font-size | `font-size = min(24, floor(W / (0.48 × chars)))`; below 18, wrap to a second line or ask the user for a shorter tagline |
-| Monospace (commands, output, flow lines) | 0.6 × font-size per character | Total ≤ `W` of the card or column it sits in, arrows and prompts included |
+| Body and tagline, regular | 0.48 × font-size | `font-size = min(24, floor(W / (0.48 × chars)))`; below 18, wrap to a second line or ask for a shorter tagline |
+| Monospace (commands, output, flow lines) | 0.6 × font-size per character | Total ≤ `W` of the card or column, arrows and prompts included |
 | Uppercase letter-spaced labels | 0.65 × font-size + letter-spacing | ≤ 60 characters |
-| Labels inside a shape | 0.5 × font-size | Fits with 16 units to spare on each side, or it moves beneath the shape |
+| Labels inside a shape | 0.5 × font-size | 16 units to spare on each side, or it moves beneath the shape |
+| CJK (Chinese, Japanese, Korean) | 1.0 × font-size per character | A full-width glyph advances one em in every CJK font, so this is arithmetic rather than an estimate. Count the CJK and Latin runs of a mixed line separately and add them |
+
+A line whose overflow would break the composition is pinned with `textLength="<W>"`, and `lengthAdjust` decides how. Pick it by script:
+
+- **Latin**: `lengthAdjust="spacingAndGlyphs"`, with `W` within a tenth of what the string measures in your own font — a target far from the natural width visibly opens or closes the tracking. It reaches any width by scaling the glyphs, which is the only way to fit a line narrower than the string.
+- **CJK**: do not pin. Size the line from its coefficient, and when it does not fit its column lower the font-size or shorten it. A pin that must exist uses `lengthAdjust="spacing"`, and only to widen, because `spacingAndGlyphs` scales the glyphs and a square glyph that has been scaled is no longer square. `spacing` cannot compress below the natural width either: asked for less it collapses the spaces and overflows anyway.
 
 Legibility thresholds, checked on every text on the banner and in every hand-drawn figure:
 
-- Size: nothing below 12 units. A 1200-unit canvas renders at about 900 pixels at README width (0.75 px per unit), so smaller text cannot be read.
-- Contrast: at least 4.5:1 (WCAG relative-luminance formula, a few lines of Python) between each text and the ground actually rendered under it — a card's fill, or on a gradient or glow the ground colour beside the glyphs at the darkest and lightest points along the line of text, both of which must pass; sample it from the rendered PNG, or without a renderer interpolate the stops at those offsets — never the nearest stop. The 3:1 large-text allowance starts at 32 units regular or 25 units at weight 700 or heavier (WCAG's 24 px and 18.66 px at 0.75 px per unit). A failing pair is fixed by changing the text colour, the ground, or the glow, then rendered again. Grey captions fail first: `#7a7a7a` on `#0f0f0f` is 4.47:1 and fails at 14 units; `#8a8a8a` passes at 5.55:1.
-- Margins: at least 60 units from any text or shape to the canvas edge, and at least 16 from text to the edge of the card or column it sits in.
+- Size: nothing below 12 units. A 1200-unit canvas renders at about 900 px at README width on a desktop (0.75 px per unit), and about 360 px on a phone (0.3 px per unit), where only the name and the largest labels survive.
+- Contrast: at least 4.5:1 (WCAG relative-luminance formula) between each text and the ground actually rendered under it — a card's fill, or on a gradient or glow the ground colour beside the glyphs at the darkest and lightest points along the line of text, both of which must pass; sample the rendered PNG, or without a renderer interpolate the stops at those offsets, never the nearest stop. The 3:1 large-text allowance starts at 32 units regular or 25 units at weight 700 or heavier. Fix a failing pair by changing the text colour, the ground, or the glow, then render again. Grey captions fail first: `#7a7a7a` on `#0f0f0f` is 4.47:1 and fails at 14 units; `#8a8a8a` passes at 5.55:1.
+- Margins: at least 60 units from any text or shape to the canvas edge, and 16 from text to the edge of the card or column it sits in.
+
+The measurements behind the coefficients and the two adjustments, and the test that tells them apart, are in [svg-text-measurements](svg-text-measurements.md).
 
 ### Constraints that keep the banner rendering everywhere
 
-- Every string on the banner is the name, the tagline, a fact with a source, a real command or output line, or a label on a figure. No slogans, statistics, or claims that are not already in the README.
-- A fixed `viewBox="0 0 1200 400"` and no `width`/`height` attributes, so it scales with the page.
+- Every string is the name, the tagline, a fact with a source, a real command or output line, or a label on a figure — no slogan, statistic, or claim the README does not already make.
+- A fixed `viewBox="0 0 1200 400"` and no `width`/`height`, so it scales with the page. An SVG with only a `viewBox` stretches to whatever contains it — the README column, roughly 900–1000 px on a desktop and 360 px on a phone — but its intrinsic size resolves to 300 × 100, so a renderer that does not apply `max-width: 100%`, such as a third-party README viewer or a package page, shows it 300 px wide.
+- The first drawing element after `<svg>` is a `<rect>` covering the whole `viewBox` with an opaque `fill`. An SVG image has no background of its own: without it GitHub's dark theme shows through, and a light-ground banner loses its ground while its dark text disappears into it.
+- Text that aligns on consecutive spaces carries `xml:space="preserve"` on that `<text>`. Without it the renderer collapses the runs the way HTML does, so `A     B` draws as `A B` and every column below it misaligns. One `<tspan x="...">` per line is the alternative and needs no attribute.
 - A `font-family` stack of system fonts. No `@import`, no `<image href>`, no external URL of any kind: GitHub serves SVGs through a proxy that blocks outbound requests, so an imported font fails silently and the text falls back anyway.
-- A fixed ground so the banner reads the same in light and dark themes.
+- No `<image>` and no `<foreignObject>` anywhere. An SVG loaded through `<img>` fetches no external file, so an `<image>` with a file href draws nothing; a `data:` URI does render (Chrome, headless, `<img>`-embedded — measured) but embeds a raster the recipe never produces. A `<foreignObject>` renders in Chrome the same way, yet not every browser draws it inside `<img>`, so some readers get a hole where the HTML block should be.
+- A fixed ground so the banner reads the same in light and dark. To follow the viewer's theme instead, use `<picture>` with `prefers-color-scheme` sources — GitHub's documented mechanism — and confirm on the rendered page that the dark source loads rather than assuming the relative `srcset` is rewritten for you.
+- GitHub serves repository images through a CDN cache, so a committed change can keep rendering the old file for a while. Keep the relative path — it survives forks and branches — and confirm on github.com that the new file is what renders once the change is pushed. Pointing `<img src>` at a commit's raw URL is a last resort for a banner that must update the moment it lands: it is an absolute URL that breaks the relative-link rule and has to be edited by hand at every banner change.
 - For a project with translated variants, one banner in the base README's language unless the user asks for one per variant.
 
 ### Render check
 
-After writing the SVG, look at it before delivering. Wrap it in a page and screenshot it headlessly — Chrome and Edge both take `--headless=new --disable-gpu --hide-scrollbars --window-size=1200,400 --screenshot=<out.png> <file.html>` — or open it in the browser preview when the host provides one, and read the image. Check that no text crosses the edge of its card, column, or the canvas; that the name is the heaviest element; that every text meets the legibility thresholds above (size, contrast, margins); that the composition is not mostly empty ground — a banner whose canvas is a quarter empty is unfinished; and the domain glance: name the one element a reader from the domain would recognise in two seconds, and if the honest answer is "the colour" or "the name", the banner is a template and goes back to the proposal. Fix and render again until it passes; two or three rounds are normal. When no renderer is available, verify every line against the fitting table and every text pair against the contrast ratio by arithmetic, and say so in the report under **Unrun checks**.
+Look at the SVG before delivering, in the reader's context rather than your own: a wrapper page exactly as wide as the `viewBox` renders at scale 1, with your fonts, without `max-width`, over a page background instead of the theme, and hides every failure below.
+
+Reference the SVG through `<img>` — never inlined — with `img { max-width: 100% }`, inside a container about 1000 px wide and again about 360 px wide, each on a white page and a `#0d1117` page. Screenshot all four — Chrome and Edge both take `--headless=new --disable-gpu --hide-scrollbars --window-size=<width>,<height> --screenshot=<out.png> <file.html>`, the window at least as wide as the container — or open it in the browser preview when the host provides one, and read the images.
+
+Then check that no text crosses the edge of its card, column, or the canvas; that the name is the heaviest element; that every text meets the thresholds above; that the canvas is not a quarter empty; and the domain glance — name the one element a reader from the domain recognises in two seconds, and if the honest answer is "the colour" or "the name", the banner is a template and goes back to the proposal. The four combinations add three checks:
+
+- At the desktop width every text clears the size and contrast thresholds. At the phone width the banner is a strip: the name and the composition must hold, not every caption, because a caption sized for the desktop cannot survive 0.3 px per unit. If the name itself stops reading, it was sized for your screen, not the reader's.
+- On the `#0d1117` page nothing has lost its ground, which is where a missing covering `<rect>` shows.
+- The columns of a mockup still line up, which is where a missing `xml:space="preserve"` shows.
+
+Fix and render again until it passes; two or three rounds are normal. Even this page cannot reproduce GitHub's stylesheet, its image proxy, or its cache, so the last look is on github.com: when the change is already pushed, open the README — or the raw asset URL — there once; when it is not, which is the usual case before delivery, record under **Unrun checks** that no GitHub-side render was seen and what would unblock it. With no renderer available at all, verify every line against the fitting table and every text pair against the contrast ratio by arithmetic, and record that too.
 
 ## One figure per concept
 
@@ -199,7 +221,7 @@ A figure earns its place when it shows something the prose beside it cannot show
 - Labels in the README's language; identifiers (`src/cli/`, `POST /jobs`) stay as written in code.
 - The prose beside the figure is complete on its own, so a renderer that drops the figure still tells the reader the same thing.
 - A chart or figure that already exists in the repository is used instead of a new one when it matches the current code; when it has drifted, report the drift and draw the current version.
-- A hand-drawn SVG has its own budget: `viewBox` 1200 units wide, as tall as the content needs (300–600 is the usual range), the same margins, fitting rules, and legibility thresholds as the banner, the same node ceiling as any figure, and a render check at its own height (`--window-size=1200,<height>`) before delivery. Raster images are not produced.
+- A hand-drawn SVG has its own budget: `viewBox` 1200 units wide, as tall as the content needs (300–600 is the usual range), the same margins, fitting rules, legibility thresholds, and rendering constraints as the banner — a covering ground rect, `xml:space="preserve"` wherever alignment depends on spaces, pinned lines where overflow would break the figure — the same node ceiling as any figure, and the same render check at its own height before delivery. Raster images are not produced.
 
 ## Feature cards
 

@@ -11,3 +11,6 @@ skills-lock.json
 # 開發用測試資產，不進版控
 tests/
 test-prompts.json
+
+# 其他工具的工作目錄
+.workbuddy-ai/
