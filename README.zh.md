@@ -22,6 +22,8 @@
 | `local-sonarqube-setup` | 把專案指向本機 Docker SonarQube（`127.0.0.1:9000`），用專案原生工具產生 coverage、執行掃描並檢查 Quality Gate。token 讀自 `SONAR_TOKEN`，不進入檔案、參數、log 或任何回覆。 | [繁中](docs/local-sonarqube-setup.zh.md) ・ [EN](docs/local-sonarqube-setup.md) | `local-sonarqube-setup/` |
 | `sonarqube-fix-all` | 分批處理 SonarQube 的發現，每批都先對建置驗證過才往下走。碰到 bytecode 操作、反射驅動與時序相依的程式碼會跳過並回報，而不是動手改寫。 | [繁中](docs/sonarqube-fix-all.zh.md) ・ [EN](docs/sonarqube-fix-all.md) | `sonarqube-fix-all/` |
 
+這兩個 skill 都以**同一台機器上、用 Docker 建置的自架 SonarQube** 為目標（預設 `http://127.0.0.1:9000`，Community Build）。它們只負責連線，不負責啟動——叫用任一 skill 前請先把容器跑起來。不支援 SonarCloud。
+
 `local-sonarqube-setup` 與 `sonarqube-fix-all` 設計上是接續使用：前者把專案接上並跑出第一份分析，後者批次修掉它回報的問題。
 
 `sonarqube-fix-all` 僅限手動觸發：它在 frontmatter 聲明 `disable-model-invocation: true`，host 不會自行啟動。請以名稱叫用（`/sonarqube-fix-all`）。其餘三個依各自的 `description` 自動觸發。

@@ -22,6 +22,8 @@ Each skill is a self-contained skill folder at the root; its documentation lives
 | `local-sonarqube-setup` | Points a project at a local Docker SonarQube (`127.0.0.1:9000`), generates coverage with the project's own tooling, scans, and checks the Quality Gate. Reads the token from `SONAR_TOKEN` and keeps it out of files, arguments, logs, and replies. | [EN](docs/local-sonarqube-setup.md) ・ [繁中](docs/local-sonarqube-setup.zh.md) | `local-sonarqube-setup/` |
 | `sonarqube-fix-all` | Works through SonarQube findings in batches, verifying each batch against the build before moving on. Skips and reports bytecode-manipulating, reflection-driven, and timing-dependent code instead of rewriting it. | [EN](docs/sonarqube-fix-all.md) ・ [繁中](docs/sonarqube-fix-all.zh.md) | `sonarqube-fix-all/` |
 
+Both skills target a **self-hosted SonarQube running in Docker** on the same machine (default `http://127.0.0.1:9000`, Community Build). They connect to it; they do not start it — bring the container up before invoking either skill. SonarCloud is not supported.
+
 `local-sonarqube-setup` and `sonarqube-fix-all` are meant to run in that order: the first connects a project and produces a first analysis, the second batch-fixes what it reports.
 
 `sonarqube-fix-all` is manual-trigger-only: it declares `disable-model-invocation: true`, so the host never fires it on its own. Invoke it by name (`/sonarqube-fix-all`). The other three trigger from their `description`.
