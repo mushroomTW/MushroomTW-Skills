@@ -10,9 +10,11 @@ Every line of custom code is a liability — it has to be maintained, tested, do
 
 ## When It Applies
 
-Before hand-rolling general mechanisms such as:
+Whenever a task means implementing, adding, fixing, or refactoring a general-purpose mechanism such as:
 
 retry and backoff, validation, date/time handling, state management, authentication/authorization, caching, serialization, CLI argument parsing, cryptographic hashing.
+
+The request does not have to mention a library. "Add retry to this call", "clean up this hand-written validator", and "should I pull in Zod or write it myself?" all trigger it — the skill fires on the *mechanism*, not on the word "package".
 
 It does **not** apply to domain-specific business logic — order discount rules, premium calculation, game rules. No package exists for these, and none should.
 

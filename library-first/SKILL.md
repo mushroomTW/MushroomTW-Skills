@@ -1,6 +1,6 @@
 ---
 name: library-first
-description: Use before hand-rolling a general mechanism such as retry, backoff, validation, date/time handling, state management, authentication/authorization, caching, serialization, CLI argument parsing, or cryptographic hashing, to evaluate existing library solutions before deciding to write it yourself. Does not apply to domain-specific business logic.
+description: Use when a task means implementing, adding, fixing, or refactoring a general-purpose mechanism — retry/backoff, validation, date/time handling, state management, authentication/authorization, caching, serialization, CLI argument parsing, cryptographic hashing — even when the request never mentions a library ("add retry to this call", "clean up this hand-written validator"), and when asked whether to adopt a package or write it yourself. Not for domain-specific business logic such as discounts, pricing, or game rules.
 ---
 
 # Library-First

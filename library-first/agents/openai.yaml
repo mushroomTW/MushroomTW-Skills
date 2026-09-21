@@ -1,4 +1,4 @@
 interface:
   display_name: "Library First"
   short_description: "Evaluate existing libraries before writing your own"
-  default_prompt: "Use $library-first before hand-rolling a general mechanism: name the problem in domain vocabulary, search this language's own ecosystem and standard library, apply the quality gate, then state whether you adopted a package or wrote it yourself and why."
+  default_prompt: "Use $library-first whenever a task means implementing, fixing, or refactoring a general-purpose mechanism (retry, validation, caching, date/time, auth, serialization, CLI parsing, hashing), even if no library was mentioned: name the problem in domain vocabulary, search this language's own ecosystem and standard library, apply the quality gate, then state whether you adopted a package or wrote it yourself and why."
