@@ -5,9 +5,10 @@ SECURITY.md, ARCHITECTURE.md, ...) and runs the same checks on each. Local
 SVG images a document references are opened and checked too, and Mermaid
 blocks are checked for the mistakes that make GitHub render an error box.
 
-Scope is deliberately narrow: only checks whose result is a verifiable fact.
-Judging whether a section or a companion document is present and useful
-belongs to `references/quality-checklist.md`, not to keyword matching.
+Scope is deliberately narrow: only checks whose result is a verifiable fact
+or a direct violation of a documented recipe rule (animation, accessible
+name). Judging whether a section or a companion document is present and
+useful belongs to `references/quality-checklist.md`, not to keyword matching.
 
 Every warning is a heuristic lead, not a verdict: read the flagged line and
 decide whether it is a real problem before editing the document.
@@ -93,6 +94,9 @@ HTML_ALT = re.compile(r"""(?is)\balt\s*=\s*["'][^"']*\S[^"']*["']""")
 # not drawn by every browser in that mode; a group scaled below 1 shrinks its
 # text under the canvas-relative floor; and CJK advances one em per glyph,
 # about twice the Latin coefficient the recipe uses.
+#
+# Animation and accessible-name warnings are recipe-rule leads rather than
+# render facts; rationale sits with their regexes below.
 SVG_ROOT = re.compile(r"(?is)<svg\b[^>]*>")
 SVG_VIEWBOX = re.compile(
     r"""(?i)\bviewBox\s*=\s*["']\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)\s*["']"""
@@ -101,6 +105,24 @@ SVG_EXTERNAL = re.compile(
     r"""(?i)(?:href|src|srcset)\s*=\s*["']\s*(?:https?:)?//|@import\b|url\(\s*["']?\s*(?:https?:)?//"""
 )
 SVG_SCRIPT = re.compile(r"(?i)<script\b")
+# A README is read, not watched: any CSS keyframes, SMIL animation element, or
+# animate* attribute on a referenced SVG is out of the recipe, with or without
+# a prefers-reduced-motion guard.
+SVG_ANIMATION = re.compile(
+    r"(?i)@keyframes\b|\banimation\s*[:=]|<(?:animate|animateTransform|animateMotion)\b"
+    r"|\banimate(?:Transform|Motion|Color)?\s*=\s*[\"']"
+)
+# The accessible name a screen-reader user gets when the image is the only
+# copy of the figure: aria-label on the <svg> root, or a non-empty <title>
+# as the root's first element child. role="img" is the recipe's preferred
+# pairing with aria-label and is named in the fix message, but either
+# mechanism alone still names the image. The title body must start with a
+# non-whitespace, non-`<` character: `\s*\S` alone would accept `<title></title>`
+# because `\S` matches the `<` of the closing tag.
+SVG_ARIA_LABEL = re.compile(r"""(?i)\baria-label\s*=\s*["'][^"']*\S[^"']*["']""")
+SVG_TITLE_CHILD = re.compile(
+    r"(?is)\A\s*(?:<!--.*?-->\s*)*<title\b[^>]*>\s*[^<\s][^<]*</title\s*>"
+)
 SVG_FONT_SIZE = re.compile(r"""(?i)font-size\s*[=:]\s*["']?\s*(\d+(?:\.\d+)?)(?:px)?\b""")
 # Each quote style is matched on its own so a style="font-family:'Segoe UI';
 # font-size:20" keeps its whole value instead of stopping at the first '.
@@ -486,6 +508,27 @@ def check_svg(path: Path, label: str) -> list[str]:
         )
     if SVG_SCRIPT.search(text):
         warnings.append(f"SVG contains a <script> element, which GitHub strips: {label}")
+    if SVG_ANIMATION.search(text):
+        warnings.append(
+            f"SVG contains an animation: {label} -- a README banner or figure is read,"
+            " not watched; remove the @keyframes, animation, or <animate> element (a"
+            " prefers-reduced-motion guard is not an exception, because the animation"
+            " itself is never written)"
+        )
+    # An accessible name is aria-label on the root or a non-empty <title> as
+    # its first element child; role="img" is what the recipe asks for alongside
+    # aria-label, and the fix message says so, but a title alone still names
+    # the image for a screen reader.
+    root_body = text[root.end() :]
+    if not (
+        SVG_ARIA_LABEL.search(root.group(0)) or SVG_TITLE_CHILD.search(root_body)
+    ):
+        warnings.append(
+            f"SVG has no accessible name: {label} -- add role=\"img\" and an aria-label"
+            " on the <svg> root (or a non-empty <title> as its first child) stating the"
+            " facts the figure shows, so a reader who cannot see the image still gets"
+            " what the prose beside it gives"
+        )
     if SVG_FOREIGN_OBJECT.search(text):
         warnings.append(
             f"SVG contains a <foreignObject>: {label} -- not every browser draws it"
@@ -690,7 +733,8 @@ def check_document(document: Path, project: Path) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Check project documents for unfinished markers, local links,"
-        " license placement, HTML block spacing, referenced SVGs, and Mermaid blocks"
+        " license placement, HTML block spacing, referenced SVGs (including animation"
+        " and accessible name), and Mermaid blocks"
     )
     parser.add_argument("documents", type=Path, nargs="+", metavar="document")
     parser.add_argument("--project", type=Path, default=None)

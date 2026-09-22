@@ -62,7 +62,9 @@ A badge is a compact status line, not decoration. Add one only when it answers a
 Choose the badge type in this order:
 
 1. **Dynamic**: the value is fetched when the page renders, so it cannot drift. Prefer this for package versions, build or coverage status, and the latest release.
-2. **Static with a recorded source**: use only when no dynamic endpoint exists. Record the origin beside the badge so a later synchronize pass can verify the value.
+2. **Static with a recorded source**: use only when no dynamic endpoint exists. Record the origin beside the badge so a later synchronize pass can verify the value. Two ways to draw it:
+   - **2a Shields.io static** — the default: a `https://img.shields.io/badge/…` URL, styled with the rest of the row.
+   - **2b Hand-drawn SVG in the repository** — only when the user chose badges at the step 3 checkpoint, the value is static with a recorded source, and the project's own visual identity needs the badge row to match it (or shields.io cannot express the datum). Put the file where the repository already keeps images (`assets/`, `docs/images/`, `.github/`); give it a fixed `viewBox`, no `width`/`height`, the same palette as the rest of the page, and `role="img"` plus an `aria-label` that carries the same fact as the alt text. Keep the whole row in one style — every badge hand-drawn, or every badge shields.io — because a mixed row reads as a collage. The pixel or stepped look, when the domain cue asks for it, follows [visual-readme](visual-readme.md)'s SVG composition grammar; the license badge ban below applies to hand-drawn badges exactly as it does to shields.io.
 3. **Static without a note**: acceptable only for values that cannot drift, such as a stack label that names a dependency rather than its version.
 
 A static value and its recorded source look like this:
@@ -90,6 +92,8 @@ Shields.io accepts `flat` (the default), `flat-square`, `plastic`, `for-the-badg
 | `for-the-badge` | Large, uppercase, wide | Two to four badges used as a deliberate header block. |
 | `plastic` | Small with a gradient | The project's existing assets already use that older style. |
 | `social` | GitHub-button styling | Star, fork, follow, or watch counts specifically. |
+
+A hand-drawn SVG badge (2b above) is a sixth style outside this table: when the user picks it, draw every badge in the row that way and skip the shields.io `style=` parameter entirely.
 
 The same badge in three styles, so the difference is visible before choosing:
 

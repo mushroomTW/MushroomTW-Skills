@@ -32,7 +32,7 @@ $excellent-project-docs 請根據這個 repository 的實際內容改善 README�
 - 依證據判斷哪些隨附文件值得存在，先提案、經你同意才建立；你點名的文件則直接處理。
 - 每個事實只有一個擁有者：README 摘要並連結，衛星文件不重述 README，文件之間的矛盾會被解決或回報。
 - 呈現方式由你決定：詢問文件集要涵蓋哪些語言、要放哪些徽章／logo／截圖與採用哪種風格、多種安裝管道時以哪一條為主，以及建立新 README 時從兩三個標語中挑選開頭那一句。
-- 提供兩種呈現層級：plain（預設）或 showcase——後者把同一組事實做成統一色盤的設計頁面：置中標頭區與 skill 依專案設計的 SVG banner（編輯海報、終端機 mockup、圖為主、分割面板四種方向）、事實列、每個概念一張圖（套主題的 Mermaid 或手繪 SVG）、功能卡片格、摺疊的參考表格——每個形狀、數字與輸出行都來自證據。
+- 提供兩種呈現層級：plain（預設）或 showcase——後者把同一組事實做成統一色盤的設計頁面：置中標頭區與 skill 依專案設計的 SVG banner（編輯海報、終端機 mockup、圖為主、分割面板四種方向）、事實列、每個概念一張圖（套主題的 Mermaid 或手繪 SVG，共用構圖語法：角色同色箭頭、卡片語法、僅領域本身擁有時才用的像素語彙，且每張手繪 SVG 皆帶 `role="img"` 與 `aria-label`）、功能卡片格、摺疊的參考表格——每個形狀、數字與輸出行都來自證據。徽章列可用 shields.io 風格，或在值有記錄來源、且專案識別需要時改為整列手繪靜態 SVG 徽章。
 - 授權交給 `LICENSE` 檔，GitHub 會在側欄自動顯示：README 不放 License 章節或徽章，除非授權需要說明（雙授權、非 OSI 授權、依版本不同），且只寫一行 SPDX 識別碼加連結。
 - 驗證每份經手文件中的安裝、啟動、測試、範例、目錄與本機連結。
 - 依 CLI、函式庫、服務、前端或研究工具調整 README 結構。
@@ -43,7 +43,7 @@ $excellent-project-docs 請根據這個 repository 的實際內容改善 README�
 
 1. 確認語言、讀者、目的、目標文件與輸出位置。
 2. 從原始碼、manifest、測試、設定、範例、發布歷史及每一份現有隨附文件建立證據清單。
-3. 選擇 README 章節與證據支持的隨附文件；對任何新的隨附文件先提案，並詢問呈現方式（plain 或 showcase 層級，後者附上從專案推導的風格提案——accent、明暗、領域線索、banner 方向——以及徽章與圖片、徽章風格、主要安裝管道、標語），等待同意。showcase 會先畫 banner 並渲染，PNG 經同意後才寫其餘頁面。
+3. 選擇 README 章節與證據支持的隨附文件；對任何新的隨附文件先提案，並詢問呈現方式（plain 或 showcase 層級，後者附上從專案推導的風格提案——accent、明暗、領域線索、banner 方向——以及徽章與圖片、徽章風格（無動態 endpoint 時可選整列手繪靜態 SVG）、主要安裝管道、標語），等待同意。showcase 會先畫 banner 並渲染，PNG 經同意後才寫其餘頁面。
 4. 逐份起草：由用途與最小範例開始，逐步補上安裝、設定、限制與維護資訊，並讓 README 連到每個衛星文件。
 5. 檢查命令、連結、標題、資產與範例是否可追溯且可執行，並確認沒有任何事實同時由兩份文件擁有。
 6. 以各文件的首次閱讀者角度進行最後複核，回報驗證結果、已提案但未建立的檔案與資訊缺口。
@@ -72,7 +72,7 @@ excellent-project-docs/
 
 ## 驗證
 
-靜態檢查器僅依賴 Python 標準函式庫，可一次接受多份 Markdown 文件，逐份檢查未完成標記、空連結目標、本機連結（Markdown 與 `<img>`/`<source>` 皆含）、缺 alt 的圖片、授權徽章或 README 內的授權章節，以及指向不存在授權檔的敘述，並略過程式碼區塊與行內程式碼。文件引用的本機 SVG 也會被打開檢查——缺 `viewBox`、GitHub 會擋掉的外部 URL 或 `<script>`、小於畫布寬度百分之一的文字、被 `transform="scale(...)"` 縮到門檻以下的文字、有文字卻沒有矩形覆蓋整張畫布（頁面底色會透出來，這正是深色主題下 banner 壞掉的原因）、靠空格對齊卻沒有 `xml:space="preserve"` 的文字、用 `spacingAndGlyphs` 固定（會把方塊字壓扁）或固定得比實際寬度還窄的 CJK 文字、寬度超過畫布的 CJK 行、以 `<img>` 內嵌時無法可靠繪製的 `<image>` 或 `<foreignObject>`，以及重複的 `id`——Mermaid 區塊則檢查 init 指令是否為合法 JSON、`:::class` 是否都有對應的 `classDef`。章節或隨附文件是否齊備、內容是否有用交由品質檢核表判斷，不以關鍵字比對代替：
+靜態檢查器僅依賴 Python 標準函式庫，可一次接受多份 Markdown 文件，逐份檢查未完成標記、空連結目標、本機連結（Markdown 與 `<img>`/`<source>` 皆含）、缺 alt 的圖片、授權徽章或 README 內的授權章節，以及指向不存在授權檔的敘述，並略過程式碼區塊與行內程式碼。文件引用的本機 SVG 也會被打開檢查——缺 `viewBox`、GitHub 會擋掉的外部 URL 或 `<script>`、CSS 或 SMIL 動畫（README 是拿來讀的，不是拿來看的）、沒有無障礙名稱的 SVG（缺 `role="img"`/`aria-label`，也沒有開頭的 `<title>`）、小於畫布寬度百分之一的文字、被 `transform="scale(...)"` 縮到門檻以下的文字、有文字卻沒有矩形覆蓋整張畫布（頁面底色會透出來，這正是深色主題下 banner 壞掉的原因）、靠空格對齊卻沒有 `xml:space="preserve"` 的文字、用 `spacingAndGlyphs` 固定（會把方塊字壓扁）或固定得比實際寬度還窄的 CJK 文字、寬度超過畫布的 CJK 行、以 `<img>` 內嵌時無法可靠繪製的 `<image>` 或 `<foreignObject>`，以及重複的 `id`——Mermaid 區塊則檢查 init 指令是否為合法 JSON、`:::class` 是否都有對應的 `classDef`。章節或隨附文件是否齊備、內容是否有用交由品質檢核表判斷，不以關鍵字比對代替：
 
 ```powershell
 python scripts/validate_docs.py README.md CONTRIBUTING.md SECURITY.md --project .
