@@ -32,7 +32,7 @@ Each finding carries one tag:
 | `stdlib:` | Hand-rolled thing the standard library ships; names the function. |
 | `native:` | Dependency or code doing what the platform already does; names the feature. |
 | `yagni:` | Abstraction with one implementation, config nobody sets, layer with one caller. |
-| `shrink:` | Same logic, fewer lines; shows the shorter form. |
+| `shrink:` | Same logic, fewer lines; shows the shorter form below the table. |
 
 ## Output
 
@@ -42,9 +42,15 @@ A Markdown table ranked biggest cut first, followed by an estimated total:
 | # | Tag | Cut | Replacement | Path |
 |---|-----|-----|-------------|------|
 | 1 | `yagni:` | <what to cut> | <replacement> | `<path>` |
+| 2 | `shrink:` | <what to cut> | shorter form in #2 | `<path>` |
+
+#2
+<shorter form, as a fenced code block>
 
 net: -<N> lines, -<M> deps possible.
 ```
+
+Every cell stays on one line. Code does not fit in a table cell, so each `shrink:` row points to a numbered code block after the table instead of inlining the shorter form.
 
 When there is nothing to cut, it prints no table, only `Lean already. Ship.`
 

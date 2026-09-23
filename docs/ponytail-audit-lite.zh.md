@@ -32,7 +32,7 @@
 | `stdlib:` | 手刻了標準函式庫已提供的東西；會寫出函式名稱。 |
 | `native:` | 依賴或程式碼在做平台本來就會做的事；會寫出功能名稱。 |
 | `yagni:` | 只有一個實作的抽象、沒人設定的設定、只有一個呼叫者的層。 |
-| `shrink:` | 邏輯相同但可以更短；會附上較短的寫法。 |
+| `shrink:` | 邏輯相同但可以更短；較短的寫法附在表格下方。 |
 
 ## 輸出
 
@@ -42,9 +42,15 @@
 | # | Tag | Cut | Replacement | Path |
 |---|-----|-----|-------------|------|
 | 1 | `yagni:` | <what to cut> | <replacement> | `<path>` |
+| 2 | `shrink:` | <what to cut> | shorter form in #2 | `<path>` |
+
+#2
+<shorter form, as a fenced code block>
 
 net: -<N> lines, -<M> deps possible.
 ```
+
+每一格都保持單行。程式碼放不進表格儲存格，所以 `shrink:` 那一列只寫編號，較短的寫法以對應編號的程式碼區塊放在表格後面。
 
 沒有可刪的東西時不出表格，只輸出 `Lean already. Ship.`
 

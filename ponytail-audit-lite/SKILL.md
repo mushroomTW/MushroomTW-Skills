@@ -34,7 +34,9 @@ A Markdown table, one row per finding, ranked biggest cut first:
 | 1 | `yagni:` | <what to cut> | <replacement> | `<path>` |
 ```
 
-Escape `|` inside cells as `\|`. Below the table, end with
+Escape `|` inside cells as `\|`. Keep every cell to one line: a `shrink:` row
+says `shorter form in #<n>` in Replacement, and the shorter form goes below the
+table as a fenced code block headed `#<n>`. Then end with
 `net: -<N> lines, -<M> deps possible.` Nothing to cut: no table, just `Lean already. Ship.`
 
 ## Boundaries
