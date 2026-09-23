@@ -43,8 +43,15 @@ LICENSE_FILE_WORD = re.compile(r"\b(?:LICENSE|LICENCE|COPYING)\b")
 
 # A License section that names a license but has no file to back it. Scoped to
 # the document's own License heading so a dependency's license mentioned
-# elsewhere in the prose stays out of range.
-LICENSE_HEADING = re.compile(r"(?i)\blicen[sc]e\b|授權|授权|許可|许可")
+# elsewhere in the prose stays out of range. In Chinese 授權/授权 also means
+# authorization (an OAuth flow) and 許可 means permission, so a bare
+# occurrence counts only when it is the whole heading; compounds that can only
+# mean a license count anywhere in it.
+LICENSE_HEADING = re.compile(
+    r"(?i)\blicen[sc]e\b"
+    r"|授權條款|授权条款|授權協議|授权协议|許可證|许可证"
+    r"|^ {0,3}#{1,6}\s+(?:[^\w\s]+\s*)?(?:開源|开源)?(?:授權|授权)\s*#*\s*$"
+)
 HEADING_LINE = re.compile(r"^ {0,3}#{1,6}\s")
 SPDX_ID = re.compile(
     r"(?i)\b(?:MIT|ISC|Unlicense|Zlib|BSD(?:[- ](?:2|3)[- ]Clause)?"
@@ -123,7 +130,11 @@ SVG_ARIA_LABEL = re.compile(r"""(?i)\baria-label\s*=\s*["'][^"']*\S[^"']*["']"""
 SVG_TITLE_CHILD = re.compile(
     r"(?is)\A\s*(?:<!--.*?-->\s*)*<title\b[^>]*>\s*[^<\s][^<]*</title\s*>"
 )
-SVG_FONT_SIZE = re.compile(r"""(?i)font-size\s*[=:]\s*["']?\s*(\d+(?:\.\d+)?)(?:px)?\b""")
+# A relative unit (em, rem, %) cannot be resolved without the cascade, so the
+# lookahead drops it instead of reading "1.5em" as 1 unit.
+SVG_FONT_SIZE = re.compile(
+    r"""(?i)font-size\s*[=:]\s*["']?\s*(\d+(?:\.\d+)?)(?:px)?(?![\w.%])"""
+)
 # Each quote style is matched on its own so a style="font-family:'Segoe UI';
 # font-size:20" keeps its whole value instead of stopping at the first '.
 SVG_ATTR = re.compile(r"""(?i)\b([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')""")
@@ -140,7 +151,7 @@ SVG_SCALE = re.compile(r"(?i)\bscale\s*\(\s*([\d.]+)")
 SVG_FOREIGN_OBJECT = re.compile(r"(?i)<foreignObject\b")
 SVG_IMAGE_ELEMENT = re.compile(r"(?i)<image\b")
 SVG_XML_SPACE = re.compile(r"""(?i)xml:space\s*=\s*["']preserve["']""")
-STYLE_FONT_SIZE = re.compile(r"""(?i)font-size\s*:\s*([\d.]+)""")
+STYLE_FONT_SIZE = re.compile(r"""(?i)font-size\s*:\s*([^;"'}]+)""")
 SPACE_RUN = re.compile(r"\S {2,}\S")
 CJK_TEXT = re.compile(
     r"[\u1100-\u11ff\u3000-\u303f\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff"
@@ -339,10 +350,7 @@ def _font_size(attributes: str) -> float | None:
     style = STYLE_FONT_SIZE.search(_attribute(attributes, "style"))
     if not style:
         return None
-    try:
-        return float(style.group(1))
-    except ValueError:
-        return None
+    return _length_in_px(style.group(1))
 
 
 _CONTAINER_TAG = re.compile(r"(?is)<\s*(/?)\s*(svg|g)\b([^>]*)>")
@@ -627,7 +635,9 @@ def check_mermaid(text: str) -> list[str]:
         body = match.group(2)
         for init in MERMAID_INIT.findall(body):
             try:
-                json.loads(init)
+                # Mermaid swaps single quotes for double before parsing, and
+                # its own directive examples are written that way.
+                json.loads(init.replace("'", '"'))
             except ValueError as error:
                 warnings.append(
                     f"Mermaid block {index} has an init directive that is not valid JSON"
@@ -716,7 +726,11 @@ def check_document(document: Path, project: Path) -> list[str]:
     targets = local_targets(prose)
     targets += [image for image in images if image not in targets]
     for target in targets:
-        candidate = (document.parent / target).resolve()
+        # GitHub resolves a leading / from the repository root.
+        if target.startswith("/"):
+            candidate = (project / target.lstrip("/")).resolve()
+        else:
+            candidate = (document.parent / target).resolve()
         try:
             candidate.relative_to(project)
         except ValueError:

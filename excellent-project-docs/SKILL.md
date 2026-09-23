@@ -1,6 +1,6 @@
 ---
 name: excellent-project-docs
-description: Write, improve, audit, or synchronize a repository's README.md and the companion files GitHub reads from the root or .github/ (CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, SUPPORT, CHANGELOG, ARCHITECTURE, ROADMAP, GOVERNANCE, issue and PR templates), with every claim traced to repository evidence. Use when the user asks for a README or project homepage, a contributing, security, or architecture file or a GitHub community profile, docs brought back in step after code or configuration changes, or a check that the docs are accurate, runnable, and consistent with each other. Not for an API manual, a documentation website or the pages under docs/, or writing unrelated to a repository.
+description: Write, improve, audit, or synchronize a repository's README.md and the companion files GitHub reads from the root, .github/, or docs/ (CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, SUPPORT, CHANGELOG, ARCHITECTURE, ROADMAP, GOVERNANCE, issue and PR templates), with every claim traced to repository evidence. Use when the user asks for a README or project homepage, a contributing, security, or architecture file or a GitHub community profile, docs brought back in step after code or configuration changes, or a check that the docs are accurate, runnable, and consistent with each other. Not for an API manual, a documentation website or the other pages under docs/, or writing unrelated to a repository.
 ---
 
 # Excellent Project Docs
