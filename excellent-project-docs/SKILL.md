@@ -18,7 +18,7 @@ Identify the requested outcome first:
 
 No mode given: default to “improve and verify”. No document named: the README is the target and companions enter only through the step 3 checkpoint. Do not turn a document into a complete documentation website unless asked.
 
-Translated variants are one document: update every variant you can write accurately and report any divergence. Add a variant only when the user chose that language at the step 1 checkpoint; name it with a BCP 47 tag (`README.zh-TW.md`) with English in the base file, preserving an established naming scheme.
+Translated variants are one document: update every variant you can write accurately and report any divergence. Add a variant only when the user chose that language at the step 3 checkpoint; name it with a BCP 47 tag (`README.zh-TW.md`) with English in the base file, preserving an established naming scheme.
 
 ## Invariants
 
@@ -29,17 +29,17 @@ Translated variants are one document: update every variant you can write accurat
 5. **Single source of truth**: one fact lives in one file. No document restates another's content, and none copies what a reader can inspect directly and what drifts. Prose carries background, rationale, limitations, and workflows the files do not reveal.
 6. **Right-sized**: candidate sections and companion documents are options, not a completeness score. Keep small projects to a README.
 7. **Propose, then create**: a companion document the user did not name is created only after approval at the step 3 checkpoint; a document the user named is handled directly.
-8. **Honest gaps**: 🔴 **CHECKPOINT** before choosing a license, contribution channel, security contact, conduct standard, roadmap, the language set, or whether the README carries badges and images and in which style. If nobody can answer, omit the section or document and report the question — never ship `TODO:`. State adoption-relevant absences (no LICENSE) as facts. Omit rather than invent.
+8. **Honest gaps**: 🔴 **CHECKPOINT** before choosing a license, contribution channel, security contact, conduct standard, roadmap, the language set, or whether the README carries badges and images and in which style. Every such question known before drafting goes into the one step 3 checkpoint rather than a message of its own. If nobody can answer, omit the section or document and report the question — never ship `TODO:`. State adoption-relevant absences (no LICENSE) as facts. Omit rather than invent.
 
 ## Workflow
 
 ### 1. Establish the goal and audience
 
-Identify language, audience, purpose, target documents, and output paths. Audience gates section choice, depth, and tone, and a companion document may serve a different reader than the README. When evidence leaves the audience ambiguous and the user can answer, 🔴 **CHECKPOINT** with plausible reader types; otherwise make the smallest evidence-based assumption and disclose it. Do not ask when evidence settles it: a published library implies integrators, a CLI manifest implies CLI users, an open `CONTRIBUTING.md` implies external contributors.
+Identify language, audience, purpose, target documents, and output paths. Audience gates section choice, depth, and tone, and a companion document may serve a different reader than the README. When evidence leaves the audience ambiguous and the user can answer, record plausible reader types as a question for the step 3 checkpoint; otherwise make the smallest evidence-based assumption and disclose it. Do not ask when evidence settles it: a published library implies integrators, a CLI manifest implies CLI users, an open `CONTRIBUTING.md` implies external contributors.
 
-Languages are the user's decision. 🔴 **CHECKPOINT** which languages the set carries when creating a README, or when the existing set is in one language and the user writes in another. Never add a variant the user did not choose; an existing one is maintained as it stands.
+Languages are the user's decision. Record which languages the set carries as a question for the step 3 checkpoint when creating a README, or when the existing set is in one language and the user writes in another. Without an answer, a new README is written in English alone and the language is reported as assumed; an existing set keeps its languages. Never add a variant the user did not choose; an existing one is maintained as it stands.
 
-Completion criterion: one sentence per target document naming who it helps and what decision it supports, and a language set either inherited from the repository or chosen by the user.
+Completion criterion: one sentence per target document naming who it helps and what decision it supports, and a language set inherited from the repository or recorded as a step 3 question.
 
 ### 2. Build an evidence inventory
 
@@ -66,7 +66,7 @@ Choose README sections from evidence, using these project-type emphases:
 - **Frontend / full-stack product**: demo or screenshots, features, stack, architecture, local development, deployment.
 - **Tool / research project**: problem context, method, reproduction steps, inputs and outputs, limitations, citations.
 
-Four choices belong to the user, not the evidence. Put them in one 🔴 **CHECKPOINT**, folded into the companion-document checkpoint below when both apply:
+Four choices belong to the user, not the evidence. Put them in one 🔴 **CHECKPOINT** together with the audience and language questions recorded in step 1 and the companion-document proposal below, so every question known before drafting reaches the user in a single message:
 
 - **Presentation level**: **plain** (the default: text, tables, code, and the badges or images chosen below) or **showcase**, the designed page in [visual-readme](references/visual-readme.md). Offer showcase as an option; do not recommend it. Include the style proposal the recipe derives from the project — accent, mood, domain cue, banner direction — with one alternative, so the user picks a look rather than answering an open question. In showcase the banner is drafted and rendered first, and the recipe's 🔴 **CHECKPOINT** on its PNG precedes the rest of the draft.
 - **Visual elements**: the badges the evidence supports, each with its dynamic endpoint or recorded source ([readme-framework](references/readme-framework.md)), and the logo, screenshots, or demo assets already in the repository. Ask whether to include any, which ones, and which badge style — a shields.io style, or a fully hand-drawn static SVG row when no dynamic endpoint exists and the project's identity needs it; offer to keep an existing style.
@@ -77,7 +77,7 @@ Without an answer: plain; no badges or images; lead with the channel the manifes
 
 Then decide the companion documents. Read [companion-documents](references/companion-documents.md) and record each candidate as **exists** (keep, improve, or synchronize), **justified** (the evidence threshold is met and the document is missing), or **not justified**. A README section that has outgrown the funnel — a contribution guide longer than the quick start, an architecture walkthrough before the first example — is evidence for one.
 
-🔴 **CHECKPOINT** when any candidate is **justified** and the user did not name it: present the proposed files, the evidence behind each, and the questions only the user can answer (security contact, contribution policy, conduct standard), then wait. Create only what the user approves; report the rest as recommendations. Skip it when the user named the documents or nothing new is justified.
+When any candidate is **justified** and the user did not name it, the same 🔴 **CHECKPOINT** presents the proposed files, the evidence behind each, and the questions only the user can answer (security contact, contribution policy, conduct standard), then waits. Create only what the user approves; report the rest as recommendations. Leave the proposal out when the user named the documents or nothing new is justified.
 
 Never add empty template sections or files. Omit unsupported sections and report consequential gaps.
 

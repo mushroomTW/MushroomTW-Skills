@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import unicodedata
 from collections import Counter
 from pathlib import Path
 from urllib.parse import unquote, urlparse
@@ -34,6 +35,14 @@ FENCED_BLOCK = re.compile(r"(?ms)^ {0,3}(`{3,}|~{3,}).*?^ {0,3}\1[ \t]*$")
 INLINE_CODE = re.compile(r"`+[^`\n]+`+")
 EMPTY_LINK = re.compile(r"\[[^\]]*\]\(\s*\)")
 LINK = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
+
+# Headings and explicit anchors a `#fragment` link can land on. Setext
+# headings count too, because a paragraph line directly above `---` is one.
+ATX_HEADING = re.compile(r"^ {0,3}#{1,6}[ \t]+(.*?)(?:[ \t]+#+)?[ \t]*$")
+SETEXT_UNDERLINE = re.compile(r"^ {0,3}(?:=+|-+)[ \t]*$")
+HTML_ANCHOR = re.compile(r"""(?i)<[a-z][^>]*?\b(?:name|id)\s*=\s*["']([^"']+)["']""")
+LINK_TEXT = re.compile(r"!?\[([^\]]*)\]\([^)]*\)")
+MARKDOWN_FILE = re.compile(r"(?i)\.(?:md|markdown)$")
 
 # A prose reference to a license file (uppercase filename convention only, so
 # ordinary words like "license" stay out of scope). Lines that negate or
@@ -207,6 +216,77 @@ def local_targets(text: str) -> list[str]:
         if base:
             targets.append(base)
     return targets
+
+
+def fragment_links(text: str) -> list[tuple[str, str]]:
+    """Return (path, fragment) for every Markdown link carrying a #fragment.
+
+    The path is "" for a link into the same document.
+    """
+    links: list[tuple[str, str]] = []
+    for match in LINK.finditer(text):
+        target = link_target(match.group(1))
+        if "#" not in target:
+            continue
+        try:
+            if urlparse(target).scheme:
+                continue
+        except ValueError:
+            continue
+        base, fragment = target.split("#", 1)
+        if fragment:
+            links.append((unquote(base), unquote(fragment)))
+    return links
+
+
+def github_slug(heading: str) -> str:
+    """Return the anchor GitHub derives from a heading's text.
+
+    Mirrors github-slugger: lowercase, drop every character that is not a
+    letter, number, mark, hyphen, underscore, or space, then turn spaces into
+    hyphens. Link syntax, HTML tags, and code backticks are markup, not text.
+    """
+    text = LINK_TEXT.sub(r"\1", heading)
+    text = SVG_TAG.sub("", text).replace("`", "")
+    kept = "".join(
+        char
+        for char in text.lower()
+        if char in "-_ " or unicodedata.category(char)[0] in "LNM"
+    )
+    return kept.replace(" ", "-")
+
+
+def document_anchors(text: str) -> set[str]:
+    """Return every anchor a document defines, lowercased."""
+    body = FENCED_BLOCK.sub("", text)
+    lines = body.splitlines()
+    anchors = {"top"}
+    seen: Counter[str] = Counter()
+    for index, line in enumerate(lines):
+        match = ATX_HEADING.match(line)
+        heading = match.group(1) if match else None
+        if (
+            heading is None
+            and line.strip()
+            and index + 1 < len(lines)
+            and SETEXT_UNDERLINE.match(lines[index + 1])
+        ):
+            heading = line.strip()
+        if heading is None:
+            continue
+        slug = github_slug(heading)
+        count = seen[slug]
+        seen[slug] += 1
+        anchors.add(slug if count == 0 else f"{slug}-{count}")
+    anchors.update(anchor.lower() for anchor in HTML_ANCHOR.findall(body))
+    return anchors
+
+
+def resolve_local(document: Path, project: Path, target: str) -> Path:
+    """Resolve a local link the way GitHub does: a leading / is the repository root."""
+    if target.startswith("/"):
+        return (project / target.lstrip("/")).resolve()
+    return (document.parent / target).resolve()
 
 
 def license_section_lines(text: str) -> list[str]:
@@ -509,6 +589,18 @@ def check_svg(path: Path, label: str) -> list[str]:
         height = float(viewbox.group(2))
     else:
         warnings.append(f"SVG has no viewBox, so it cannot scale with the page: {label}")
+    fixed = [
+        name
+        for name in ("width", "height")
+        if _attribute(root.group(0), name)
+        and not _attribute(root.group(0), name).endswith("%")
+    ]
+    if fixed:
+        warnings.append(
+            f"SVG root sets a fixed width or height ({', '.join(fixed)}): {label}"
+            " -- the recipe keeps only the viewBox so the image scales with the"
+            " README column; remove them"
+        )
     if SVG_EXTERNAL.search(text):
         warnings.append(
             f"SVG loads a resource from outside the repository: {label}"
@@ -694,10 +786,11 @@ def check_document(document: Path, project: Path) -> list[str]:
 
     warnings.extend(check_mermaid(text))
 
-    has_license_file = (
-        any(project.glob("LICENSE*"))
-        or any(project.glob("LICENCE*"))
-        or any(project.glob("COPYING*"))
+    # Compared by name rather than glob, which is case-sensitive on Linux and
+    # would miss License.md or license.
+    has_license_file = any(
+        entry.name.upper().startswith(("LICENSE", "LICENCE", "COPYING"))
+        for entry in project.iterdir()
     )
     if not has_license_file:
         for line in prose.splitlines():
@@ -726,11 +819,7 @@ def check_document(document: Path, project: Path) -> list[str]:
     targets = local_targets(prose)
     targets += [image for image in images if image not in targets]
     for target in targets:
-        # GitHub resolves a leading / from the repository root.
-        if target.startswith("/"):
-            candidate = (project / target.lstrip("/")).resolve()
-        else:
-            candidate = (document.parent / target).resolve()
+        candidate = resolve_local(document, project, target)
         try:
             candidate.relative_to(project)
         except ValueError:
@@ -741,13 +830,32 @@ def check_document(document: Path, project: Path) -> list[str]:
         elif candidate.suffix.lower() == ".svg":
             warnings.extend(check_svg(candidate, target))
 
+    # Only Markdown targets are checked: a fragment on a source file (#L10) is
+    # a line range GitHub generates, not a heading.
+    anchor_cache: dict[Path, set[str]] = {document: document_anchors(text)}
+    for base, fragment in fragment_links(prose):
+        if base:
+            if not MARKDOWN_FILE.search(base):
+                continue
+            candidate = resolve_local(document, project, base)
+            if not candidate.is_file():
+                continue  # the missing file is already reported above
+        else:
+            candidate = document
+        if candidate not in anchor_cache:
+            anchor_cache[candidate] = document_anchors(
+                candidate.read_text(encoding="utf-8", errors="replace")
+            )
+        if fragment.lower() not in anchor_cache[candidate]:
+            warnings.append(f"Anchor does not exist: {base}#{fragment}")
+
     return warnings
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Check project documents for unfinished markers, local links,"
-        " license placement, HTML block spacing, referenced SVGs (including animation"
+        description="Check project documents for unfinished markers, local links and"
+        " anchors, license placement, HTML block spacing, referenced SVGs (including animation"
         " and accessible name), and Mermaid blocks"
     )
     parser.add_argument("documents", type=Path, nargs="+", metavar="document")

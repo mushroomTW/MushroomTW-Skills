@@ -40,7 +40,7 @@ The sections are the same at both presentation levels. Plain is the default; whe
 
 ### The license lives in the LICENSE file
 
-GitHub reads `LICENSE` and shows the license in the repository sidebar, so a README section that repeats it is a second owner for the same fact. Half of the most-starred repositories carry no License section at all; the rest keep it to a single line such as `[MIT](LICENSE)`. Follow that: when a LICENSE file exists and the licensing is plain, write no License section and no license badge. Write the one-line form only for the exceptions in the table above. When auditing, a License section that merely restates the LICENSE file is reported as removable redundancy; a section that contradicts the file, or names a license with no file behind it, stays an error.
+GitHub reads `LICENSE` and shows the license in the repository sidebar, so a README section that repeats it is a second owner for the same fact. When a LICENSE file exists and the licensing is plain, write no License section and no license badge. Write the one-line form only for the exceptions in the table above. When auditing, a License section that merely restates the LICENSE file is reported as removable redundancy; a section that contradicts the file, or names a license with no file behind it, stays an error.
 
 ## When a section becomes its own file
 
