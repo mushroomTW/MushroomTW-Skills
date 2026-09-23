@@ -2,7 +2,7 @@
 
 **English** | [繁體中文](README.zh.md)
 
-Four portable Agent Skills for project documentation, dependency decisions, and SonarQube quality workflows. They follow the open Agent Skills format and can be installed into Claude Code, Codex, Cursor, OpenCode, and other skills-compatible agents; workflows that need SonarQube still require that capability on the host.
+Five portable Agent Skills for project documentation, dependency decisions, over-engineering audits, and SonarQube quality workflows. They follow the open Agent Skills format and can be installed into Claude Code, Codex, Cursor, OpenCode, and other skills-compatible agents; workflows that need SonarQube still require that capability on the host.
 
 Each skill is a self-contained skill folder at the root; its documentation lives in `docs/`.
 
@@ -14,6 +14,7 @@ Each skill is a self-contained skill folder at the root; its documentation lives
 | --- | --- | --- | --- |
 | `excellent-project-docs` | Writes, improves, audits, or re-syncs a repository's `README.md` and the companion files GitHub reads (`CONTRIBUTING`, `SECURITY`, `ARCHITECTURE`, `CHANGELOG`, …) against what the repository actually contains. Proposes companion files before creating them; claims it cannot trace to a file are reported as gaps rather than written as facts. | [EN](docs/excellent-project-docs.md) ・ [繁中](docs/excellent-project-docs.zh.md) | `excellent-project-docs/` |
 | `library-first` | Before you hand-roll retry, validation, caching, auth, or date handling, forces one search of that language's own ecosystem and a stated reason for the build-or-adopt decision. | [EN](docs/library-first.md) ・ [繁中](docs/library-first.zh.md) | `library-first/` |
+| `ponytail-audit-lite` | Scans a whole repository for over-engineering and returns a ranked table of what to delete, simplify, or replace with a standard-library or platform equivalent. Reports only; applies nothing. Adapted from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) (MIT). | [EN](docs/ponytail-audit-lite.md) ・ [繁中](docs/ponytail-audit-lite.zh.md) | `ponytail-audit-lite/` |
 
 ### SonarQube workflow
 
@@ -26,7 +27,7 @@ Both skills target a **self-hosted SonarQube running in Docker** on the same mac
 
 `local-sonarqube-setup` and `sonarqube-fix-all` are meant to run in that order: the first connects a project and produces a first analysis, the second batch-fixes what it reports.
 
-`sonarqube-fix-all` is manual-trigger-only: it declares `disable-model-invocation: true`, so the host never fires it on its own. Invoke it by name (`/sonarqube-fix-all`). The other three trigger from their `description`.
+`sonarqube-fix-all` and `ponytail-audit-lite` are manual-trigger-only: they declare `disable-model-invocation: true`, so the host never fires them on their own. Invoke them by name (`/sonarqube-fix-all`, `/ponytail-audit-lite`). The other three trigger from their `description`.
 
 ## Design rationale
 
@@ -39,7 +40,7 @@ The references below back two design decisions, not the effectiveness of the ski
 
 ## Install
 
-Every directory here is a plain skill folder. From the repository root, the [`skills` CLI](https://github.com/vercel-labs/skills) can discover supported agents and install all four. The first invocation of `npx` may use the network to download the CLI:
+Every directory here is a plain skill folder. From the repository root, the [`skills` CLI](https://github.com/vercel-labs/skills) can discover supported agents and install all five. The first invocation of `npx` may use the network to download the CLI:
 
 ```bash
 npx skills add . --list
@@ -70,7 +71,7 @@ npx skills use . --skill <skill-name>
 
 `local-sonarqube-setup` additionally expects a compatible scanner already on the host and a `SONAR_TOKEN` environment variable; it does not install the scanner. SonarScanner for .NET currently lacks this environment-variable path, so the skill stops instead of exposing the token in arguments or files. `sonarqube-fix-all` expects an already-configured SonarQube MCP connection and also reads `SONAR_TOKEN`.
 
-All four ship an `agents/openai.yaml` for Codex; beyond that file, `library-first` is a single `SKILL.md` with no other supporting files.
+All five ship an `agents/openai.yaml` for Codex; beyond that file, `library-first` is a single `SKILL.md` with no other supporting files. `ponytail-audit-lite` also carries its upstream `LICENSE`, which travels with the install.
 
 ## Repository layout
 
@@ -82,11 +83,13 @@ MushroomTW-Skills/
 ├── docs/                         ← per-skill docs (EN default, .zh.md = 繁中)
 │   ├── excellent-project-docs.md / .zh.md
 │   ├── library-first.md / .zh.md
+│   ├── ponytail-audit-lite.md / .zh.md
 │   ├── local-sonarqube-setup.md / .zh.md
 │   └── sonarqube-fix-all.md / .zh.md
 │
 ├── excellent-project-docs/       SKILL.md + agents/ references/ scripts/
 ├── library-first/                SKILL.md + agents/
+├── ponytail-audit-lite/          SKILL.md + agents/ LICENSE (upstream MIT)
 ├── local-sonarqube-setup/        SKILL.md + agents/ reference/
 └── sonarqube-fix-all/            SKILL.md + agents/
 ```

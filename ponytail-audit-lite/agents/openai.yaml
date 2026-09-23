@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ponytail Audit Lite"
+  short_description: "Rank what to cut from an over-engineered repository"
+  default_prompt: "Use $ponytail-audit-lite to scan this whole repository for over-engineering and report a ranked table of what to delete, simplify, or replace with standard-library or platform equivalents. Report only; apply nothing."
