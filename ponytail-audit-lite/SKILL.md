@@ -1,10 +1,7 @@
 ---
 name: ponytail-audit-lite
 disable-model-invocation: true
-description: >
-  Whole-repo audit for over-engineering. Scans the
-  entire codebase instead of a diff: a ranked list of what to delete, simplify,
-  or replace with stdlib/native equivalents. One-shot report, does not apply fixes.
+description: Manually run a whole-repository simplification audit and produce a one-shot report.
 ---
 
 Repo-wide. Scan the whole tree instead of a diff. Rank
