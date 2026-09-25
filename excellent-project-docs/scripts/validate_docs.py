@@ -34,7 +34,10 @@ UNFINISHED_MARKERS = re.compile(
 FENCED_BLOCK = re.compile(r"(?ms)^ {0,3}(`{3,}|~{3,}).*?^ {0,3}\1[ \t]*$")
 INLINE_CODE = re.compile(r"`+[^`\n]+`+")
 EMPTY_LINK = re.compile(r"\[[^\]]*\]\(\s*\)")
-LINK = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
+# 連結目標可用 <...> 包住，或含一層成對括號；連結文字可再包一層 [...]
+# （徽章寫法 [![alt](圖)](目標)）。連結與圖片共用同一個目標樣式。
+LINK_DESTINATION = r"((?:<[^>]*>|[^()\s<]|\([^()]*\))*(?:\s+[^)]*)?)"
+LINK = re.compile(r"!?\[(?:[^\[\]]|\[[^\]]*\])*\]\(" + LINK_DESTINATION + r"\)")
 
 # Headings and explicit anchors a `#fragment` link can land on. Setext
 # headings count too, because a paragraph line directly above `---` is one.
@@ -90,7 +93,7 @@ LICENSE_BADGE = re.compile(r"(?i)shields\.io/[^\s)\"']*licen[sc]e|/badge/licen[s
 HTML_OPEN_NEEDS_BLANK = re.compile(r"^\s*<div\b[^>]*>\s*$|</summary>\s*$")
 HTML_CLOSE_NEEDS_BLANK = re.compile(r"^\s*</(?:div|details)>\s*$")
 
-MARKDOWN_IMAGE = re.compile(r"!\[([^\]]*)\]\(([^)]+)\)")
+MARKDOWN_IMAGE = re.compile(r"!\[([^\]]*)\]\(" + LINK_DESTINATION + r"\)")
 HTML_IMG = re.compile(r"(?is)<img\b[^>]*>")
 HTML_SRC = re.compile(r"""(?is)\b(?:src|srcset)\s*=\s*["']([^"']+)["']""")
 HTML_ALT = re.compile(r"""(?is)\balt\s*=\s*["'][^"']*\S[^"']*["']""")

@@ -4,6 +4,8 @@ Two presentation levels exist. **Plain** is the default: text, tables, code bloc
 
 Everything else in [readme-framework](readme-framework.md) still holds. Showcase changes how facts are presented, not which facts exist: every node in a diagram, every fact in the banner, every card in the grid is a component, command, number, or step the evidence inventory recorded; the license stays in the LICENSE file with no badge or section; no image or diagram carries the only copy of a fact, because renderers outside GitHub (npm, PyPI, crates.io, editor previews) may show nothing in its place.
 
+The examples in this file come from one real project, a RimWorld modding server (its `create_mod` tool, its 18 tools, its map grid). They show shape, never content: every string on your page comes from the target repository's evidence inventory.
+
 The bar for every element below: **it must be recognisably this project's.** A banner, card grid, or diagram that would fit any repository unchanged is a template, not a design — give it the project's colour, its shapes, its numbers.
 
 ## Style proposal
