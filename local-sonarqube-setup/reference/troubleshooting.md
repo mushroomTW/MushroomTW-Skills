@@ -89,7 +89,7 @@ Handling: extend the polling limit and re-check; if it stays `PENDING`, inspect 
 
 Diagnosis: SonarQube is behind HTTPS with a self-signed certificate not trusted by the scanner JVM.
 
-Handling: import the server certificate into the scanner JVM truststore (`reference/commands.md §8` + `scanners/scanner-environment/manage-tls-certificates.md`). Do not disable TLS verification.
+Handling: import the server certificate into the scanner JVM truststore, following the official `scanners/scanner-environment/manage-tls-certificates.md`. Do not disable TLS verification.
 
 ## `Malformed input or input contains unmappable characters` (non-ASCII filenames)
 
@@ -112,15 +112,9 @@ Handling: Linux — raise `ulimit -n` and check `server-installation/pre-install
 
 ## `Report for commit can't be processed: a newer report has already been processed`
 
-Diagnosis: parallel scans of the same project share the same commit SHA (e.g., matrix job with `GITHUB_SHA` from default branch) and one report is rejected.
+Diagnosis: two scans of the same project overlapped, or an older commit was scanned after a newer one had already been processed.
 
-Handling: run sequentially (`max-parallel: 1`) or separate jobs per branch; ensure `sonar.branch.name` matches the real branch.
-
-## `Failed to upload analysis report: POST 403` on cloud / firewall
-
-Diagnosis: WAF / firewall blocks the report upload API.
-
-Handling: allow `POST /api/ce/submit` and related endpoints in the cloud firewall / WAF config, then re-run. Do not downgrade to HTTP.
+Handling: run one scan at a time, and scan the commit that is currently checked out.
 
 ## Analysis stops on Windows — username ends with `!` or special character
 

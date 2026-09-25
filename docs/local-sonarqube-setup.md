@@ -36,7 +36,7 @@ The full set is in the Hard rules section of SKILL.md.
 | --- | --- | --- |
 | 1 | Discover | Read `AGENTS.md`, README, build docs, and existing sonar config; run `git status --short`; derive language and test layout from the manifest |
 | 2 | Confirm service and scanner | `GET /api/system/status` must be `UP`; record the scanner version |
-| 3 | Find or create the project | Query via MCP first; only `POST /api/projects/create` if absent, then record the dashboard URL |
+| 3 | Find or create the project | Query via MCP when available, otherwise the REST API; only `POST /api/projects/create` if absent, then record the dashboard URL |
 | 4 | Scan configuration | Merge minimally into existing config rather than overwriting; exclude build artifacts and caches, never an entire language directory or the test directory |
 | 5 | Produce reports | Run the project's own checks and tests first, then generate coverage with its native tooling; confirm report paths exist and are non-empty |
 | 6 | Run the scan | Set `SONAR_HOST_URL` / `SONAR_TOKEN` within a single process; require `EXECUTION SUCCESS` and exit code 0 |

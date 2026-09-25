@@ -32,7 +32,7 @@ Official prerequisite: `analyzing-source-code/overview.md` — full clone requir
 |---|---|---|
 | Maven | SonarScanner for Maven | `mvn verify sonar:sonar` |
 | Gradle | SonarScanner for Gradle | `gradle sonar` |
-| .NET / MSBuild | SonarScanner for .NET | Credential STOP: current scanner requires a token property and does not support `SONAR_TOKEN` |
+| .NET / MSBuild | SonarScanner for .NET | Credential STOP: the scanner does not read `SONAR_TOKEN` |
 | NPM | SonarScanner for NPM | `sonar-scanner` via npm |
 | Python | SonarScanner for Python | `sonar-scanner` / `pysonar` |
 | Other | SonarScanner CLI | `sonar-scanner` |
@@ -67,7 +67,7 @@ Troubleshoot with `SONAR_SCANNER_JAVA_OPTS` vs `SONAR_SCANNER_OPTS` distinction 
 `SONAR_TOKEN` is the standard variable name SonarScanner reads, supplied directly by the system environment; no extra mapping is needed.
 
 > [!CAUTION]
-> SonarScanner for .NET currently does not support `SONAR_TOKEN` and documents `/d:sonar.token=...`. That would expose the expanded secret in process arguments, so this skill stops on .NET instead of using the documented argument or writing a token file.
+> SonarScanner for .NET does not read `SONAR_TOKEN` (checked against the 11.3 source, September 2026; SonarSource tracks the request as SCAN4NET-562) and documents `/d:sonar.token=...`. That would expose the expanded secret in process arguments, so this skill stops on .NET instead of using the documented argument or writing a token file. The scanner does read a `SONARQUBE_SCANNER_PARAMS` JSON environment variable, an env-only path this skill has not tested, so it is not used. Re-check this when the scanner version changes.
 
 ```powershell
 if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
@@ -244,11 +244,11 @@ docker run --rm `
   sonarsource/sonar-scanner-cli
 ```
 
-Cache to avoid re-downloading analyzers each run:
+Cache to avoid re-downloading analyzers each run. A named volume keeps the cache out of the working tree:
 
 ```powershell
 docker run --rm `
-  -v "${PWD}/.sonar-cache:/opt/sonar-scanner/.sonar/cache" `
+  -v "sonar-cache:/opt/sonar-scanner/.sonar/cache" `
   -v "${PWD}:/usr/src" `
   -e SONAR_HOST_URL="http://host.docker.internal:9000" `
   --env SONAR_TOKEN `
@@ -257,9 +257,11 @@ docker run --rm `
 $env:SONAR_USER_HOME = "C:/cache/sonar"
 ```
 
-> Ensure user 1000 has RW on mounted dirs; otherwise permission errors. On Windows use `host.docker.internal` not `localhost` when SonarQube runs in Docker.
+> The container runs as user 1000, which needs RW on the mounted source directory and on the cache volume; otherwise permission errors. If the first run fails writing the cache, fix the volume's ownership once: `docker run --rm -u 0 -v sonar-cache:/c alpine chown -R 1000:1000 /c`. Inside the container `localhost` is the container itself, so use `host.docker.internal`. Docker Desktop (Windows, macOS) resolves it by default; on Linux add `--add-host=host.docker.internal:host-gateway` to the `docker run` line.
 
 ## 9. Preferred MCP tools
+
+The names below are how Claude Code exposes the SonarQube MCP server; other hosts name the same tools differently. Without an MCP connection, use the REST fallbacks in §4 and §7.
 
 | Need | Tool |
 | --- | --- |

@@ -36,7 +36,7 @@
 | --- | --- | --- |
 | 1 | 探勘 | 讀 `AGENTS.md`、README、建置文件與既有 sonar 設定；跑 `git status --short`，從 manifest 推導語言與測試佈局 |
 | 2 | 確認服務與掃描器 | `GET /api/system/status` 須為 `UP`，記錄 scanner 版本 |
-| 3 | 專案查詢／建立 | 先用 MCP 查詢；不存在才 `POST /api/projects/create`，記下 dashboard URL |
+| 3 | 專案查詢／建立 | 有 MCP 就用 MCP 查詢，否則用 REST API；不存在才 `POST /api/projects/create`，記下 dashboard URL |
 | 4 | 掃描設定 | 已有設定最小幅度合併，不整份覆蓋；排除產物與快取，不得排除整個語言目錄或測試目錄 |
 | 5 | 產生報告 | 先跑專案既有的檢查與測試，再以原生工具產生 coverage，確認報告路徑存在且非空 |
 | 6 | 執行掃描 | 單一程序內設定 `SONAR_HOST_URL` / `SONAR_TOKEN`，須確認 `EXECUTION SUCCESS` 且 exit code 0 |
