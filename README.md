@@ -27,7 +27,7 @@ Both skills target a **self-hosted SonarQube running in Docker** on the same mac
 
 `local-sonarqube-setup` and `sonarqube-fix-all` are meant to run in that order: the first connects a project and produces a first analysis, the second batch-fixes what it reports.
 
-`sonarqube-fix-all` and `ponytail-audit-lite` are manual-trigger-only: they declare `disable-model-invocation: true`, so the host never fires them on their own. Invoke them by name (`/sonarqube-fix-all`, `/ponytail-audit-lite`). The other three trigger from their `description`.
+`sonarqube-fix-all` and `ponytail-audit-lite` are manual-trigger-only: they declare `disable-model-invocation: true` for Claude Code and `policy.allow_implicit_invocation: false` in `agents/openai.yaml` for Codex, so neither host fires them on its own; other hosts apply their own rules. Invoke them by name (`/sonarqube-fix-all`, `/ponytail-audit-lite`). The other three trigger from their `description`.
 
 ## Design rationale
 

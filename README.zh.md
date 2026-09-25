@@ -27,7 +27,7 @@
 
 `local-sonarqube-setup` 與 `sonarqube-fix-all` 設計上是接續使用：前者把專案接上並跑出第一份分析，後者批次修掉它回報的問題。
 
-`sonarqube-fix-all` 與 `ponytail-audit-lite` 僅限手動觸發：它們在 frontmatter 聲明 `disable-model-invocation: true`，host 不會自行啟動。請以名稱叫用（`/sonarqube-fix-all`、`/ponytail-audit-lite`）。其餘三個依各自的 `description` 自動觸發。
+`sonarqube-fix-all` 與 `ponytail-audit-lite` 僅限手動觸發：它們在 frontmatter 為 Claude Code 聲明 `disable-model-invocation: true`，並在 `agents/openai.yaml` 為 Codex 設定 `policy.allow_implicit_invocation: false`，兩者都不會自行啟動；其他 host 依其自身規則決定。請以名稱叫用（`/sonarqube-fix-all`、`/ponytail-audit-lite`）。其餘三個依各自的 `description` 自動觸發。
 
 ## 設計依據
 
