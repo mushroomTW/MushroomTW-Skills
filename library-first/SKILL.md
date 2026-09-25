@@ -1,6 +1,6 @@
 ---
 name: library-first
-description: Use when a task means implementing, adding, fixing, or refactoring a general-purpose mechanism — retry/backoff, validation, date/time handling, state management, authentication/authorization, caching, serialization, CLI argument parsing, cryptographic hashing — even when the request never mentions a library ("add retry to this call", "clean up this hand-written validator"), and when asked whether to adopt a package or write it yourself. Not for domain-specific business logic such as discounts, pricing, or game rules.
+description: Use when a task means implementing, adding, fixing, or refactoring a general-purpose mechanism — retry/backoff, validation, date/time handling, state management, authentication/authorization, caching, serialization, CLI argument parsing, cryptographic hashing — even when the request never mentions a library ("add retry to this call", "clean up this hand-written validator"), and when asked whether to adopt a package or write it yourself. Not for domain-specific business logic such as discounts, pricing, or game rules, nor for a fix inside code that already uses an adopted package.
 ---
 
 # Library-First
@@ -22,7 +22,7 @@ description: Use when a task means implementing, adding, fixing, or refactoring 
 | 3 | Evaluate candidates | candidates | `Pass`/`Fail`/`Unknown`/`N/A` | apply the Quality Gate to third-party packages; confirm fitness and version support for a standard library |
 | 4 | Terminal decision | evaluation results | `used`/`wrote manually`/`deferred` | exactly one; see the templates |
 
-🔴 CHECKPOINT 1 · 🛑 STOP — pause after Step 2 on the `search` path: confirm the standard library was covered, mainstream packages were covered, and the query used a domain term rather than a variable name. The `manual` path never fakes a search; it goes straight to Step 4.
+🔴 CHECKPOINT 1 — a self-check after Step 2 on the `search` path, not a pause for the user: confirm the standard library was covered, mainstream packages were covered, and the query used a domain term rather than a variable name. The `manual` path never fakes a search; it goes straight to Step 4.
 
 ### Quality Gate (a third-party package is adopted only when all six pass)
 
@@ -50,7 +50,7 @@ Decision: used <pkg>@<ver> because gate 0-5 pass, <reason>.
 Decision: used standard library <API> because target version <ver> supports it and API fits.
 Decision: wrote manually because domain-specific business logic.
 Decision: wrote manually because performance-critical, measured <library> <metric> at <value> against budget <threshold>, so overhead is unacceptable.
-Decision: wrote manually because security-sensitive, full auditability is required and opaque dependencies are unacceptable.
+Decision: wrote manually because <user or policy> requires this security-sensitive code to be fully auditable in-house, so opaque dependencies are unacceptable.
 Decision: wrote manually because evaluated <pkg> failed gate #<n>.
 Decision: wrote manually because no suitable candidate exists after checking <sources>.
 Decision: wrote manually because this is a one-off three-line helper with no edge cases, state, or growth.
@@ -59,17 +59,17 @@ Decision: deferred because gate #<n> depends on <missing project fact>; immediat
 
 ## The four cases that are hand-written
 
-Domain logic (discounts, premiums, game rules), performance-critical code (with measurements), security-sensitive code (full auditability required), and evaluated-and-insufficient candidates (*evaluated*, not assumed).
+Domain logic (discounts, premiums, game rules), performance-critical code (with measurements), security-sensitive code whose full in-house auditability the user or a policy explicitly requires (being security-sensitive alone is a reason to adopt a vetted library, never to hand-write auth, cryptography, or hashing), and evaluated-and-insufficient candidates (*evaluated*, not assumed).
 
 ## Do not hand-write these
 
 | Need | Do not write your own |
 |---|---|
 | Retry / circuit breaker | `cockatiel` (TS), `Polly` (C#), `tenacity` (Py) |
-| Auth | Auth0, Supabase, Keycloak, ASP.NET Identity |
+| Auth | `ASP.NET Identity` (C#), `Auth.js` (TS), `Authlib` (Py); a hosted identity service is a product decision, not a package |
 | Frontend state | Zustand, Redux, Jotai |
 | Schema validation | Zod, Pydantic, FluentValidation |
-| Date/time | `date-fns`, Temporal, NodaTime |
+| Date/time | `date-fns`, `Temporal` (native where the runtime ships it, otherwise `@js-temporal/polyfill`), `NodaTime` |
 | Cache / serialization / CLI / hashing | search the ecosystem's mainstream solution first |
 
 > The names above are recalled search starting points, not adoptable identities: each still passes Gate 0 before it may appear in a decision.
@@ -101,3 +101,5 @@ Domain logic (discounts, premiums, game rules), performance-critical code (with 
 |---|---|---|---|---|
 | Exponential backoff retry (Node) | `exponential backoff retry` | `cockatiel`/`p-retry` + standard library | `cockatiel` 0-5 pass | `Decision: used cockatiel@<ver> because gate 0-5 pass, non-invasive API and light dependencies` |
 | Discount of 100 on orders over 1000 | `order discount rule (domain)` | not applicable (business rule) | no search needed | `Decision: wrote manually because domain-specific business logic` |
+| LRU cache for a pure function (Python 3.12) | `memoization LRU cache` | `functools.lru_cache` + `cachetools` | standard library fits, 3.12 ships it | `Decision: used standard library functools.lru_cache because target version 3.12 supports it and API fits.` |
+| Schema validation in a closed-source app with no stated license policy | `schema validation` | an LGPL candidate | gate 3 `Unknown` | `Decision: deferred because gate #3 depends on the project's license policy; immediate action: do not implement until the policy on LGPL dependencies is confirmed.` |

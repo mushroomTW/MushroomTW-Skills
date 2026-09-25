@@ -16,7 +16,7 @@ retry and backoff, validation, date/time handling, state management, authenticat
 
 The request does not have to mention a library. "Add retry to this call", "clean up this hand-written validator", and "should I pull in Zod or write it myself?" all trigger it — the skill fires on the *mechanism*, not on the word "package".
 
-It does **not** apply to domain-specific business logic — order discount rules, premium calculation, game rules. No package exists for these, and none should.
+It does **not** apply to domain-specific business logic — order discount rules, premium calculation, game rules. No package exists for these, and none should. Nor does it apply to a fix inside code that already uses an adopted package.
 
 ## Process
 
@@ -42,7 +42,7 @@ When unsure whether a package meets these, **look it up — do not guess**.
 
 - **Domain-specific business logic**
 - **Performance-critical path** — a general library's abstraction cost is unacceptable on a hot path, backed by actual measurement
-- **Security-sensitive, needs full control** — every line must be auditable; opaque dependencies are unacceptable
+- **Security-sensitive, with full in-house auditability explicitly required** by the user or a policy — opaque dependencies are then unacceptable. Being security-sensitive alone is a reason to adopt a vetted library, never to hand-write auth, cryptography, or hashing
 - **Existing solutions evaluated and genuinely insufficient** — note: *evaluated*, not assumed insufficient
 
 ## Install
