@@ -12,7 +12,7 @@
 
 ## 觸發時機
 
-請以名稱明確叫用 —— 此 skill 僅限手動觸發，即使請求提到 SonarQube 問題或 quality gate 沒過也不會自動觸發。它在 frontmatter 聲明 `disable-model-invocation: true`，host 不會自行啟動它：
+請以名稱明確叫用 —— 此 skill 僅限手動觸發，即使請求提到 SonarQube 問題或 quality gate 沒過也不會自動觸發。它在 frontmatter 為 Claude Code 聲明 `disable-model-invocation: true`，並在 `agents/openai.yaml` 為 Codex 設定 `policy.allow_implicit_invocation: false`，兩者都不會自行啟動它；其他 host 依其自身規則決定：
 
 ```text
 /sonarqube-fix-all
@@ -21,7 +21,7 @@
 ## 限制
 
 - 分析伺服器是 **Docker 自架的 SonarQube，絕不是 SonarCloud**
-- 絕不要求使用者提供、建立、顯示或修改 SonarQube 憑證。查詢走 MCP，掃描 token 讀系統環境變數 `SONAR_TOKEN`，其值絕不印出或寫入 log
+- 絕不要求使用者提供、建立、顯示或修改 SonarQube 憑證。查詢走 MCP，掃描 token 由 scanner 自行讀取系統環境變數 `SONAR_TOKEN`，其值絕不印出、寫入 log 或放進命令列參數
 - **絕不更改伺服器上的 issue 狀態**。`Accepted`、`False positive`、`Won't fix`、檔案排除、停用 quality profile 規則全部禁止，除非使用者明確要求該項重分類
 - 絕不重設、還原或丟棄使用者既有變更。絕不 push
 - 輸出精簡：只給摘要與相關片段，不倒完整 payload、issue 清單或原始 log
@@ -31,14 +31,14 @@
 | # | 階段 | 重點 |
 | --- | --- | --- |
 | 1 | 偵測工具鏈 | 不假設語言、建置工具或測試框架，從 manifest 與 lockfile 判定；monorepo 逐模組解析，批次不跨模組 |
-| 2 | 前置檢查 | 工作樹乾淨、**變更前建置必須是綠的**、在專屬分支上工作。任一項不成立就停下回報 |
+| 2 | 前置檢查 | 工作樹乾淨（或使用者選擇帶入的既有變更，先 commit 成基準檢查點）、**變更前建置必須是綠的**、在專屬分支上工作。任一項不成立就停下回報 |
 | 3 | 解析環境 | 從對話、repo 設定、建置 manifest 與 Docker 設定推導 workspace root、MCP 連線、server URL、project key。**絕不猜 project key** |
 | 4 | 抓取與分類 | 依嚴重度→規則→檔案分組，Blocker/Critical/High 優先，同檔案的相容修正合併成一批 |
 | 5 | 敏感區域辨識 | 見下節 |
 | 6 | 修正或說明理由 | 預設在源頭修。就地抑制與保留開啟各有明確條件 |
 | 7 | 逐批驗證 | 每批跑該模組的 formatter、linter、build；有測試就跑測試，沒有就以「build 乾淨、無新增警告、未動敏感區」為準。每批通過後 commit 一個檢查點 |
 | 8 | 重新掃描 | 全量 build＋測試後跑 SonarScanner，以 **issue key 集合差異**比對，不看總數。最多三輪自動掃描 |
-| 9 | 回報 | 分節列出：變更檔案、源頭修正、待人工冒煙測試、抑制項及理由、保留開啟項及理由、驗證命令與 Quality Gate 狀態。關閉問題一律不得寫成缺陷減少 |
+| 9 | 回報 | 分節列出：變更檔案、源頭修正、待人工冒煙測試、抑制項及理由、保留開啟的 issue 與 Security Hotspot 及理由、驗證命令與 Quality Gate 狀態。關閉問題一律不得寫成缺陷減少 |
 
 ## 敏感區域——不重寫
 

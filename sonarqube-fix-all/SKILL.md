@@ -16,7 +16,7 @@ These hold for the entire workflow:
 
 - Target **self-hosted SonarQube in Docker**, never SonarCloud; do not request an organization key or use SonarCloud setup.
 - Query through the configured MCP connection. Scan only with the `SONAR_TOKEN` system environment variable; never request, create, display, modify, print, echo, or log credentials.
-- Do not change server-side status or propose candidates for approval. `Accepted`, `False positive`, `Won't fix`, exclusions, and disabled rules require an explicit target (issue keys, or one rule scoped to a named file/module) and the desired status. Vague targets such as "unimportant issues" are invalid: 🛑 **STOP reclassification**, say why, continue source fixes, and report unsafe/unfixable findings as left-open for the user to reclassify.
+- Change server-side status only on an explicit request, and never propose reclassification candidates for approval. `Accepted`, `False positive`, `Won't fix`, exclusions, and disabled rules are applied only when the user names both the target (issue keys, or one rule scoped to a named file/module) and the desired status. Vague targets such as "unimportant issues" are invalid: 🛑 **STOP reclassification**, say why, continue source fixes, and report unsafe/unfixable findings as left-open for the user to reclassify.
 - Never reset, revert, or discard the user's existing changes. Never push.
 - Keep output lean: summaries and relevant excerpts, not full payloads, issue dumps, or raw logs.
 
@@ -42,6 +42,8 @@ For monorepos, resolve per module and do not mix modules in a batch.
 - The project builds green **before** any changes. Never start batch-fixing on a project that does not build — the build is the only verification signal available in later steps.
 - Work happens on a dedicated branch, created if needed.
 
+When the user carries existing changes along, commit them on that branch as the baseline checkpoint before the first batch, so reverting to a checkpoint later never discards them. Stage only the tracked files shown by `git status`; leave untracked files out unless the user names them.
+
 ## 3. Resolve the environment
 
 Resolve workspace root, MCP connection, server URL, and project key from the conversation and repository configuration. Ask only when deterministic discovery fails; never guess a project key.
@@ -53,6 +55,8 @@ Fetch all open issues with the largest practical page size, retaining only key, 
 Group by severity → rule → file. Process Blocker/Critical/High before Medium/Low; combine compatible same-file fixes and fetch each rule definition once per round.
 
 Read the affected symbol and the context a fix needs — its definition, its callers, and the blast radius; broaden only when needed.
+
+Security Hotspots follow the same rules as issues: fix at the source when the risk is real and the fix is safe, otherwise leave them open with a reason. Never mark a hotspot `Safe` or `Reviewed` on the server unless the user explicitly requests it under the Constraints rule above.
 
 ## 5. Sensitive regions — do not rewrite
 
@@ -104,14 +108,7 @@ Checkpoint-commit each passing batch; never commit red verification.
 
 After all batches, run the full build and test suite once, then the toolchain-appropriate SonarScanner.
 
-Use `SONAR_TOKEN` only from the system environment. Pass it by reference so its value never appears in commands or output:
-
-| Shell | Reference |
-|---|---|
-| PowerShell | `-Dsonar.token=$env:SONAR_TOKEN` |
-| POSIX shell | `-Dsonar.token=$SONAR_TOKEN` |
-
-If the scanner reads `SONAR_TOKEN` itself, pass no token argument.
+Use `SONAR_TOKEN` only from the system environment, and let the scanner read it itself: current SonarScanner CLI, Maven, and Gradle scanners read `SONAR_TOKEN`, so pass no token argument; versions older than SonarQube 10 read only `sonar.login`. Never put the token on the command line — even `-Dsonar.token=$env:SONAR_TOKEN` is expanded by the shell, so the secret lands in the process arguments, where process listings and audit logs can read it. A scanner that does not read `SONAR_TOKEN` (SonarScanner for .NET, or an older version) is treated like an unset token below; on a 401, check the scanner version before reporting, and name an outdated version as the cause.
 
 If unset/empty, skip rescanning but continue source fixes from the MCP report. State that confirmation awaits external analysis; do not request or search elsewhere for a token.
 
@@ -129,7 +126,7 @@ Report, each as its own section:
 - **Source-fixed** issues (verified locally) — kept distinct from **SonarQube-confirmed** closures
 - Pending manual smoke tests, with steps
 - Suppressed issues, each with its justification
-- Left-open issues, each with its reason
+- Left-open issues and Security Hotspots, each with its reason
 - Verification commands run, scan status, Quality Gate status
 
 Never present a closed issue, a cleared warning, or a green Quality Gate as a defect reduction or a quality improvement. Closure evidences that a rule stopped triggering, not that the code has fewer faults — the two are weakly related, and analyzer severity is not a fault forecast. Report what was actually verified (build, tests, scan status) and let it stand on its own.

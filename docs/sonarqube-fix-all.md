@@ -12,7 +12,7 @@ To connect a project to a local SonarQube first, use [local-sonarqube-setup](loc
 
 ## When It Applies
 
-Invoke it explicitly by name — this skill is manual-trigger-only and never auto-triggers, even when a request mentions SonarQube issues or a failing quality gate. Its frontmatter declares `disable-model-invocation: true`, so the host never fires it on its own:
+Invoke it explicitly by name — this skill is manual-trigger-only and never auto-triggers, even when a request mentions SonarQube issues or a failing quality gate. Its frontmatter declares `disable-model-invocation: true` for Claude Code, and `agents/openai.yaml` sets `policy.allow_implicit_invocation: false` for Codex, so neither host fires it on its own; other hosts decide by their own rules:
 
 ```text
 /sonarqube-fix-all
@@ -21,7 +21,7 @@ Invoke it explicitly by name — this skill is manual-trigger-only and never aut
 ## Constraints
 
 - The analysis server is **self-hosted SonarQube in Docker, never SonarCloud**
-- Never ask the user to provide, create, display, or modify a SonarQube credential. Queries go through MCP; the scan token is read from the `SONAR_TOKEN` system environment variable and its value is never printed or logged
+- Never ask the user to provide, create, display, or modify a SonarQube credential. Queries go through MCP; the scanner reads the token from the `SONAR_TOKEN` system environment variable itself, and its value is never printed, logged, or passed as a command-line argument
 - **Never change an issue's status on the server.** `Accepted`, `False positive`, `Won't fix`, file exclusions, and disabling quality-profile rules are all off-limits unless the user explicitly asks for that specific reclassification
 - Never reset, revert, or discard the user's existing changes. Never push
 - Keep output lean: summaries and relevant excerpts, not full payloads, issue dumps, or raw logs
@@ -31,14 +31,14 @@ Invoke it explicitly by name — this skill is manual-trigger-only and never aut
 | # | Stage | Key points |
 | --- | --- | --- |
 | 1 | Detect the toolchain | Assume no language, build tool, or test runner; identify them from manifests and lockfiles. In a monorepo, resolve per module and keep batches within one module |
-| 2 | Preflight | Working tree clean, the project **builds green before any change**, and work happens on a dedicated branch. If any fails, stop and report |
+| 2 | Preflight | Working tree clean (or existing changes the user chose to carry along, committed as the baseline checkpoint), the project **builds green before any change**, and work happens on a dedicated branch. If any fails, stop and report |
 | 3 | Resolve the environment | Derive workspace root, MCP connection, server URL, and project key from the conversation, repo config, build manifest, and Docker config. **Never guess a project key** |
 | 4 | Fetch and triage | Group by severity → rule → file; Blocker/Critical/High first; combine compatible fixes in the same file into one batch |
 | 5 | Identify sensitive regions | See below |
 | 6 | Fix, or justify | Fix at the source by default. Suppressing in place and leaving open each have explicit conditions |
 | 7 | Verify each batch | Run that module's formatter, linter, and build; run tests where they exist, otherwise require a clean build with no new warnings and no sensitive region touched. Commit a checkpoint after each passing batch |
 | 8 | Rescan | Full build and test suite, then SonarScanner; compare by **issue key set difference**, not totals. At most three automatic scan rounds |
-| 9 | Report | Separate sections for: files changed, source-fixed issues, pending manual smoke tests, suppressed issues with justification, left-open issues with reasons, verification commands and Quality Gate status. Closure is never reported as a defect reduction |
+| 9 | Report | Separate sections for: files changed, source-fixed issues, pending manual smoke tests, suppressed issues with justification, left-open issues and Security Hotspots with reasons, verification commands and Quality Gate status. Closure is never reported as a defect reduction |
 
 ## Sensitive Regions — Do Not Rewrite
 
