@@ -12,7 +12,8 @@ Adapted from the `ponytail-audit` skill in [DietrichGebert/ponytail](https://git
 
 Differences from upstream:
 
-- **Manual trigger only.** The frontmatter declares `disable-model-invocation: true` and the trigger phrases were dropped from `description`, so the host never fires it on its own. Invoke it by name (`/ponytail-audit-lite`).
+- **Manual trigger only.** The frontmatter declares `disable-model-invocation: true` for Claude Code, `agents/openai.yaml` sets `policy.allow_implicit_invocation: false` for Codex, and the trigger phrases were dropped from `description`, so neither host fires it on its own. Invoke it by name (`/ponytail-audit-lite`).
+- **Evidence before `delete:`.** A finding is tagged `delete:` or `yagni:` only after a whole-tree reference search; code reached by reflection, dependency injection, framework conventions, an entry point, or a published public API is left out. Generated, vendored, and dependency directories are skipped.
 - **Standalone.** References to the companion `ponytail-review` skill and the "stop ponytail-audit" mode switch were removed; the tag list is spelled out in full.
 - **Table output.** Findings come back as a Markdown table instead of one line each.
 
@@ -49,6 +50,8 @@ A Markdown table ranked biggest cut first, followed by an estimated total:
 
 net: -<N> lines, -<M> deps possible.
 ```
+
+`N` is the sum of the lines every finding removes, including any left out of the table, counted from the files; `M` is the number of dependencies they remove. Past 20 findings, the table keeps the 20 biggest and says how many were left out.
 
 Every cell stays on one line. Code does not fit in a table cell, so each `shrink:` row points to a numbered code block after the table instead of inlining the shorter form.
 

@@ -12,7 +12,8 @@
 
 與上游的差異：
 
-- **僅限手動觸發。** frontmatter 聲明 `disable-model-invocation: true`，並從 `description` 拿掉觸發詞，host 不會自行啟動。請以名稱叫用（`/ponytail-audit-lite`）。
+- **僅限手動觸發。** frontmatter 為 Claude Code 聲明 `disable-model-invocation: true`，`agents/openai.yaml` 為 Codex 設定 `policy.allow_implicit_invocation: false`，並從 `description` 拿掉觸發詞，兩者都不會自行啟動。請以名稱叫用（`/ponytail-audit-lite`）。
+- **先有證據才標 `delete:`。** 標 `delete:` 或 `yagni:` 前必須先在整個倉庫搜尋引用；經由反射、依賴注入、框架慣例、進入點或已發佈公開 API 使用的程式碼一律不列。生成、vendored 與依賴目錄不掃描。
 - **可獨立使用。** 移除對姊妹 skill `ponytail-review` 的引用與「stop ponytail-audit」模式切換，標籤清單完整寫在本檔內。
 - **表格輸出。** 結果改為 Markdown 表格，而不是每項一行。
 
@@ -49,6 +50,8 @@
 
 net: -<N> lines, -<M> deps possible.
 ```
+
+`N` 是所有發現（含未列入表格者）刪除行數的加總，從檔案實際數出來；`M` 是它們移除的依賴數。超過 20 項時只留刪減量最大的 20 項，並註明省略了幾項。
 
 每一格都保持單行。程式碼放不進表格儲存格，所以 `shrink:` 那一列只寫編號，較短的寫法以對應編號的程式碼區塊放在表格後面。
 
