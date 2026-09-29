@@ -2,7 +2,7 @@
 
 [English](README.md) | **繁體中文**
 
-五個可攜式 Agent Skill，涵蓋專案文件撰寫、相依決策、過度設計稽核與 SonarQube 品質流程。它們遵循開放的 Agent Skills 格式，可安裝到 Claude Code、Codex、Cursor、OpenCode 與其他相容的 agent；需要 SonarQube 的流程，仍要求 host 提供對應能力。
+六個可攜式 Agent Skill，涵蓋專案文件撰寫、相依決策、過度設計稽核、SonarQube 品質流程與 RimWorld 模組測試。它們遵循開放的 Agent Skills 格式，可安裝到 Claude Code、Codex、Cursor、OpenCode 與其他相容的 agent；需要 SonarQube 的流程，仍要求 host 提供對應能力。
 
 每個 skill 都是根目錄下一個獨立的 skill 資料夾，說明文件放在 `docs/`。
 
@@ -27,7 +27,13 @@
 
 `local-sonarqube-setup` 與 `sonarqube-fix-all` 設計上是接續使用：前者把專案接上並跑出第一份分析，後者批次修掉它回報的問題。
 
-`sonarqube-fix-all` 與 `ponytail-audit-lite` 僅限手動觸發：它們在 frontmatter 為 Claude Code 聲明 `disable-model-invocation: true`，並在 `agents/openai.yaml` 為 Codex 設定 `policy.allow_implicit_invocation: false`，兩者都不會自行啟動；其他 host 依其自身規則決定。請以名稱叫用（`/sonarqube-fix-all`、`/ponytail-audit-lite`）。其餘三個依各自的 `description` 自動觸發。
+`sonarqube-fix-all` 與 `ponytail-audit-lite` 僅限手動觸發：它們在 frontmatter 為 Claude Code 聲明 `disable-model-invocation: true`，並在 `agents/openai.yaml` 為 Codex 設定 `policy.allow_implicit_invocation: false`，兩者都不會自行啟動；其他 host 依其自身規則決定。請以名稱叫用（`/sonarqube-fix-all`、`/ponytail-audit-lite`）。其餘四個依各自的 `description` 自動觸發。
+
+### RimWorld 模組開發
+
+| Skill | 做什麼 | 說明文件 | 目錄 |
+| --- | --- | --- | --- |
+| `rimtest-redux-integrate` | 撰寫或除錯 RimWorld 模組測試時，先詢問要不要用 RimTest Redux 做遊戲內整合測試，再建立 companion 測試 mod、以 Harmony reverse patch 取回的原版方法作對照組比對結果，並等延遲的啟動工作完成才執行。 | [繁中](docs/rimtest-redux-integrate.zh.md) ・ [EN](docs/rimtest-redux-integrate.md) | `rimtest-redux-integrate/` |
 
 ## 設計依據
 
@@ -40,7 +46,7 @@
 
 ## 安裝
 
-這裡每個目錄都是標準的 skill 資料夾。在倉庫根目錄可用 [`skills` CLI](https://github.com/vercel-labs/skills) 自動偵測相容 agent 並安裝全部五個 skill。第一次執行 `npx` 時可能需要連網下載 CLI：
+這裡每個目錄都是標準的 skill 資料夾。在倉庫根目錄可用 [`skills` CLI](https://github.com/vercel-labs/skills) 自動偵測相容 agent 並安裝全部六個 skill。第一次執行 `npx` 時可能需要連網下載 CLI：
 
 ```bash
 npx skills add . --list
@@ -69,9 +75,9 @@ cp -r <skill-name> <host-skills-directory>/<skill-name>
 npx skills use . --skill <skill-name>
 ```
 
-`local-sonarqube-setup` 另外要求主機已有相容 scanner 與 `SONAR_TOKEN` 環境變數，它不負責安裝 scanner。目前 SonarScanner for .NET 不支援此環境變數路徑，因此 skill 會停止，不把 token 暴露於參數或檔案。`sonarqube-fix-all` 需要已設定好的 SonarQube MCP 連線，同樣讀取 `SONAR_TOKEN`。
+`local-sonarqube-setup` 另外要求主機已有相容 scanner 與 `SONAR_TOKEN` 環境變數，它不負責安裝 scanner。目前 SonarScanner for .NET 不支援此環境變數路徑，因此 skill 會停止，不把 token 暴露於參數或檔案。`sonarqube-fix-all` 需要已設定好的 SonarQube MCP 連線，同樣讀取 `SONAR_TOKEN`。以 `rimtest-redux-integrate` 撰寫的測試在 RimWorld 內執行，需要 RimWorld 1.6，並安裝 `brrainz.harmony`、`ilyvion.Laboratory` 與 `ilyvion.rimtestredux` 三個 mod。
 
-五個都附了給 Codex 用的 `agents/openai.yaml`；除了這個檔案之外，`library-first` 只有單一個 `SKILL.md`，沒有其他輔助檔案。`ponytail-audit-lite` 另附上游的 `LICENSE`，安裝時會一併帶走。
+六個都附了給 Codex 用的 `agents/openai.yaml`；除了這個檔案之外，`library-first` 只有單一個 `SKILL.md`，沒有其他輔助檔案。`ponytail-audit-lite` 另附上游的 `LICENSE`，安裝時會一併帶走；`rimtest-redux-integrate/references/rimtest-redux-api.md` 改寫了部分 RimTest Redux README，該專案的 MIT 授權聲明另存於同目錄的 `references/LICENSE-rimtest-redux`。
 
 ## 倉庫結構
 
@@ -85,13 +91,15 @@ MushroomTW-Skills/
 │   ├── library-first.md / .zh.md
 │   ├── ponytail-audit-lite.md / .zh.md
 │   ├── local-sonarqube-setup.md / .zh.md
-│   └── sonarqube-fix-all.md / .zh.md
+│   ├── sonarqube-fix-all.md / .zh.md
+│   └── rimtest-redux-integrate.md / .zh.md
 │
 ├── excellent-project-docs/       SKILL.md + agents/ references/ scripts/
 ├── library-first/                SKILL.md + agents/
 ├── ponytail-audit-lite/          SKILL.md + agents/ LICENSE（上游 MIT）
 ├── local-sonarqube-setup/        SKILL.md + agents/ reference/
-└── sonarqube-fix-all/            SKILL.md + agents/
+├── sonarqube-fix-all/            SKILL.md + agents/
+└── rimtest-redux-integrate/      SKILL.md + agents/ references/
 ```
 
 各子專案內都沒有 `README.md`，說明文件已全數集中到 `docs/`。

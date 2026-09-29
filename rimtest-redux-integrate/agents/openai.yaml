@@ -1,0 +1,4 @@
+interface:
+  display_name: "RimTest Redux Integrate"
+  short_description: "Add in-game integration tests to a RimWorld mod"
+  default_prompt: "Use $rimtest-redux-integrate when writing or debugging tests for this RimWorld mod: ask whether to add in-game integration tests with RimTest Redux, then set up the companion test mod, compare results against a vanilla baseline, wait for deferred startup work to finish before running, and report passed, failed, and skipped counts per settings combination."
