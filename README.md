@@ -77,7 +77,7 @@ npx skills use . --skill <skill-name>
 
 `local-sonarqube-setup` additionally expects a compatible scanner already on the host and a `SONAR_TOKEN` environment variable; it does not install the scanner. SonarScanner for .NET currently lacks this environment-variable path, so the skill stops instead of exposing the token in arguments or files. `sonarqube-fix-all` expects an already-configured SonarQube MCP connection and also reads `SONAR_TOKEN`. Tests written with `rimtest-redux-integrate` run inside RimWorld and need RimWorld 1.6 with the `brrainz.harmony`, `ilyvion.Laboratory`, and `ilyvion.rimtestredux` mods installed.
 
-All six ship an `agents/openai.yaml` for Codex; beyond that file, `library-first` is a single `SKILL.md` with no other supporting files. `ponytail-audit-lite` also carries its upstream `LICENSE`, which travels with the install; `rimtest-redux-integrate/references/rimtest-redux-api.md` adapts parts of the RimTest Redux README, and that project's MIT notice ships beside it as `references/LICENSE-rimtest-redux`.
+All six ship an `agents/openai.yaml` for Codex; beyond that file, `library-first` is a single `SKILL.md` with no other supporting files. `ponytail-audit-lite` and `rimtest-redux-integrate` also carry their upstream `LICENSE` (the latter for the RimTest Redux README material adapted in `references/`), which travels with the install.
 
 ## Repository layout
 
@@ -99,7 +99,7 @@ MushroomTW-Skills/
 ├── ponytail-audit-lite/          SKILL.md + agents/ LICENSE (upstream MIT)
 ├── local-sonarqube-setup/        SKILL.md + agents/ reference/
 ├── sonarqube-fix-all/            SKILL.md + agents/
-└── rimtest-redux-integrate/      SKILL.md + agents/ references/
+└── rimtest-redux-integrate/      SKILL.md + agents/ references/ LICENSE (upstream MIT)
 ```
 
 No subproject contains a `README.md`; all documentation was consolidated into `docs/`.

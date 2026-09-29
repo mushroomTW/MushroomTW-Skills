@@ -77,7 +77,7 @@ npx skills use . --skill <skill-name>
 
 `local-sonarqube-setup` 另外要求主機已有相容 scanner 與 `SONAR_TOKEN` 環境變數，它不負責安裝 scanner。目前 SonarScanner for .NET 不支援此環境變數路徑，因此 skill 會停止，不把 token 暴露於參數或檔案。`sonarqube-fix-all` 需要已設定好的 SonarQube MCP 連線，同樣讀取 `SONAR_TOKEN`。以 `rimtest-redux-integrate` 撰寫的測試在 RimWorld 內執行，需要 RimWorld 1.6，並安裝 `brrainz.harmony`、`ilyvion.Laboratory` 與 `ilyvion.rimtestredux` 三個 mod。
 
-六個都附了給 Codex 用的 `agents/openai.yaml`；除了這個檔案之外，`library-first` 只有單一個 `SKILL.md`，沒有其他輔助檔案。`ponytail-audit-lite` 另附上游的 `LICENSE`，安裝時會一併帶走；`rimtest-redux-integrate/references/rimtest-redux-api.md` 改寫了部分 RimTest Redux README，該專案的 MIT 授權聲明另存於同目錄的 `references/LICENSE-rimtest-redux`。
+六個都附了給 Codex 用的 `agents/openai.yaml`；除了這個檔案之外，`library-first` 只有單一個 `SKILL.md`，沒有其他輔助檔案。`ponytail-audit-lite` 與 `rimtest-redux-integrate` 另附上游的 `LICENSE`（後者對應 `references/` 裡改寫自 RimTest Redux README 的內容），安裝時會一併帶走。
 
 ## 倉庫結構
 
@@ -99,7 +99,7 @@ MushroomTW-Skills/
 ├── ponytail-audit-lite/          SKILL.md + agents/ LICENSE（上游 MIT）
 ├── local-sonarqube-setup/        SKILL.md + agents/ reference/
 ├── sonarqube-fix-all/            SKILL.md + agents/
-└── rimtest-redux-integrate/      SKILL.md + agents/ references/
+└── rimtest-redux-integrate/      SKILL.md + agents/ references/ LICENSE（上游 MIT）
 ```
 
 各子專案內都沒有 `README.md`，說明文件已全數集中到 `docs/`。

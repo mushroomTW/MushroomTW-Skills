@@ -1,6 +1,6 @@
 # RimTest Redux API
 
-Adapted from the [RimTest Redux README](https://github.com/ilyvion/rimtest-redux) (mod 0.2.0, RimWorld 1.6); internals and examples 2–3 checked against its source. Upstream MIT notice: [LICENSE-rimtest-redux](LICENSE-rimtest-redux).
+Adapted from the [RimTest Redux README](https://github.com/ilyvion/rimtest-redux) (mod 0.2.0, RimWorld 1.6); internals and examples 2–3 checked against its source.
 
 ## Framework rules
 
