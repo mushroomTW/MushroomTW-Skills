@@ -36,13 +36,12 @@ For monorepos, resolve per module and do not mix modules in a batch.
 
 ## 2. Preflight
 
-🛑 **STOP — do not edit a single file until all three pass.** If any of them fails, report which one and wait for the user:
+🛑 **STOP — do not edit a single file until both pass.** If either of them fails, report which one and wait for the user:
 
 - Working tree is clean, or the user confirms the existing changes should be carried along.
 - The project builds green **before** any changes. Never start batch-fixing on a project that does not build — the build is the only verification signal available in later steps.
-- Work happens on a dedicated branch, created if needed.
 
-When the user carries existing changes along, commit them on that branch as the baseline checkpoint before the first batch, so reverting to a checkpoint later never discards them. Stage only the tracked files shown by `git status`; leave untracked files out unless the user names them.
+When the user carries existing changes along, commit them as the baseline checkpoint before the first batch, so reverting to a checkpoint later never discards them. Stage only the tracked files shown by `git status`; leave untracked files out unless the user names them.
 
 ## 3. Resolve the environment
 

@@ -31,7 +31,7 @@ Invoke it explicitly by name — this skill is manual-trigger-only and never aut
 | # | Stage | Key points |
 | --- | --- | --- |
 | 1 | Detect the toolchain | Assume no language, build tool, or test runner; identify them from manifests and lockfiles. In a monorepo, resolve per module and keep batches within one module |
-| 2 | Preflight | Working tree clean (or existing changes the user chose to carry along, committed as the baseline checkpoint), the project **builds green before any change**, and work happens on a dedicated branch. If any fails, stop and report |
+| 2 | Preflight | Working tree clean (or existing changes the user chose to carry along, committed as the baseline checkpoint) and the project **builds green before any change**. If either fails, stop and report |
 | 3 | Resolve the environment | Derive workspace root, MCP connection, server URL, and project key from the conversation, repo config, build manifest, and Docker config. **Never guess a project key** |
 | 4 | Fetch and triage | Group by severity → rule → file; Blocker/Critical/High first; combine compatible fixes in the same file into one batch |
 | 5 | Identify sensitive regions | See below |
