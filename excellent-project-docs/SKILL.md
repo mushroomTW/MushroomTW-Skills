@@ -22,6 +22,8 @@ Translated variants are one document: update every variant you can write accurat
 
 ## Invariants
 
+所有產出或修改的 Markdown 文件都必須符合 GitHub Flavored Markdown（GFM）規範；使用表格、任務清單、刪除線及圍欄程式碼區塊等語法時，須確保能在 GitHub 正確解析與呈現。
+
 1. **Evidence first**: gather facts from the repository before writing. Never invent features, commands, versions, environment variables, deployment methods, performance numbers, badges, screenshots, license details, contribution rules, security contacts, or release history.
 2. **Reader-led**: order information around the reader's decisions, not the author's implementation order. The top of the README must independently explain the project's purpose and smallest useful path; the top of each companion document must state its one topic and who it is for.
 3. **Cognitive funnel**: one-line purpose → minimal runnable example → limitations and disqualifying prerequisites → installation and configuration → API or architecture details → contribution and acknowledgements. The license stays in the LICENSE file, which GitHub surfaces itself; a one-line License section only when the licensing needs explaining ([readme-framework](references/readme-framework.md)). A stage that outgrows the README moves to a companion document, leaving a summary and a link.
@@ -97,6 +99,8 @@ Completion criterion: a reader understands the purpose and completes the smalles
 
 Per document:
 
+- 確認 Markdown 語法符合 GitHub Flavored Markdown（GFM）規範，並檢查標題、清單、表格與圍欄程式碼區塊的結構及間距。
+- `validate_docs.py` 已整合 `scripts/validate_gfm.py`；也可獨立執行 `python <skill-directory>/scripts/validate_gfm.py <document>...`。結束碼為 `0`（未發現涵蓋範圍內的問題）、`1`（有警告）或 `2`（讀取失敗）。此腳本僅啟發式檢查頂層標題、表頭欄數與圍欄問題，略過容器、縮排程式碼及 HTML 區塊；不檢查完整清單、任務清單或刪除線語意，不代表完整 GFM 合規認證。警告須人工判讀，完整呈現仍須在 GitHub 預覽確認。依據：[GFM 規範](https://github.github.com/gfm/)。
 - Markdown headings, table-of-contents anchors, external links, and local links.
 - Local images, GIFs, videos, and example files exist.
 - Commands match manifests, Makefiles, CI workflows, or `--help` — not merely that the text appears somewhere.

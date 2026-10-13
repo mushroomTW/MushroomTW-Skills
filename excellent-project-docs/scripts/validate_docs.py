@@ -24,6 +24,8 @@ from collections import Counter
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
+from validate_gfm import check_gfm
+
 # Only formatted markers count as unfinished work. Bare prose words such as
 # "todo" or "placeholder" are legitimate content in many READMEs (task apps,
 # template engines), so matching them would bury real markers in noise.
@@ -752,7 +754,7 @@ def check_document(document: Path, project: Path) -> list[str]:
     """Run every static check on one document and return its warnings."""
     text = document.read_text(encoding="utf-8")
     prose = strip_code(text)
-    warnings: list[str] = []
+    warnings: list[str] = check_gfm(text)
 
     markers = sorted({match.group(0).strip() for match in UNFINISHED_MARKERS.finditer(prose)})
     if markers:
