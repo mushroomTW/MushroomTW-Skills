@@ -2,7 +2,7 @@
 
 **English** | [繁體中文](README.zh.md)
 
-Seven portable Agent Skills for project documentation, dependency decisions, over-engineering audits, SonarQube quality workflows, and RimWorld mod testing. They follow the open Agent Skills format and can be installed into Claude Code, Codex, Cursor, OpenCode, and other skills-compatible agents; workflows that need SonarQube still require that capability on the host.
+Seven portable Agent Skills for project documentation, dependency decisions, over-engineering audits, SonarQube quality workflows, and RimWorld mod development. They follow the open Agent Skills format and can be installed into Claude Code, Codex, Cursor, OpenCode, and other skills-compatible agents; workflows that need SonarQube still require that capability on the host.
 
 Each skill is a self-contained skill folder at the root; its documentation lives in `docs/`.
 
@@ -21,13 +21,10 @@ Each skill is a self-contained skill folder at the root; its documentation lives
 | Skill | What it does | Docs | Directory |
 | --- | --- | --- | --- |
 | `local-sonarqube-setup` | Points a project at a local Docker SonarQube (`127.0.0.1:9000`), generates coverage with the project's own tooling, scans, and checks the Quality Gate. Reads the token from `SONAR_TOKEN` and keeps it out of files, arguments, logs, and replies. | [EN](docs/local-sonarqube-setup.md) ・ [繁中](docs/local-sonarqube-setup.zh.md) | `local-sonarqube-setup/` |
-| `sonarqube-fix-all` | Works through SonarQube findings in batches, verifying each batch against the build before moving on. Skips and reports bytecode-manipulating, reflection-driven, and timing-dependent code instead of rewriting it. | [EN](docs/sonarqube-fix-all.md) ・ [繁中](docs/sonarqube-fix-all.zh.md) | `sonarqube-fix-all/` |
 
-Both skills target a **self-hosted SonarQube running in Docker** on the same machine (default `http://127.0.0.1:9000`, Community Build). They connect to it; they do not start it — bring the container up before invoking either skill. SonarCloud is not supported.
+`local-sonarqube-setup` targets a **self-hosted SonarQube running in Docker** on the same machine (default `http://127.0.0.1:9000`, Community Build). It connects to the service; it does not start it — bring the container up before invoking the skill. SonarCloud is not supported.
 
-`local-sonarqube-setup` and `sonarqube-fix-all` are meant to run in that order: the first connects a project and produces a first analysis, the second batch-fixes what it reports.
-
-`sonarqube-fix-all` and `ponytail-audit-lite` are manual-trigger-only: they declare `disable-model-invocation: true` for Claude Code and `policy.allow_implicit_invocation: false` in `agents/openai.yaml` for Codex, so neither host fires them on its own; other hosts apply their own rules. Invoke them by name (`/sonarqube-fix-all`, `/ponytail-audit-lite`). The other five trigger from their `description`.
+`ponytail-audit-lite` is manual-trigger-only: it declares `disable-model-invocation: true` for Claude Code and `policy.allow_implicit_invocation: false` in `agents/openai.yaml` for Codex; other hosts apply their own rules. Invoke it by name (`/ponytail-audit-lite`). The other six trigger from their `description`.
 
 ### RimWorld modding
 
@@ -35,6 +32,7 @@ Both skills target a **self-hosted SonarQube running in Docker** on the same mac
 | --- | --- | --- | --- |
 | `rimtest-redux-integrate` | When you write or debug tests for a RimWorld mod, asks whether to add in-game integration tests with RimTest Redux, then sets up a companion test mod, compares results against a vanilla baseline recovered by Harmony reverse patch, and waits for deferred startup work before running. | [EN](docs/rimtest-redux-integrate.md) ・ [繁中](docs/rimtest-redux-integrate.zh.md) | `rimtest-redux-integrate/` |
 | `rimworld-devtools` | Uses SmashPhil DevTools for in-game tests, result interpretation, test plans, and benchmarks when DevTools is selected or already in use. | [EN](docs/rimworld-devtools.md) ・ [繁中](docs/rimworld-devtools.zh.md) | `rimworld-devtools/` |
+| `rimworld-smashtools` | Selects and uses SmashTools features for RimWorld mods, and handles integration, packaging, initialization, and verification. | [EN](docs/rimworld-smashtools.md) ・ [繁中](docs/rimworld-smashtools.zh.md) | `rimworld-smashtools/` |
 
 ## Design rationale
 
@@ -76,11 +74,11 @@ To use one skill as reference material without installing it:
 npx skills use . --skill <skill-name>
 ```
 
-`local-sonarqube-setup` additionally expects a compatible scanner already on the host and a `SONAR_TOKEN` environment variable; it does not install the scanner. SonarScanner for .NET currently lacks this environment-variable path, so the skill stops instead of exposing the token in arguments or files. `sonarqube-fix-all` expects an already-configured SonarQube MCP connection and also reads `SONAR_TOKEN`. Tests written with `rimtest-redux-integrate` run inside RimWorld and need RimWorld 1.6 with the `brrainz.harmony`, `ilyvion.Laboratory`, and `ilyvion.rimtestredux` mods installed.
+`local-sonarqube-setup` additionally expects a compatible scanner already on the host and a `SONAR_TOKEN` environment variable; it does not install the scanner. SonarScanner for .NET currently lacks this environment-variable path, so the skill stops instead of exposing the token in arguments or files. Tests written with `rimtest-redux-integrate` run inside RimWorld and need RimWorld 1.6 with the `brrainz.harmony`, `ilyvion.Laboratory`, and `ilyvion.rimtestredux` mods installed.
 
 `rimworld-devtools` requires a compatible SmashPhil/DevTools build, game assemblies, SDK, and a running game for execution.
 
-All seven ship an `agents/openai.yaml` for Codex; beyond that file, `library-first` is a single `SKILL.md` with no other supporting files. `ponytail-audit-lite` and `rimtest-redux-integrate` also carry their upstream `LICENSE` (the latter for the RimTest Redux README material adapted in `references/`), which travels with the install.
+All seven ship an `agents/openai.yaml` for Codex; beyond that file, `library-first` is a single `SKILL.md` with no other supporting files. `ponytail-audit-lite`, `rimtest-redux-integrate`, and `rimworld-smashtools` also carry their upstream `LICENSE`, which travels with the install.
 
 ## Repository layout
 
@@ -94,17 +92,17 @@ MushroomTW-Skills/
 │   ├── library-first.md / .zh.md
 │   ├── ponytail-audit-lite.md / .zh.md
 │   ├── local-sonarqube-setup.md / .zh.md
-│   ├── sonarqube-fix-all.md / .zh.md
 │   ├── rimtest-redux-integrate.md / .zh.md
-│   └── rimworld-devtools.md / .zh.md
+│   ├── rimworld-devtools.md / .zh.md
+│   └── rimworld-smashtools.md / .zh.md
 │
 ├── excellent-project-docs/       SKILL.md + agents/ references/ scripts/
 ├── library-first/                SKILL.md + agents/
 ├── ponytail-audit-lite/          SKILL.md + agents/ LICENSE (upstream MIT)
 ├── local-sonarqube-setup/        SKILL.md + agents/ reference/
-├── sonarqube-fix-all/            SKILL.md + agents/
 ├── rimtest-redux-integrate/      SKILL.md + agents/ references/ LICENSE (upstream MIT)
-└── rimworld-devtools/            SKILL.md + agents/ references/
+├── rimworld-devtools/            SKILL.md + agents/ references/
+└── rimworld-smashtools/          SKILL.md + agents/ references/ LICENSE (upstream MIT)
 ```
 
 No subproject contains a `README.md`; all documentation was consolidated into `docs/`.

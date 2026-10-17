@@ -6,7 +6,7 @@
 
 Connect a supported code project to a **local Docker SonarQube** instance (default `http://127.0.0.1:9000`): create the project, produce reports, run the analysis, and verify the Quality Gate.
 
-This skill only gets a project connected and analyzed. To batch-fix the issues SonarQube reports, use [sonarqube-fix-all](sonarqube-fix-all.md) instead.
+This skill configures the connection and runs analysis; it does not apply fixes to reported issues.
 
 ## When It Applies
 

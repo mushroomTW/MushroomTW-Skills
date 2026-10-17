@@ -6,7 +6,7 @@
 
 把支援的程式碼專案接入**本機 Docker SonarQube**（預設 `http://127.0.0.1:9000`）：建立專案、產生報告、執行分析、驗證 Quality Gate。
 
-這個 skill 只負責「接上去並跑起來」。要批次修掉 Sonar 回報的問題，請改用 [sonarqube-fix-all](sonarqube-fix-all.zh.md)。
+這個 skill 只負責設定連線與執行分析，不會套用回報問題的修正。
 
 ## 觸發時機
 

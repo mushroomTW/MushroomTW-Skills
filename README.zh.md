@@ -2,7 +2,7 @@
 
 [English](README.md) | **繁體中文**
 
-七個可攜式 Agent Skill，涵蓋專案文件撰寫、相依決策、過度設計稽核、SonarQube 品質流程與 RimWorld 模組測試。它們遵循開放的 Agent Skills 格式，可安裝到 Claude Code、Codex、Cursor、OpenCode 與其他相容的 agent；需要 SonarQube 的流程，仍要求 host 提供對應能力。
+七個可攜式 Agent Skill，涵蓋專案文件撰寫、相依決策、過度設計稽核、SonarQube 品質流程與 RimWorld 模組開發。它們遵循開放的 Agent Skills 格式，可安裝到 Claude Code、Codex、Cursor、OpenCode 與其他相容的 agent；需要 SonarQube 的流程，仍要求 host 提供對應能力。
 
 每個 skill 都是根目錄下一個獨立的 skill 資料夾，說明文件放在 `docs/`。
 
@@ -21,13 +21,10 @@
 | Skill | 做什麼 | 說明文件 | 目錄 |
 | --- | --- | --- | --- |
 | `local-sonarqube-setup` | 把專案指向本機 Docker SonarQube（`127.0.0.1:9000`），用專案原生工具產生 coverage、執行掃描並檢查 Quality Gate。token 讀自 `SONAR_TOKEN`，不進入檔案、參數、log 或任何回覆。 | [繁中](docs/local-sonarqube-setup.zh.md) ・ [EN](docs/local-sonarqube-setup.md) | `local-sonarqube-setup/` |
-| `sonarqube-fix-all` | 分批處理 SonarQube 的發現，每批都先對建置驗證過才往下走。碰到 bytecode 操作、反射驅動與時序相依的程式碼會跳過並回報，而不是動手改寫。 | [繁中](docs/sonarqube-fix-all.zh.md) ・ [EN](docs/sonarqube-fix-all.md) | `sonarqube-fix-all/` |
 
-這兩個 skill 都以**同一台機器上、用 Docker 建置的自架 SonarQube** 為目標（預設 `http://127.0.0.1:9000`，Community Build）。它們只負責連線，不負責啟動——叫用任一 skill 前請先把容器跑起來。不支援 SonarCloud。
+`local-sonarqube-setup` 以**同一台機器上、用 Docker 建置的自架 SonarQube** 為目標（預設 `http://127.0.0.1:9000`，Community Build）。它只負責連線，不負責啟動——叫用前請先把容器跑起來。不支援 SonarCloud。
 
-`local-sonarqube-setup` 與 `sonarqube-fix-all` 設計上是接續使用：前者把專案接上並跑出第一份分析，後者批次修掉它回報的問題。
-
-`sonarqube-fix-all` 與 `ponytail-audit-lite` 僅限手動觸發：它們在 frontmatter 為 Claude Code 聲明 `disable-model-invocation: true`，並在 `agents/openai.yaml` 為 Codex 設定 `policy.allow_implicit_invocation: false`，兩者都不會自行啟動；其他 host 依其自身規則決定。請以名稱叫用（`/sonarqube-fix-all`、`/ponytail-audit-lite`）。其餘五個依各自的 `description` 自動觸發。
+`ponytail-audit-lite` 僅限手動觸發：它在 frontmatter 為 Claude Code 聲明 `disable-model-invocation: true`，並在 `agents/openai.yaml` 為 Codex 設定 `policy.allow_implicit_invocation: false`；其他 host 依其自身規則決定。請以名稱叫用（`/ponytail-audit-lite`）。其餘六個依各自的 `description` 自動觸發。
 
 ### RimWorld 模組開發
 
@@ -35,6 +32,7 @@
 | --- | --- | --- | --- |
 | `rimtest-redux-integrate` | 撰寫或除錯 RimWorld 模組測試時，先詢問要不要用 RimTest Redux 做遊戲內整合測試，再建立 companion 測試 mod、以 Harmony reverse patch 取回的原版方法作對照組比對結果，並等延遲的啟動工作完成才執行。 | [繁中](docs/rimtest-redux-integrate.zh.md) ・ [EN](docs/rimtest-redux-integrate.md) | `rimtest-redux-integrate/` |
 | `rimworld-devtools` | 已選用或接入 SmashPhil DevTools 時，協助撰寫遊戲內測試、判讀結果、使用 Test Plan 與效能基準測試。 | [繁中](docs/rimworld-devtools.zh.md) ・ [EN](docs/rimworld-devtools.md) | `rimworld-devtools/` |
+| `rimworld-smashtools` | 選用 SmashTools 現成功能開發 RimWorld 模組，並處理整合、發布、初始化及驗證。 | [繁中](docs/rimworld-smashtools.zh.md) ・ [EN](docs/rimworld-smashtools.md) | `rimworld-smashtools/` |
 
 ## 設計依據
 
@@ -76,11 +74,11 @@ cp -r <skill-name> <host-skills-directory>/<skill-name>
 npx skills use . --skill <skill-name>
 ```
 
-`local-sonarqube-setup` 另外要求主機已有相容 scanner 與 `SONAR_TOKEN` 環境變數，它不負責安裝 scanner。目前 SonarScanner for .NET 不支援此環境變數路徑，因此 skill 會停止，不把 token 暴露於參數或檔案。`sonarqube-fix-all` 需要已設定好的 SonarQube MCP 連線，同樣讀取 `SONAR_TOKEN`。以 `rimtest-redux-integrate` 撰寫的測試在 RimWorld 內執行，需要 RimWorld 1.6，並安裝 `brrainz.harmony`、`ilyvion.Laboratory` 與 `ilyvion.rimtestredux` 三個 mod。
+`local-sonarqube-setup` 另外要求主機已有相容 scanner 與 `SONAR_TOKEN` 環境變數，它不負責安裝 scanner。目前 SonarScanner for .NET 不支援此環境變數路徑，因此 skill 會停止，不把 token 暴露於參數或檔案。以 `rimtest-redux-integrate` 撰寫的測試在 RimWorld 內執行，需要 RimWorld 1.6，並安裝 `brrainz.harmony`、`ilyvion.Laboratory` 與 `ilyvion.rimtestredux` 三個 mod。
 
 `rimworld-devtools` 需要相容的 SmashPhil/DevTools 建置、遊戲參考組件與 SDK，實際執行需要遊戲。
 
-七個都附了給 Codex 用的 `agents/openai.yaml`；除了這個檔案之外，`library-first` 只有單一個 `SKILL.md`，沒有其他輔助檔案。`ponytail-audit-lite` 與 `rimtest-redux-integrate` 另附上游的 `LICENSE`（後者對應 `references/` 裡改寫自 RimTest Redux README 的內容），安裝時會一併帶走。
+七個都附了給 Codex 用的 `agents/openai.yaml`；除了這個檔案之外，`library-first` 只有單一個 `SKILL.md`，沒有其他輔助檔案。`ponytail-audit-lite`、`rimtest-redux-integrate` 與 `rimworld-smashtools` 另附上游的 `LICENSE`，安裝時會一併帶走。
 
 ## 倉庫結構
 
@@ -94,17 +92,17 @@ MushroomTW-Skills/
 │   ├── library-first.md / .zh.md
 │   ├── ponytail-audit-lite.md / .zh.md
 │   ├── local-sonarqube-setup.md / .zh.md
-│   ├── sonarqube-fix-all.md / .zh.md
 │   ├── rimtest-redux-integrate.md / .zh.md
-│   └── rimworld-devtools.md / .zh.md
+│   ├── rimworld-devtools.md / .zh.md
+│   └── rimworld-smashtools.md / .zh.md
 │
 ├── excellent-project-docs/       SKILL.md + agents/ references/ scripts/
 ├── library-first/                SKILL.md + agents/
 ├── ponytail-audit-lite/          SKILL.md + agents/ LICENSE（上游 MIT）
 ├── local-sonarqube-setup/        SKILL.md + agents/ reference/
-├── sonarqube-fix-all/            SKILL.md + agents/
 ├── rimtest-redux-integrate/      SKILL.md + agents/ references/ LICENSE（上游 MIT）
-└── rimworld-devtools/            SKILL.md + agents/ references/
+├── rimworld-devtools/            SKILL.md + agents/ references/
+└── rimworld-smashtools/          SKILL.md + agents/ references/ LICENSE（上游 MIT）
 ```
 
 各子專案內都沒有 `README.md`，說明文件已全數集中到 `docs/`。
