@@ -1,0 +1,3 @@
+interface:
+  display_name: "RimWorld Mod Testing"
+  short_description: "Write and run in-game mod tests with SmashPhil DevTools"
