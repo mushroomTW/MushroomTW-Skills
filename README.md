@@ -2,7 +2,7 @@
 
 **English** | [繁體中文](README.zh.md)
 
-Seven portable Agent Skills for project documentation, dependency decisions, over-engineering audits, SonarQube quality workflows, and RimWorld mod development. They follow the open Agent Skills format and can be installed into Claude Code, Codex, Cursor, OpenCode, and other skills-compatible agents; workflows that need SonarQube still require that capability on the host.
+Five portable Agent Skills for over-engineering audits, SonarQube quality workflows, and RimWorld mod development. They follow the open Agent Skills format and can be installed into Claude Code, Codex, Cursor, OpenCode, and other skills-compatible agents; workflows that need SonarQube still require that capability on the host.
 
 Each skill is a self-contained skill folder at the root; its documentation lives in `docs/`.
 
@@ -12,8 +12,6 @@ Each skill is a self-contained skill folder at the root; its documentation lives
 
 | Skill | What it does | Docs | Directory |
 | --- | --- | --- | --- |
-| `excellent-project-docs` | Writes, improves, audits, or re-syncs a repository's `README.md` and the companion files GitHub reads (`CONTRIBUTING`, `SECURITY`, `ARCHITECTURE`, `CHANGELOG`, …) against what the repository actually contains. Proposes companion files before creating them; claims it cannot trace to a file are reported as gaps rather than written as facts. | [EN](docs/excellent-project-docs.md) ・ [繁中](docs/excellent-project-docs.zh.md) | `excellent-project-docs/` |
-| `library-first` | Before you hand-roll retry, validation, caching, auth, or date handling, forces one search of that language's own ecosystem and a stated reason for the build-or-adopt decision. | [EN](docs/library-first.md) ・ [繁中](docs/library-first.zh.md) | `library-first/` |
 | `ponytail-audit-lite` | Scans a whole repository for over-engineering and returns a ranked table of what to delete, simplify, or replace with a standard-library or platform equivalent. Reports only; applies nothing. Adapted from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) (MIT). | [EN](docs/ponytail-audit-lite.md) ・ [繁中](docs/ponytail-audit-lite.zh.md) | `ponytail-audit-lite/` |
 
 ### SonarQube workflow
@@ -24,7 +22,7 @@ Each skill is a self-contained skill folder at the root; its documentation lives
 
 `local-sonarqube-setup` targets a **self-hosted SonarQube running in Docker** on the same machine (default `http://127.0.0.1:9000`, Community Build). It connects to the service; it does not start it — bring the container up before invoking the skill. SonarCloud is not supported.
 
-`ponytail-audit-lite` is manual-trigger-only: it declares `disable-model-invocation: true` for Claude Code and `policy.allow_implicit_invocation: false` in `agents/openai.yaml` for Codex; other hosts apply their own rules. Invoke it by name (`/ponytail-audit-lite`). The other six trigger from their `description`.
+`ponytail-audit-lite` is manual-trigger-only: it declares `disable-model-invocation: true` for Claude Code and `policy.allow_implicit_invocation: false` in `agents/openai.yaml` for Codex; other hosts apply their own rules. Invoke it by name (`/ponytail-audit-lite`). The other four trigger from their `description`.
 
 ### RimWorld modding
 
@@ -34,18 +32,9 @@ Each skill is a self-contained skill folder at the root; its documentation lives
 | `rimworld-devtools` | Uses SmashPhil DevTools for in-game tests, result interpretation, test plans, and benchmarks when DevTools is selected or already in use. | [EN](docs/rimworld-devtools.md) ・ [繁中](docs/rimworld-devtools.zh.md) | `rimworld-devtools/` |
 | `rimworld-smashtools` | Selects and uses SmashTools features for RimWorld mods, and handles integration, packaging, initialization, and verification. | [EN](docs/rimworld-smashtools.md) ・ [繁中](docs/rimworld-smashtools.zh.md) | `rimworld-smashtools/` |
 
-## Design rationale
-
-The references below back two design decisions, not the effectiveness of the skills themselves — no published study evaluates them.
-
-| Design decision | Skills | Evidence |
-| --- | --- | --- |
-| Never state a fact the repository cannot back | `excellent-project-docs` | F. Liu et al., [Exploring and Evaluating Hallucinations in LLM-Powered Code Generation](https://arxiv.org/abs/2404.00971), preprint 2024 — taxonomy of code-generation hallucinations and the HalluCode benchmark |
-| Search the ecosystem instead of recalling a package name | `library-first` | Spracklen et al., [We Have a Package for You!](https://www.usenix.org/conference/usenixsecurity25/presentation/spracklen), USENIX Security 2025 — 19.7% of packages referenced across 576,000 generated samples do not exist |
-
 ## Install
 
-Every directory here is a plain skill folder. From the repository root, the [`skills` CLI](https://github.com/vercel-labs/skills) can discover supported agents and install all seven. The first invocation of `npx` may use the network to download the CLI:
+Every directory here is a plain skill folder. From the repository root, the [`skills` CLI](https://github.com/vercel-labs/skills) can discover supported agents and install all five. The first invocation of `npx` may use the network to download the CLI:
 
 ```bash
 npx skills add . --list
@@ -78,7 +67,7 @@ npx skills use . --skill <skill-name>
 
 `rimworld-devtools` requires a compatible SmashPhil/DevTools build, game assemblies, SDK, and a running game for execution.
 
-All seven ship an `agents/openai.yaml` for Codex; beyond that file, `library-first` is a single `SKILL.md` with no other supporting files. `ponytail-audit-lite`, `rimtest-redux-integrate`, and `rimworld-smashtools` also carry their upstream `LICENSE`, which travels with the install.
+All five ship an `agents/openai.yaml` for Codex. `ponytail-audit-lite`, `rimtest-redux-integrate`, and `rimworld-smashtools` also carry their upstream `LICENSE`, which travels with the install.
 
 ## Repository layout
 
@@ -88,16 +77,12 @@ MushroomTW-Skills/
 ├── LICENSE                       (MIT)
 │
 ├── docs/                         ← per-skill docs (EN default, .zh.md = 繁中)
-│   ├── excellent-project-docs.md / .zh.md
-│   ├── library-first.md / .zh.md
 │   ├── ponytail-audit-lite.md / .zh.md
 │   ├── local-sonarqube-setup.md / .zh.md
 │   ├── rimtest-redux-integrate.md / .zh.md
 │   ├── rimworld-devtools.md / .zh.md
 │   └── rimworld-smashtools.md / .zh.md
 │
-├── excellent-project-docs/       SKILL.md + agents/ references/ scripts/
-├── library-first/                SKILL.md + agents/
 ├── ponytail-audit-lite/          SKILL.md + agents/ LICENSE (upstream MIT)
 ├── local-sonarqube-setup/        SKILL.md + agents/ reference/
 ├── rimtest-redux-integrate/      SKILL.md + agents/ references/ LICENSE (upstream MIT)

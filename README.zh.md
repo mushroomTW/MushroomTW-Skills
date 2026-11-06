@@ -2,7 +2,7 @@
 
 [English](README.md) | **繁體中文**
 
-七個可攜式 Agent Skill，涵蓋專案文件撰寫、相依決策、過度設計稽核、SonarQube 品質流程與 RimWorld 模組開發。它們遵循開放的 Agent Skills 格式，可安裝到 Claude Code、Codex、Cursor、OpenCode 與其他相容的 agent；需要 SonarQube 的流程，仍要求 host 提供對應能力。
+五個可攜式 Agent Skill，涵蓋過度設計稽核、SonarQube 品質流程與 RimWorld 模組開發。它們遵循開放的 Agent Skills 格式，可安裝到 Claude Code、Codex、Cursor、OpenCode 與其他相容的 agent；需要 SonarQube 的流程，仍要求 host 提供對應能力。
 
 每個 skill 都是根目錄下一個獨立的 skill 資料夾，說明文件放在 `docs/`。
 
@@ -12,8 +12,6 @@
 
 | Skill | 做什麼 | 說明文件 | 目錄 |
 | --- | --- | --- | --- |
-| `excellent-project-docs` | 依照 repository 的實際內容撰寫、改善、稽核或同步 `README.md` 與 GitHub 會讀取的隨附文件（`CONTRIBUTING`、`SECURITY`、`ARCHITECTURE`、`CHANGELOG`……）。隨附文件先提案再建立；無法追溯到檔案的敘述會被列為待補資訊，而不是寫成事實。 | [繁中](docs/excellent-project-docs.zh.md) ・ [EN](docs/excellent-project-docs.md) | `excellent-project-docs/` |
-| `library-first` | 在你動手寫重試、驗證、快取、認證或日期處理之前，先強制搜尋該語言自己的生態系，並要求把「用套件還是自己寫」的理由講出來。 | [繁中](docs/library-first.zh.md) ・ [EN](docs/library-first.md) | `library-first/` |
 | `ponytail-audit-lite` | 掃描整個倉庫找出過度設計，回傳依刪減量排序的表格，列出可刪除、簡化，或改用標準函式庫／平台原生功能取代之處。只回報，不動手改。改寫自 [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)（MIT）。 | [繁中](docs/ponytail-audit-lite.zh.md) ・ [EN](docs/ponytail-audit-lite.md) | `ponytail-audit-lite/` |
 
 ### SonarQube 流程
@@ -24,7 +22,7 @@
 
 `local-sonarqube-setup` 以**同一台機器上、用 Docker 建置的自架 SonarQube** 為目標（預設 `http://127.0.0.1:9000`，Community Build）。它只負責連線，不負責啟動——叫用前請先把容器跑起來。不支援 SonarCloud。
 
-`ponytail-audit-lite` 僅限手動觸發：它在 frontmatter 為 Claude Code 聲明 `disable-model-invocation: true`，並在 `agents/openai.yaml` 為 Codex 設定 `policy.allow_implicit_invocation: false`；其他 host 依其自身規則決定。請以名稱叫用（`/ponytail-audit-lite`）。其餘六個依各自的 `description` 自動觸發。
+`ponytail-audit-lite` 僅限手動觸發：它在 frontmatter 為 Claude Code 聲明 `disable-model-invocation: true`，並在 `agents/openai.yaml` 為 Codex 設定 `policy.allow_implicit_invocation: false`；其他 host 依其自身規則決定。請以名稱叫用（`/ponytail-audit-lite`）。其餘四個依各自的 `description` 自動觸發。
 
 ### RimWorld 模組開發
 
@@ -34,18 +32,9 @@
 | `rimworld-devtools` | 已選用或接入 SmashPhil DevTools 時，協助撰寫遊戲內測試、判讀結果、使用 Test Plan 與效能基準測試。 | [繁中](docs/rimworld-devtools.zh.md) ・ [EN](docs/rimworld-devtools.md) | `rimworld-devtools/` |
 | `rimworld-smashtools` | 選用 SmashTools 現成功能開發 RimWorld 模組，並處理整合、發布、初始化及驗證。 | [繁中](docs/rimworld-smashtools.zh.md) ・ [EN](docs/rimworld-smashtools.md) | `rimworld-smashtools/` |
 
-## 設計依據
-
-下列文獻支撐的是兩項設計決策，不是這些 skill 的效果——後者沒有任何已發表的研究評估過。
-
-| 設計決策 | 對應 Skill | 依據 |
-| --- | --- | --- |
-| 不寫任何無法由倉庫佐證的事實 | `excellent-project-docs` | F. Liu et al.，[Exploring and Evaluating Hallucinations in LLM-Powered Code Generation](https://arxiv.org/abs/2404.00971)，2024 preprint — 程式碼生成幻覺的分類法與 HalluCode 基準 |
-| 實際搜尋生態系，而不是憑印象講出套件名 | `library-first` | Spracklen et al.，[We Have a Package for You!](https://www.usenix.org/conference/usenixsecurity25/presentation/spracklen)，USENIX Security 2025 — 57.6 萬份生成樣本中，19.7% 被引用的套件根本不存在 |
-
 ## 安裝
 
-這裡每個目錄都是標準的 skill 資料夾。在倉庫根目錄可用 [`skills` CLI](https://github.com/vercel-labs/skills) 自動偵測相容 agent 並安裝全部七個 skill。第一次執行 `npx` 時可能需要連網下載 CLI：
+這裡每個目錄都是標準的 skill 資料夾。在倉庫根目錄可用 [`skills` CLI](https://github.com/vercel-labs/skills) 自動偵測相容 agent 並安裝全部五個 skill。第一次執行 `npx` 時可能需要連網下載 CLI：
 
 ```bash
 npx skills add . --list
@@ -78,7 +67,7 @@ npx skills use . --skill <skill-name>
 
 `rimworld-devtools` 需要相容的 SmashPhil/DevTools 建置、遊戲參考組件與 SDK，實際執行需要遊戲。
 
-七個都附了給 Codex 用的 `agents/openai.yaml`；除了這個檔案之外，`library-first` 只有單一個 `SKILL.md`，沒有其他輔助檔案。`ponytail-audit-lite`、`rimtest-redux-integrate` 與 `rimworld-smashtools` 另附上游的 `LICENSE`，安裝時會一併帶走。
+五個都附了給 Codex 用的 `agents/openai.yaml`。`ponytail-audit-lite`、`rimtest-redux-integrate` 與 `rimworld-smashtools` 另附上游的 `LICENSE`，安裝時會一併帶走。
 
 ## 倉庫結構
 
@@ -88,16 +77,12 @@ MushroomTW-Skills/
 ├── LICENSE                       （MIT）
 │
 ├── docs/                         ← 各 skill 說明文件（英文預設，.zh.md 為繁中）
-│   ├── excellent-project-docs.md / .zh.md
-│   ├── library-first.md / .zh.md
 │   ├── ponytail-audit-lite.md / .zh.md
 │   ├── local-sonarqube-setup.md / .zh.md
 │   ├── rimtest-redux-integrate.md / .zh.md
 │   ├── rimworld-devtools.md / .zh.md
 │   └── rimworld-smashtools.md / .zh.md
 │
-├── excellent-project-docs/       SKILL.md + agents/ references/ scripts/
-├── library-first/                SKILL.md + agents/
 ├── ponytail-audit-lite/          SKILL.md + agents/ LICENSE（上游 MIT）
 ├── local-sonarqube-setup/        SKILL.md + agents/ reference/
 ├── rimtest-redux-integrate/      SKILL.md + agents/ references/ LICENSE（上游 MIT）
