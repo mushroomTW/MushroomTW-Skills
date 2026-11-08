@@ -2,9 +2,9 @@
 
 **English** | [繁體中文](README.zh.md)
 
-MushroomTW-Skills is a collection of portable Agent Skills designed for modern AI agents (such as Claude Code, Codex, Cursor, OpenCode, and any agent supporting the open Agent Skills specification). It covers **codebase over-engineering audits**, **local SonarQube quality workflow automation**, and **RimWorld mod development & in-game testing**.
+MushroomTW-Skills is a curated collection of portable Agent Skills designed for modern AI coding assistants (such as Claude Code, Codex, Cursor, OpenCode, and any agent supporting the open Agent Skills specification). It covers **codebase over-engineering audits**, **local SonarQube quality workflow automation**, and **RimWorld mod development & in-game testing**.
 
-Each skill is an independent directory containing its prompt specification, trigger rules, and reference materials. Full documentation is consolidated in `docs/`.
+Each skill is an independent directory containing its prompt specification, trigger rules, and technical reference materials. In-depth documentation is consolidated in `docs/`.
 
 ---
 
@@ -12,10 +12,10 @@ Each skill is an independent directory containing its prompt specification, trig
 
 | Skill | Category | Trigger | Summary | Docs | Directory |
 | --- | --- | --- | --- | --- | --- |
-| `ponytail-audit-lite` | General Audit | Manual (`/ponytail-audit-lite`) | Full-repo audit for over-engineering; outputs a ranked table of code to delete, simplify, or replace with stdlib/platform native. Reports only; applies nothing. | [EN](docs/ponytail-audit-lite.md) ・ [繁中](docs/ponytail-audit-lite.zh.md) | `ponytail-audit-lite/` |
-| `local-sonarqube-setup` | Quality Workflow | Auto (Natural Language) | Connects to a local Docker SonarQube, generates coverage, runs scans, and validates Quality Gate. Strict token protection. | [EN](docs/local-sonarqube-setup.md) ・ [繁中](docs/local-sonarqube-setup.zh.md) | `local-sonarqube-setup/` |
+| `ponytail-audit-lite` | General Audit | Manual (`/ponytail-audit-lite`) | Repo-wide over-engineering audit; returns a ranked table of code to delete, simplify, or replace with stdlib/platform native. Strictly report-only. | [EN](docs/ponytail-audit-lite.md) ・ [繁中](docs/ponytail-audit-lite.zh.md) | `ponytail-audit-lite/` |
+| `local-sonarqube-setup` | Quality Workflow | Auto (Natural Language) | Connects a project to a local Docker SonarQube instance, generates coverage, runs scans, and verifies the Quality Gate. Strict token protection. | [EN](docs/local-sonarqube-setup.md) ・ [繁中](docs/local-sonarqube-setup.zh.md) | `local-sonarqube-setup/` |
 | `rimtest-redux-integrate` | RimWorld Modding | Auto (Natural Language) | Sets up RimTest Redux in-game integration tests with a companion test mod, Harmony reverse-patch vanilla baselines, and startup timing protection. | [EN](docs/rimtest-redux-integrate.md) ・ [繁中](docs/rimtest-redux-integrate.zh.md) | `rimtest-redux-integrate/` |
-| `rimworld-devtools` | RimWorld Modding | Auto (Natural Language) | Integrates SmashPhil DevTools for in-game testing, Test Plan management, result interpretation, and benchmarks. | [EN](docs/rimworld-devtools.md) ・ [繁中](docs/rimworld-devtools.zh.md) | `rimworld-devtools/` |
+| `rimworld-devtools` | RimWorld Modding | Auto (Natural Language) | Integrates SmashPhil DevTools for in-game testing, Test Plan management, result interpretation, and performance benchmarks. | [EN](docs/rimworld-devtools.md) ・ [繁中](docs/rimworld-devtools.zh.md) | `rimworld-devtools/` |
 | `rimworld-smashtools` | RimWorld Modding | Auto (Natural Language) | Architecture & feature integration guide for the SmashTools framework (pathfinding, object pooling, UI, rendering, lifecycle, packaging). | [EN](docs/rimworld-smashtools.md) ・ [繁中](docs/rimworld-smashtools.zh.md) | `rimworld-smashtools/` |
 
 ---
@@ -29,7 +29,7 @@ Each skill is an independent directory containing its prompt specification, trig
 - **Purpose**: Quickly diagnose unnecessary complexity across an entire repository, identifying speculative features, redundant abstractions, and YAGNI violations.
 - **Key Features**:
   - **Report-Only**: Performs a one-shot scan across the whole project and outputs actionable recommendations without modifying any files.
-  - **Ranked Findings Table**: Generates a Markdown table sorted by estimated lines removed, categorized by `delete` (dead code/unused flexibility), `yagni` (single-implementation abstractions, forwarding wrappers), `stdlib` (reinventing standard library functionality), `native` (platform-provided capabilities), and `shrink` (equivalent shorter implementations).
+  - **Ranked Findings Table**: Generates a Markdown table sorted by estimated lines removed, categorized by `delete` (dead code / unused flexibility), `yagni` (single-implementation abstractions, forwarding wrappers), `stdlib` (reinventing standard library functionality), `native` (platform-provided capabilities), and `shrink` (equivalent shorter implementations).
   - **Noise Filtering**: Automatically skips vendored code (`node_modules`, `vendor`), build outputs, generated files, and `.gitignore` matches. Focuses strictly on simplicity rather than standard bugs, security vulnerabilities, or performance tuning.
 - **Invocation**: **Manual trigger only**. Configured with `disable-model-invocation: true` (Claude Code) and `policy.allow_implicit_invocation: false` (Codex) to prevent accidental execution during normal conversations. Invoke explicitly via `/ponytail-audit-lite`.
 - **Origin**: Adapted from [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) (MIT License).
@@ -44,7 +44,7 @@ Each skill is an independent directory containing its prompt specification, trig
 - **Key Features**:
   - **End-to-End Workflow**: Discovers build tools (Maven, Gradle, .NET, npm, etc.), produces native coverage reports, runs the appropriate scanner, tracks the analysis background task, and checks the Quality Gate status.
   - **Strict Token Safety**: Reads credentials exclusively from the `SONAR_TOKEN` environment variable. Never exposes tokens in files, command-line arguments, logs, or model responses. Aborts safely if a scanner (such as current SonarScanner for .NET) cannot accept tokens securely without exposure.
-  - **Uncompromised Quality Gate**: Never fabricates a passing status by relaxing rules or accepting false positives; always reports actual Gate metrics and failures.
+  - **Uncompromised Quality Gate**: Never fabricates a passing status by relaxing rules or marking issues as `Accepted` / `False positive`; always reports actual Gate metrics and failures.
 - **Prerequisites & Limitations**:
   - Targets a self-hosted SonarQube instance running in Docker on the local machine (default `http://127.0.0.1:9000`, Community Build). The container must be running prior to invoking the skill.
   - SonarCloud is not supported.
@@ -58,7 +58,7 @@ Each skill is an independent directory containing its prompt specification, trig
 
 - **Purpose**: Build and run integration tests inside the actual RimWorld game engine, catching Harmony patch conflicts, execution timing issues, and asset loading states that headless unit tests miss.
 - **Key Features**:
-  - **Opt-in Confirmation**: Explicitly asks whether to introduce RimTest Redux before proceeding, keeping test workflows developer-driven.
+  - **Opt-in Confirmation**: Explicitly asks whether to introduce RimTest Redux before proceeding, keeping test workflows developer-driven (skips confirmation if a companion test mod already exists).
   - **Isolated Companion Test Mod**: Houses all test fixtures and assertions in a separate companion mod that is never packaged into release builds.
   - **Harmony Baseline Comparison**: Uses Harmony reverse patching to extract unmodified vanilla methods, comparing mod behavior directly against vanilla baselines.
   - **Startup Timing Protection**: Delays test execution until RimWorld's deferred initialization (`LongEvent`, background tasks) completes to eliminate race conditions.
@@ -72,7 +72,7 @@ Each skill is an independent directory containing its prompt specification, trig
   - **Comprehensive Test Support**: Covers smoke tests, test plans, fixture assemblies, and non-throwing in-game assertions.
   - **Intelligent Log Interpretation**: Analyzes game test logs, filters irrelevant background messages, and categorizes failures (mod bug, vanilla behavior, or test environment issue).
   - **Performance Benchmarking**: Runs in-game performance benchmarks to detect execution bottlenecks and track frame times.
-- **Prerequisites**: Requires compatible SmashPhil DevTools assemblies, RimWorld game assemblies, SDK, and an active running game instance for execution.
+- **Prerequisites**: Requires compatible SmashPhil DevTools assemblies, RimWorld game assemblies, .NET SDK, and an active running game instance for execution.
 
 #### `rimworld-smashtools` — SmashTools Architecture & Feature Integration
 

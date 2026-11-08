@@ -4,47 +4,52 @@
 
 > This document lives in `docs/`. The skill itself is at [`rimtest-redux-integrate/SKILL.md`](../rimtest-redux-integrate/SKILL.md).
 
-A skill for testing RimWorld mods inside the running game with [RimTest Redux](https://steamcommunity.com/sharedfiles/filedetails/?id=3762405308), and for avoiding the timing and Harmony traps that make such tests pass or fail for the wrong reason.
+A specialized skill for building and running in-game integration tests for RimWorld mods with [RimTest Redux](https://steamcommunity.com/sharedfiles/filedetails/?id=3762405308), while steering clear of startup timing race conditions and Harmony engine pitfalls that cause tests to spuriously pass or fail.
 
-Headless unit tests run with Unity stubbed out, so they never see whether a Harmony patch was actually applied, when deferred startup work finishes, or what atlases and injected translations end up looking like. In-game tests cover exactly that gap — but only if they wait for the right moment and compare against the right baseline.
+Headless unit tests run with Unity and game subsystems stubbed out, meaning they cannot verify whether a Harmony patch actually injected, when deferred game startup operations complete, or how graphics atlases and dynamically injected translations resolve in the live engine. In-game tests bridge this critical gap — provided they synchronize with the correct lifecycle timing and compare against an untainted baseline.
 
 ## When It Applies
 
-Whenever you write or debug tests for a RimWorld mod, including checking that Harmony patches really apply and chasing startup-timing failures. The request does not have to mention RimTest Redux.
+Applies whenever writing or debugging integration tests for RimWorld mods, including validating that Harmony patches inject successfully and diagnosing startup timing failures. The user's request does not need to mention RimTest Redux explicitly.
 
-The skill first **asks** whether to use RimTest Redux, and skips the question when the repository already has a companion test mod depending on it. If you pick another approach, the rest of the skill stays out of the way.
+The skill begins by **asking** whether to introduce RimTest Redux into the project. It automatically skips this prompt if the repository already contains a companion test mod depending on RimTest Redux. If the user prefers an alternative approach, the remainder of this skill steps aside.
 
 ## What It Covers
 
-1. **Project layout** — tests live in a separate, development-only companion mod that loads before the mod under test, references its built DLL, and never ships with it.
-2. **Writing tests** — `[TestSuite]` / `[Test]` classes, failures collected and reported together; when a precondition (a map, a compatible mod) is absent, the test logs a skip reason and returns early.
-3. **Vanilla baseline** — a Harmony reverse patch recovers the unmodified vanilla method, and the mod's result is compared item by item, content and order — limited to objects created through the vanilla entry point, since other mods write cached fields directly.
-4. **Probes** — `[HarmonyPatch]` classes that record state, cover every overload of their target, and disable themselves through `Prepare()` when no target is found.
-5. **Timing** — RimTest Redux's run-at-startup waits for queued long events but not for work on Tasks or threads or spread across frames, so for such mods a custom driver waits for a completion signal the mod under test provides.
-6. **Reporting** — one run per settings combination with passed, failed, and skipped counts each, and every failure classified as the mod's bug, vanilla behavior, or RimTest Redux's own behavior.
+1. **Companion Mod Architecture**: Tests are isolated within a dedicated, development-only companion test mod that loads before the target mod, references its compiled DLL, and is strictly excluded from release packages.
+2. **Writing In-Game Tests**: Structured `[TestSuite]` and `[Test]` classes that batch failure reports for collective inspection. When environmental prerequisites (such as an active map or compatible third-party mod) are missing, tests log explicit skip rationale and exit early.
+3. **Harmony Baseline Comparison**: Employs Harmony Reverse Patching to dynamically reconstruct unmodified vanilla methods, comparing mod output item-by-item (content and ordering). Comparisons are scoped to objects instantiated through vanilla entry points to avoid cross-contamination from third-party mods writing directly to cached fields.
+4. **State Probes**: `[HarmonyPatch]` classes that inspect and record internal state across all overloads of their target, using `Prepare()` to safely deactivate themselves when target methods are absent.
+5. **Lifecycle & Timing Safeguards**: RimTest Redux automatically awaits queued `LongEvent` tasks at startup, but does not inherently await asynchronous `Task` instances, worker threads, or multi-frame coroutines. For such mods, a custom test driver monitors explicit completion signals dispatched by the mod under test.
+6. **Granular Reporting**: Executes suites across distinct mod setting combinations, reporting passed, failed, and skipped metrics. Every failure is accurately classified as a bug in the mod under test, vanilla behavior, or RimTest Redux framework behavior.
 
-The skill also carries [`references/rimtest-redux-api.md`](../rimtest-redux-integrate/references/rimtest-redux-api.md): RimTest Redux's framework rules, attributes, and assertion API adapted from its README, the internal members a custom driver calls through reflection, and three examples — a basic suite, collected failures with logged skips, and a custom driver.
+The skill also includes [`references/rimtest-redux-api.md`](../rimtest-redux-integrate/references/rimtest-redux-api.md), containing framework rules, attribute definitions, assertion APIs, internal reflection hooks for custom drivers, and complete code examples (basic test suite, collected assertions with skip logging, and a custom test driver).
 
-## Harmony Pitfalls
+## Harmony & Mono Pitfalls
 
-| Pitfall | Remedy |
-| --- | --- |
-| A method containing a `catch … when` filter cannot be patched ("Incorrect code generation for exception block") | Use separate plain `catch` blocks in any method that must be patched |
-| `Harmony.PatchCategory(string)` uses the calling assembly, so calling it from a test crashes Mono | Pass the target assembly explicitly |
+| Pitfall | Root Cause & Diagnostic | Solution |
+| --- | --- | --- |
+| **`catch … when` Exception Filter** | Mono compiler failure: "Incorrect code generation for exception block" when patching methods containing exception filters. | Replace `catch … when` constructs with standard sequential `catch` blocks in any method targeted by a patch. |
+| **`Harmony.PatchCategory(string)`** | `PatchCategory` resolves using the calling assembly. Invoking it directly from test assemblies causes Mono runtime crashes. | Always supply the target mod assembly explicitly when calling category patches. |
 
-## Requirements
+## Prerequisites
 
-Running the tests needs RimWorld 1.6 with the `brrainz.harmony`, `ilyvion.Laboratory`, and `ilyvion.rimtestredux` mods installed; the test assembly targets net481.
+Running in-game tests requires RimWorld 1.6 with the following mods installed in the load order:
+- `brrainz.harmony` (Harmony library)
+- `ilyvion.Laboratory` (Test framework prerequisite)
+- `ilyvion.rimtestredux` (RimTest Redux test runner)
+
+The companion test project must target `.NET Framework 4.8.1` (`net481`).
 
 ## Install
 
-From the repository root, let the `skills` CLI discover supported agents and install this skill:
+From the repository root, use the `skills` CLI to discover supported agent hosts and install this skill:
 
 ```bash
 npx skills add . --skill rimtest-redux-integrate
 ```
 
-Add `--global` for personal scope; without it, the CLI installs at project scope. For a manual installation, copy `rimtest-redux-integrate/` to a skills directory documented by the host instead of assuming a runtime-specific path.
+Add `--global` for personal user scope; omitting it installs at project scope. For manual installation, copy `rimtest-redux-integrate/` directly into your agent host's configured skills directory.
 
 > [!NOTE]
-> The first `npx` invocation may download the CLI. Reload or restart the host when it only discovers skills at session start.
+> The initial `npx` invocation may download the CLI. Reload or restart your agent host if it only discovers skills during session startup.

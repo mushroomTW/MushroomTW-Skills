@@ -2,49 +2,54 @@
 
 [English](rimtest-redux-integrate.md) | **繁體中文**
 
-> 本文件位於 `docs/`。skill 本體位於 [`rimtest-redux-integrate/SKILL.md`](../rimtest-redux-integrate/SKILL.md)。
+> 本文件位於 `docs/`。Skill 本體位於 [`rimtest-redux-integrate/SKILL.md`](../rimtest-redux-integrate/SKILL.md)。
 
-一個用 [RimTest Redux](https://steamcommunity.com/sharedfiles/filedetails/?id=3762405308) 在遊戲執行中測試 RimWorld 模組的 skill，同時避開那些讓測試因錯誤原因通過或失敗的時序與 Harmony 陷阱。
+專為在 RimWorld 遊戲執行期透過 [RimTest Redux](https://steamcommunity.com/sharedfiles/filedetails/?id=3762405308) 進行模組測試而設計的 Skill，協助建立高可靠度的遊戲內整合測試，並避開因啟動時序競爭或 Harmony 陷阱所導致的假性通過或誤報失敗。
 
-headless 單元測試把 Unity stub 掉，所以看不到 Harmony patch 是否真的套用、延遲的啟動工作何時完成、圖集與注入的翻譯最後長什麼樣子。遊戲內測試補的正是這一塊——前提是它等對時機、比對對的基準。
+脫機（Headless）單元測試通常以 Stub 替代 Unity 引擎與遊戲子系統，因此無法驗證 Harmony Patch 是否真實注入生效、延遲的啟動任務（Deferred Startup Tasks）何時完成，也無法確認材質圖集（Atlas）與動態注入的字串翻譯在實際環境中的最終狀態。遊戲內整合測試精準填補了此項關鍵盲區——但前提是測試必須等待精確的啟動時序，並以正確的原版基準（Baseline）進行比對。
 
 ## 觸發時機
 
-只要是撰寫或除錯 RimWorld 模組的測試，包括確認 Harmony patch 真的套用、追查啟動時序造成的失敗。請求不需要提到 RimTest Redux。
+適用於撰寫或除錯 RimWorld 模組的測試流程，包含確認 Harmony Patch 實際生效、排查啟動時序競爭等情境。使用者的提問無需明確指明 RimTest Redux。
 
-skill 會先**詢問**要不要用 RimTest Redux；倉庫裡已經有依賴它的 companion 測試 mod 時就略過這一問。你選了別的做法，skill 其餘部分就不介入。
+Skill 在介入前會先**主動詢問**開發者是否採用 RimTest Redux 作為測試框架；若儲存庫中已存在依賴 RimTest Redux 的伴隨測試 Mod，則會自動略過此詢問。若開發者選擇其他測試架構，Skill 其餘流程將不會強行介入。
 
 ## 涵蓋內容
 
-1. **專案結構**——測試放在獨立的開發用 companion mod，載入順序排在被測 mod 之前，參考被測 mod 建置出的 DLL，且不隨它發布。
-2. **撰寫測試**——`[TestSuite]`／`[Test]` 類別，失敗先收集再一次列出；前置條件（地圖、相容 mod）不存在時，記下略過原因後提早 `return`。
-3. **原版對照組**——以 Harmony reverse patch 取回未被改寫的原版方法，逐項比對被測 mod 的結果，內容與順序都比；只比對經過原版入口產生的物件，因為其他 mod 會直接寫入快取欄位。
-4. **探針**——記錄狀態的 `[HarmonyPatch]` 類別，涵蓋目標的每個多載，找不到任何目標時由 `Prepare()` 停用自己。
-5. **時序**——RimTest Redux 的啟動時執行會等排入的長事件跑完，但不會等 Task、執行緒或跨多幀分批處理的工作；遇到這類 mod，就由自訂 driver 等待被測 mod 提供的完成訊號。
-6. **回報**——每種設定組合各跑一次並記錄通過、失敗、略過數，每個失敗都歸類為被測 mod 的問題、原版行為或 RimTest Redux 自身行為。
+1. **獨立伴隨測試 Mod（Companion Mod）**：測試程式碼獨立收納於專為開發環境設計的伴隨測試 Mod 中，其載入順序排在被測 Mod 之前，直接參考其編譯完成的 DLL，且絕對不會隨正式版本打包發布。
+2. **撰寫遊戲內測試**：使用 `[TestSuite]` 與 `[Test]` 標註測試類別與方法，採集批次失敗報告一次呈現；當前置環境（如特定地圖或相容 Mod）缺失時，測試會記錄明確的略過原因並提早結束。
+3. **Harmony 原版對照組（Reverse Patch）**：運用 Harmony Reverse Patch 動態還原未被竄改的原版方法，逐項嚴格比對被測 Mod 的輸出內容與集合順序；比對範圍僅限於原版入口建立的物件，防範其他外部 Mod 直寫快取欄位的干擾。
+4. **狀態探針（Probes）**：以 `[HarmonyPatch]` 類別記錄執行期狀態，涵蓋目標方法的所有多載（Overload）；若找不到目標方法，則由 `Prepare()` 主動自我停用以防遊戲崩潰。
+5. **啟動時序防護**：RimTest Redux 原生啟動機制會等待排程長任務（`LongEvent`），但無法自動等待非同步 `Task`、背景工作執行緒或跨多幀分散的非同步操作；針對此類 Mod，自訂測試驅動器（Driver）會等待被測 Mod 明確發布的就緒訊號。
+6. **細緻回報分類**：針對各類設定組合個別執行測試並統計通過、失敗與略過數量；所有失敗項目皆精確分類為「被測 Mod 程式錯誤」、「原版既有行為」或「RimTest Redux 框架行為」。
 
-skill 另附 [`references/rimtest-redux-api.md`](../rimtest-redux-integrate/references/rimtest-redux-api.md)：改寫自 RimTest Redux README 的框架規則、attribute 與斷言 API，自訂 driver 需透過反射呼叫的 internal 成員，以及三個範例——基本 suite、收集失敗並記錄略過、自訂 driver。
+本 Skill 亦隨附 [`references/rimtest-redux-api.md`](../rimtest-redux-integrate/references/rimtest-redux-api.md)，詳細整理了 RimTest Redux 框架規範、Attribute 宣告、斷言 API、自訂 Driver 專用的反射內部成員，以及三套完整範例（基礎測試套件、含略過說明的收集式斷言、自訂測試驅動器）。
 
-## Harmony 陷阱
+## Harmony 與 Mono 陷阱防護
 
-| 陷阱 | 做法 |
-| --- | --- |
-| 含 `catch … when` 篩選器的方法無法被 patch（"Incorrect code generation for exception block"） | 要被 patch 的方法改用獨立的多個 `catch` |
-| `Harmony.PatchCategory(string)` 取呼叫端組件，在測試裡呼叫會讓 Mono 崩潰 | 明確傳入被測 mod 的組件 |
+| 陷阱問題 | 成因與錯誤診斷 | 解決方案 |
+| --- | --- | --- |
+| **`catch … when` 例外篩選器** | Mono 編譯器重大限制：對包含例外篩選器的方法進行 Patch 時會報錯「Incorrect code generation for exception block」。 | 在任何需要被 Patch 注入的方法中，將 `catch … when` 改寫為標準的循序 `catch` 區塊。 |
+| **`Harmony.PatchCategory(string)`** | `PatchCategory` 預設依賴呼叫端組件（Calling Assembly）；若自測試組件中直接呼叫，會引發 Mono 執行期崩潰。 | 呼叫分類 Patch 時，務必明確傳入目標 Mod 的 Assembly 參考。 |
 
-## 需求
+## 環境需求與先決條件
 
-執行測試需要 RimWorld 1.6，並安裝 `brrainz.harmony`、`ilyvion.Laboratory`、`ilyvion.rimtestredux` 三個 mod；測試組件目標為 net481。
+執行遊戲內測試需要 RimWorld 1.6，並於模組載入清單中依序啟用下列模組：
+- `brrainz.harmony`（Harmony 函式庫）
+- `ilyvion.Laboratory`（測試前置框架）
+- `ilyvion.rimtestredux`（RimTest Redux 測試執行器）
 
-## 安裝
+伴隨測試專案之編譯目標必須為 `.NET Framework 4.8.1` (`net481`)。
 
-請在倉庫根目錄讓 `skills` CLI 自動偵測相容 agent，並安裝此 skill：
+## 安裝方式
+
+請於儲存庫根目錄下，透過 `skills` CLI 自動偵測相容 Agent 並安裝本 Skill：
 
 ```bash
 npx skills add . --skill rimtest-redux-integrate
 ```
 
-若要安裝到個人層級，請加上 `--global`；未加時為專案層級。若採手動安裝，請把 `rimtest-redux-integrate/` 複製到 host 文件指定的 skills 目錄，不要假設特定 runtime 路徑。
+加上 `--global` 可安裝至個人使用者層級；未加時預設為專案層級。若採用手動安裝，請將 `rimtest-redux-integrate/` 目錄複製至 Agent 主機所指定的 Skills 目錄中。
 
 > [!NOTE]
-> 第一次執行 `npx` 可能會下載 CLI。若 host 只在 session 啟動時偵測 skill，安裝後請重新載入或重啟。
+> 首次執行 `npx` 可能需要下載 CLI。若 Agent 主機僅在啟動對話階段載入 Skills，安裝完成後請重新載入或重啟主機環境。

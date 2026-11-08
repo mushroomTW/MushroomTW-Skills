@@ -4,58 +4,58 @@
 
 > This document lives in `docs/`. The skill itself is at [`local-sonarqube-setup/SKILL.md`](../local-sonarqube-setup/SKILL.md).
 
-Connect a supported code project to a **local Docker SonarQube** instance (default `http://127.0.0.1:9000`): create the project, produce reports, run the analysis, and verify the Quality Gate.
+Connect a supported software project to a **local Docker SonarQube** instance (default `http://127.0.0.1:9000`): create the project, generate native test coverage reports, execute code analysis, and verify the Quality Gate.
 
-This skill configures the connection and runs analysis; it does not apply fixes to reported issues.
+This skill configures the connection and runs the analysis workflow; it does not apply automatic code fixes to reported issues.
 
 ## When It Applies
 
-When the user asks to set up, configure, run, or troubleshoot a local SonarQube analysis.
+Triggered when the user requests to set up, configure, execute, or troubleshoot a local SonarQube analysis pipeline.
 
 ## Assumptions
 
-- The host is the current Windows machine; commands run in PowerShell
-- SonarQube defaults to `http://127.0.0.1:9000`, overridden only when explicitly specified
-- A directly runnable `sonar-scanner` is already installed — **this skill does not install, download, or replace the scanner**
-- Credentials come from the `SONAR_TOKEN` system environment variable. SonarScanner for .NET currently does not support this path, so the skill stops instead of exposing the token in arguments or files.
-- Language, build system, and coverage generation are always discovered from the repository's actual contents; no default language assumptions are applied
+- The host environment is the current Windows machine; commands run in PowerShell.
+- SonarQube instance defaults to `http://127.0.0.1:9000`, overridden only when explicitly specified.
+- A runnable `sonar-scanner` is already installed and available in the system PATH — **this skill does not install, download, or replace scanners**.
+- Authentication credentials must be provided via the `SONAR_TOKEN` system environment variable. Because SonarScanner for .NET does not support secure environment-based token ingestion, the skill halts execution rather than exposing tokens in CLI arguments or files.
+- Languages, build tools, and coverage generation mechanisms are dynamically discovered from actual repository contents; no speculative language assumptions are made.
 
 ## Hard Rules (Excerpt)
 
-- The token exists only in process memory. It must never reach a command-line argument, URL, log, `sonar-project.properties`, or any reply; externally it is described only as "set" or "not set"
-- Do not add SonarQube or database services, modify CI or compose files, commit, or push (unless explicitly asked)
-- Do not change runtime behaviour, public APIs, production code, or build semantics just to make a scan work
-- Never fake completion via `Accepted`, `False positive`, or by disabling rules
-- Preserve the user's existing uncommitted changes
+- **Strict Token Safety**: The token resides exclusively in process memory. It must never appear in command-line arguments, URLs, log outputs, `sonar-project.properties`, or conversation replies; externally, it is referenced only as "set" or "not set".
+- **Zero Extraneous Modifications**: Do not spin up SonarQube or database containers, modify CI/CD pipelines or Compose files, commit code, or push changes unless explicitly directed.
+- **Production Code Integrity**: Do not alter runtime behavior, public APIs, production logic, or build semantics merely to satisfy a scanner.
+- **Uncompromised Quality Gate**: Never bypass quality gates or fake a pass via `Accepted`, `False positive`, or rule suppressions.
+- **Preserve User Changes**: Always preserve existing uncommitted workspace modifications.
 
-The full set is in the Hard rules section of SKILL.md.
+The complete list of operational rules is detailed in the Hard Rules section of [`SKILL.md`](../local-sonarqube-setup/SKILL.md).
 
 ## Workflow
 
-| # | Step | Key points |
+| # | Step | Key Points |
 | --- | --- | --- |
-| 1 | Discover | Read `AGENTS.md`, README, build docs, and existing sonar config; run `git status --short`; derive language and test layout from the manifest |
-| 2 | Confirm service and scanner | `GET /api/system/status` must be `UP`; record the scanner version |
-| 3 | Find or create the project | Query via MCP when available, otherwise the REST API; only `POST /api/projects/create` if absent, then record the dashboard URL |
-| 4 | Scan configuration | Merge minimally into existing config rather than overwriting; exclude build artifacts and caches, never an entire language directory or the test directory |
-| 5 | Produce reports | Run the project's own checks and tests first, then generate coverage with its native tooling; confirm report paths exist and are non-empty |
-| 6 | Run the scan | Set `SONAR_HOST_URL` / `SONAR_TOKEN` within a single process; require `EXECUTION SUCCESS` and exit code 0 |
-| 7 | Verify and wrap up | Take the CE task from `.scannerwork/report-task.txt` and poll to completion, check the Quality Gate, add artifacts to ignore rules |
+| 1 | **Discovery** | Inspect `AGENTS.md`, README, build documentation, and existing Sonar configurations; execute `git status --short`; deduce language and test layout from build manifests. |
+| 2 | **Confirm Service & Scanner** | Validate `GET /api/system/status` returns `UP`; verify and record the local scanner version. |
+| 3 | **Find or Create Project** | Query existing projects via MCP (or REST API fallback); only issue `POST /api/projects/create` if absent, then record the dashboard URL. |
+| 4 | **Configure Scan** | Minimally merge necessary properties into existing config without overwriting; exclude build outputs and caches, never exclude test directories or whole language trees. |
+| 5 | **Produce Reports** | Execute native project checks and unit tests first, then generate coverage reports using native tooling; verify report files exist and are non-empty. |
+| 6 | **Execute Analysis** | Set `SONAR_HOST_URL` and `SONAR_TOKEN` within a single process scope; ensure `EXECUTION SUCCESS` and exit code 0. |
+| 7 | **Verify & Wrap Up** | Extract the Compute Engine task ID from `.scannerwork/report-task.txt`, poll until completion, inspect Quality Gate status, and add generated scan artifacts to ignore rules. |
 
 ## References
 
-- [`reference/commands.md`](../local-sonarqube-setup/reference/commands.md) — PowerShell commands, a `sonar-project.properties` template, and the MCP tool mapping. Required reading before step 2.
-- [`reference/troubleshooting.md`](../local-sonarqube-setup/reference/troubleshooting.md) — read only when a step fails.
+- [`reference/commands.md`](../local-sonarqube-setup/reference/commands.md) — PowerShell command templates, `sonar-project.properties` configuration templates, and MCP tool mappings. (Required reading before Step 2).
+- [`reference/troubleshooting.md`](../local-sonarqube-setup/reference/troubleshooting.md) — Diagnostic and recovery steps when an execution step fails.
 
 ## Install
 
-From the repository root, let the `skills` CLI discover supported agents and install this skill:
+From the repository root, use the `skills` CLI to discover supported agent hosts and install this skill:
 
 ```bash
 npx skills add . --skill local-sonarqube-setup
 ```
 
-Add `--global` for personal scope; without it, the CLI installs at project scope. For a manual installation, copy `local-sonarqube-setup/` to a skills directory documented by the host instead of assuming a runtime-specific path.
+Add `--global` for personal user scope; omitting it installs at project scope. For manual installation, copy `local-sonarqube-setup/` directly into your agent host's configured skills directory.
 
 > [!NOTE]
-> The first `npx` invocation may download the CLI. Reload or restart the host when it only discovers skills at session start.
+> The initial `npx` invocation may download the CLI. Reload or restart your agent host if it only discovers skills during session startup.
