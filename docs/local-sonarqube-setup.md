@@ -17,8 +17,9 @@ Triggered when the user requests to set up, configure, execute, or troubleshoot 
 - The host environment is the current Windows machine; commands run in PowerShell.
 - SonarQube instance defaults to `http://127.0.0.1:9000`, overridden only when explicitly specified.
 - A runnable `sonar-scanner` is already installed and available in the system PATH — **this skill does not install, download, or replace scanners**.
-- Authentication credentials must be provided via the `SONAR_TOKEN` system environment variable. Because SonarScanner for .NET does not support secure environment-based token ingestion, the skill halts execution rather than exposing tokens in CLI arguments or files.
+- Authentication credentials must be provided via the `SONAR_TOKEN` system environment variable. SonarScanner for .NET does not read `SONAR_TOKEN` in its `begin` step, so the skill builds a `SONARQUBE_SCANNER_PARAMS` JSON variable inside the same process. Tokens never appear in CLI arguments or files.
 - Languages, build tools, and coverage generation mechanisms are dynamically discovered from actual repository contents; no speculative language assumptions are made.
+- The SonarQube project name is the project's own name (from existing Sonar config, the build manifest, or the repository name). Server-side settings such as Quality Profile, Quality Gate, main branch, and New Code definition stay at the server defaults unless the user asks to change them.
 
 ## Hard Rules (Excerpt)
 
@@ -44,6 +45,7 @@ The complete list of operational rules is detailed in the Hard Rules section of 
 
 ## References
 
+- [`reference/languages.md`](../local-sonarqube-setup/reference/languages.md) — Languages supported by Community Build, the scanner for each ecosystem, and per-language required properties and pitfalls (read from Step 1 onward).
 - [`reference/commands.md`](../local-sonarqube-setup/reference/commands.md) — PowerShell command templates, `sonar-project.properties` configuration templates, and MCP tool mappings. (Required reading before Step 2).
 - [`reference/troubleshooting.md`](../local-sonarqube-setup/reference/troubleshooting.md) — Diagnostic and recovery steps when an execution step fails.
 

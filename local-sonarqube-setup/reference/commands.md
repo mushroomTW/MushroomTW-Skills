@@ -32,12 +32,13 @@ Official prerequisite: `analyzing-source-code/overview.md` — full clone requir
 |---|---|---|
 | Maven | SonarScanner for Maven | `mvn verify sonar:sonar` |
 | Gradle | SonarScanner for Gradle | `gradle sonar` |
-| .NET / MSBuild | SonarScanner for .NET | Credential STOP: the scanner does not read `SONAR_TOKEN` |
-| NPM | SonarScanner for NPM | `sonar-scanner` via npm |
-| Python | SonarScanner for Python | `sonar-scanner` / `pysonar` |
+| .NET / MSBuild | SonarScanner for .NET | `dotnet sonarscanner begin` → build → `end`, token via `SONARQUBE_SCANNER_PARAMS` (§6.1) |
+| NPM | SonarScanner for NPM (`@sonar/scan`) | `npx @sonar/scan` |
+| Python | SonarScanner for Python (`pysonar`) | `pysonar` |
+| Rust / Cargo | SonarScanner for Cargo | `cargo sonar-scanner` (needs the community Rust plugin) |
 | Other | SonarScanner CLI | `sonar-scanner` |
 
-> CLI cannot analyze C# / VB.NET — must use Scanner for .NET.
+> CLI cannot analyze C# / VB.NET — must use Scanner for .NET. Per-language requirements (Java binaries, Node.js, Python version, unsupported languages) are in `reference/languages.md`.
 
 **Java runtime**:
 
@@ -51,7 +52,7 @@ sonar-scanner --version  # check embedded JRE / auto-provisioning notes
 | Maven / Gradle | Java 11+ (auto) | Java 21+ (17 removed) |
 | CLI 7.2+ | Java 11+ (auto) | Java 21+ |
 | CLI <7.2 | Java 17+ (auto) | Java 21+ |
-| .NET / NPM / Python | n/a | Java 21+ |
+| .NET / NPM / Python | none (no host Java needed) | Java 21+ |
 
 Auto-provisioning downloads scanner engine + analyzers at analysis time from the server (see `analysis-overview.md#scanner-engine-and-analyzers-download`). When ON, no manual upgrade is needed. When OFF, ensure `JAVA_HOME` points to 21+.
 
@@ -67,7 +68,7 @@ Troubleshoot with `SONAR_SCANNER_JAVA_OPTS` vs `SONAR_SCANNER_OPTS` distinction 
 `SONAR_TOKEN` is the standard variable name SonarScanner reads, supplied directly by the system environment; no extra mapping is needed.
 
 > [!CAUTION]
-> SonarScanner for .NET does not read `SONAR_TOKEN` (checked against the 11.3 source, September 2026; SonarSource tracks the request as SCAN4NET-562) and documents `/d:sonar.token=...`. That would expose the expanded secret in process arguments, so this skill stops on .NET instead of using the documented argument or writing a token file. The scanner does read a `SONARQUBE_SCANNER_PARAMS` JSON environment variable, an env-only path this skill has not tested, so it is not used. Re-check this when the scanner version changes.
+> SonarScanner for .NET's `begin` step does not read `SONAR_TOKEN`, and the docs show `/d:sonar.token=...`, which would expose the secret in process arguments. Never use that form. Use the env-only path in §6.1 instead: build `SONARQUBE_SCANNER_PARAMS` inside the same process from `SONAR_TOKEN`. Tested November 2026 with scanner 12.1.0 against Community Build 26.11 with forced authentication: `begin` authenticates only through `SONARQUBE_SCANNER_PARAMS`; `end` accepts either variable and fails with neither; no file under the working tree contains the token afterwards. Re-test when the scanner's major version changes.
 
 ```powershell
 if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
@@ -85,6 +86,7 @@ Clear it only after every step (verification included) has finished — clearing
 
 ```powershell
 Remove-Item Env:SONAR_TOKEN -ErrorAction SilentlyContinue
+Remove-Item Env:SONARQUBE_SCANNER_PARAMS -ErrorAction SilentlyContinue   # only if §6.1 built it
 ```
 
 Do not use `setx`; do not write it to any file.
@@ -161,14 +163,7 @@ Precedence low → high: **Global (UI)** < **Project (UI)** < **Scanner config f
 
 ### 5.3 Language-specific reports
 
-Never guess a property name. Use `reference/coverage.md` table and confirm against `analyzing-source-code/test-coverage/*` for your SonarQube version. Common keys (verify!):
-
-- Java: `sonar.coverage.jacoco.xmlReportPaths`
-- JS/TS: `sonar.javascript.lcov.reportPaths`
-- Python: `sonar.python.coverage.reportPaths`
-- .NET: `sonar.cs.dotcover.reportsPaths` / `sonar.cs.vscoveragexml.reportsPaths`
-- PHP: `sonar.php.coverage.reportPaths`
-- Generic: `sonar.coverageReportPaths`
+Never guess a property name. Coverage keys are listed only in `reference/coverage.md`; analysis keys such as `sonar.java.binaries`, `sonar.python.version` and `sonar.nodejs.executable` are in `reference/languages.md`. Confirm against `analyzing-source-code/test-coverage/*` for your SonarQube version.
 
 When there is no report to import, state plainly that none is provided.
 
@@ -198,13 +193,43 @@ $env:SONAR_SCANNER_JAVA_OPTS = "-Xmx1024m"
 
 Debug dump: `sonar-scanner -Dsonar.scanner.internal.dumpToFile=dump.properties` (also in UI `Background Tasks > Show SonarScanner Context`).
 
+### 6.1 SonarScanner for .NET (C# / VB.NET)
+
+`sonar-project.properties` is not read here. Project settings go to `begin` as `/k:`, `/n:` and `/d:sonar.*=` arguments; credentials never do. Build the JSON variable inside the same process so the token never appears in arguments, files or output, and merge any existing value instead of overwriting it:
+
+```powershell
+$params = @{}
+if ($env:SONARQUBE_SCANNER_PARAMS) {
+    ($env:SONARQUBE_SCANNER_PARAMS | ConvertFrom-Json).PSObject.Properties | ForEach-Object { $params[$_.Name] = $_.Value }
+}
+$params['sonar.token'] = $env:SONAR_TOKEN
+$env:SONARQUBE_SCANNER_PARAMS = $params | ConvertTo-Json -Compress
+
+dotnet sonarscanner begin /k:$projectKey "/n:$projectName" "/d:sonar.host.url=$env:SONAR_HOST_URL" `
+    "/d:sonar.cs.opencover.reportsPaths=**/coverage.opencover.xml"   # only when coverage exists (coverage.md)
+if ($LASTEXITCODE -ne 0) { throw "begin failed: $LASTEXITCODE" }
+dotnet build <solution-or-project>    # the repo's own build command and configuration
+if ($LASTEXITCODE -ne 0) { throw "build failed: $LASTEXITCODE" }
+dotnet test <test-project> --no-build --settings <repo-runsettings>   # only when the repo has tests; produces coverage
+if ($LASTEXITCODE -ne 0) { throw "tests failed: $LASTEXITCODE" }
+dotnet sonarscanner end
+if ($LASTEXITCODE -ne 0) { throw "end failed: $LASTEXITCODE" }
+```
+
+- Success means all three exit codes are 0 and `end` logs `ANALYSIS SUCCESSFUL` with the expected dashboard URL.
+- `begin` and `end` must run from the same directory. `.sonarqube/` is the scanner work directory; add it to the ignore rules at wrap-up.
+- Collect coverage between `begin` and `end`. Prefer the repo's own runsettings. Without one, use `dotnet test --collect "XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover`.
+- Coverlet needs PDBs. A configuration with `DebugType=none` (often `Release`) yields a report with no modules, so build and test in a configuration that emits symbols (usually the default `Debug`). Do not edit the project to add them.
+- If the build needs local paths (game installs, SDK locations), set the environment variables the repo documents (e.g. in `Directory.Build.props`) instead of editing project files.
+
 ## 7. Verify the CE task and the Quality Gate
 
 Parse `report-task.txt` for the CE task id:
 
 ```powershell
 $report = @{}
-Get-Content .scannerwork\report-task.txt | ForEach-Object {
+$reportTask = if (Test-Path .sonarqube\out\.sonar\report-task.txt) { '.sonarqube\out\.sonar\report-task.txt' } else { '.scannerwork\report-task.txt' }   # .NET vs other scanners
+Get-Content $reportTask | ForEach-Object {
     if ($_ -match '^([^=]+)=(.*)$') { $report[$Matches[1]] = $Matches[2] }
 }
 $ceTaskId = $report['ceTaskId']

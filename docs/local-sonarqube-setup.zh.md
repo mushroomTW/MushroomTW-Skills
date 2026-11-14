@@ -17,8 +17,9 @@
 - 執行環境為本機 Windows 主機，命令皆以 PowerShell 執行。
 - SonarQube 位址預設為 `http://127.0.0.1:9000`，僅在使用者明確指定時覆寫。
 - 主機環境需預先安裝可直接執行的 `sonar-scanner` 於 PATH 中——**本 Skill 不包含 Scanner 的下載、安裝或版本替換**。
-- 認證金鑰必須由系統環境變數 `SONAR_TOKEN` 提供。由於目前 SonarScanner for .NET 尚無法安全地從環境變數讀取 Token，Skill 會主動中斷流程，絕不將 Token 暴露於命令列參數或檔案中。
+- 認證金鑰必須由系統環境變數 `SONAR_TOKEN` 提供。SonarScanner for .NET 的 `begin` 步驟不讀 `SONAR_TOKEN`，因此 Skill 會在同一程序內組出 `SONARQUBE_SCANNER_PARAMS` JSON 環境變數，Token 絕不出現在命令列參數或檔案中。
 - 程式語言、建置工具與涵蓋率生成方式一律從儲存庫實際內容動態探勘，不預設立場或套用假設。
+- SonarQube 上的專案名稱採用專案本身的名稱（依序取自既有 Sonar 設定、建置檔或儲存庫名稱）；Quality Profile、Quality Gate、主分支、New Code 定義等伺服器端設定一律沿用預設，使用者要求才修改。
 
 ## 硬性規則（節錄）
 
@@ -44,6 +45,7 @@
 
 ## 參考資料
 
+- [`reference/languages.md`](../local-sonarqube-setup/reference/languages.md)——Community Build 支援的語言、各生態系對應的 scanner，以及各語言的必要參數與常見陷阱（從步驟 1 起參考）。
 - [`reference/commands.md`](../local-sonarqube-setup/reference/commands.md)——PowerShell 常用指令範本、`sonar-project.properties` 設定範本與 MCP 工具對照表（進入步驟 2 前必讀）。
 - [`reference/troubleshooting.md`](../local-sonarqube-setup/reference/troubleshooting.md)——各步驟遭遇失敗時的診斷與排查指引。
 

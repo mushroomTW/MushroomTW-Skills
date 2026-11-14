@@ -22,7 +22,11 @@ Handling: first confirm which scope holds the variable (print booleans only, nev
 If either is `True`, reopen the shell so the process inherits it, or load it inside the current process:
 
 ```powershell
-$env:SONAR_TOKEN = [Environment]::GetEnvironmentVariable('SONAR_TOKEN','Machine')
+# User scope takes precedence over Machine scope, matching how a new shell resolves it
+$env:SONAR_TOKEN = [Environment]::GetEnvironmentVariable('SONAR_TOKEN','User')
+if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
+    $env:SONAR_TOKEN = [Environment]::GetEnvironmentVariable('SONAR_TOKEN','Machine')
+}
 ```
 
 Only when both are `False` is it genuinely unset — ask the user to generate a token and set the system environment variable.
