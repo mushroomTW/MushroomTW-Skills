@@ -6,7 +6,7 @@
 
 1. Support check (do this first)
 2. Scanner per ecosystem
-3. Language notes: Java · Kotlin · JS/TS/CSS · Python · Go · C#/VB.NET · PHP · IaC/Docker · Secrets/HTML/XML/Flex
+3. Language notes (with coverage keys): Java · Kotlin · JS/TS/CSS · Python · Go · C#/VB.NET · PHP · IaC/Docker · Secrets/HTML/XML/Flex · Coverage checks
 4. Languages that need a community plugin
 5. Languages Community Build cannot analyze
 
@@ -25,10 +25,10 @@ After the scan, check that the lines-of-code measure (`ncloc`) is above zero. Ze
 ## 2. Scanner per ecosystem
 
 | Ecosystem | Scanner | Invocation | Reads `SONAR_TOKEN` env |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Maven | SonarScanner for Maven | `mvn verify sonar:sonar` | yes |
 | Gradle | SonarScanner for Gradle | `gradle sonar` (plugin `org.sonarqube`) | yes |
-| MSBuild / .NET CLI | SonarScanner for .NET | `dotnet sonarscanner begin/build/end` | `begin`: **no**, so pass the token through an in-process `SONARQUBE_SCANNER_PARAMS` (`commands.md §6.1`) |
+| MSBuild / .NET CLI | SonarScanner for .NET | `dotnet sonarscanner begin/build/end` | `begin`: **no**, so pass the token through an in-process `SONARQUBE_SCANNER_PARAMS` (`commands.md §4.3`) |
 | npm project | SonarScanner for NPM (`@sonar/scan`) | `npx @sonar/scan` (5.x needs Node.js 22.12+) | yes |
 | Python | SonarScanner for Python (`pysonar`, Python 3.10+) | `pysonar`; also reads `[tool.sonar]` in `pyproject.toml` | yes |
 | Rust / Cargo | SonarScanner for Cargo | `cargo sonar-scanner`; config in `[package.metadata.sonar]` of `Cargo.toml` (`host-url` is required, or it targets SonarQube Cloud; never put the token there) | yes |
@@ -46,7 +46,7 @@ With JRE auto-provisioning enabled, the .NET, NPM and Python scanners need no Ja
 - **Through the CLI**: if the project has more than one `.java` file, `sonar.java.binaries` (the compiled `.class` directories) is **required**. Without it the analysis fails with `please provide compiled classes with sonar.java.binaries`. Build the project first and point the property at the real output directory, such as `target/classes` or `build/classes/java/main`. Add `sonar.java.libraries` (dependency jars, wildcards allowed) for accuracy, and `sonar.java.test.binaries` / `sonar.java.test.libraries` when tests are in scope. Never exclude `.java` files to get past this error.
 - Set `sonar.java.source` (for example `21`) when the scanner does not set it. If it is missing, rules for Java 9+ are skipped.
 - If the project is built with a different JDK from the one running the scanner, set `sonar.java.jdkHome` to the project's JDK.
-- Coverage: JaCoCo XML → `sonar.coverage.jacoco.xmlReportPaths`.
+- Coverage: JaCoCo XML → `sonar.coverage.jacoco.xmlReportPaths`. Run the build's test phase first (for example `mvn verify`) so `jacoco.xml` exists. The older `sonar.jacoco.reportPaths` is deprecated.
 
 ### Kotlin
 
@@ -76,7 +76,7 @@ With JRE auto-provisioning enabled, the .NET, NPM and Python scanners need no Ja
 
 ### C# / VB.NET
 
-- These need SonarScanner for .NET 5.x or later (`dotnet sonarscanner`). The CLI cannot analyze them. Run `begin` → the repo's own build → `end` as shown in `commands.md §6.1`. That section also covers the token, which must never go into `/d:sonar.token`.
+- These need SonarScanner for .NET 5.x or later (`dotnet sonarscanner`). The CLI cannot analyze them. Run `begin` → the repo's own build → `end` as shown in `commands.md §4.3`. That section also covers the token, which must never go into `/d:sonar.token`.
 - `sonar-project.properties` is ignored by this scanner. Pass settings to `begin` with `/d:`.
 - The build between `begin` and `end` must succeed. If it needs local paths, set the environment variables the repo documents rather than editing project files.
 - Coverage (wildcards allowed):
@@ -86,7 +86,7 @@ With JRE auto-provisioning enabled, the .NET, NPM and Python scanners need no Ja
 ### PHP
 
 - Keep `vendor` excluded. `php.ini` files are analyzed only when they are inside the project.
-- Coverage: PHPUnit Clover XML → `sonar.php.coverage.reportPaths`.
+- Coverage: Clover XML from PHPUnit or phpcov → `sonar.php.coverage.reportPaths`.
 
 ### IaC and Docker
 
@@ -100,11 +100,29 @@ With JRE auto-provisioning enabled, the .NET, NPM and Python scanners need no Ja
 - HTML and XML need no setup.
 - Flex coverage: Cobertura XML → `sonar.flex.cobertura.reportPaths`.
 
+### Coverage checks
+
+SonarQube only imports a report that the repo's own tool produced before the scan (for .NET, between `begin` and `end`).
+
+- Use the repo's own test command and coverage config. Property names are case-sensitive, and in PowerShell any `-D` value containing a `.` must be quoted.
+- Test coverage (how much code is covered) and test execution (which tests ran) are separate features with separate keys. Setup needs only coverage.
+- A file that exists can still be empty. Check it has real content before scanning:
+
+  ```powershell
+  Get-ChildItem -Recurse -Filter coverage.opencover.xml | Select-String '<Module ' -List   # OpenCover/Coverlet
+  Select-String -Path coverage/lcov.info -Pattern '^SF:' -List                              # LCOV
+  ```
+
+- Paths inside the report must match the scan root. In a monorepo, each module points at its own report.
+- A tool with no dedicated key: convert to the generic format and use `sonar.coverageReportPaths`.
+- Never create a placeholder report. No coverage tool → say so and scan without the key.
+- After the scan, `coverage=0.0` with passing tests usually means the report was empty.
+
 ## 4. Languages that need a community plugin
 
 From Community Build 26.11, **Ruby, Scala and Rust** are analyzed only after an administrator installs the community-maintained plugin (`sonar-ruby-plugin`, `sonar-scala-plugin`, `sonar-rust-plugin`). Installing a server plugin is outside this skill's scope. Check `GET /api/plugins/installed` (or ask the user). If the plugin is missing, stop and tell the user. Once it is installed:
 
-- Ruby: SimpleCov JSON → `sonar.ruby.coverage.reportPaths` (for example `coverage/coverage.json`); `vendor` is excluded by default.
+- Ruby: SimpleCov 0.20+ JSON formatter → `sonar.ruby.coverage.reportPaths` (for example `coverage/coverage.json`); `vendor` is excluded by default.
 - Scala: Scoverage `scoverage.xml` → `sonar.scala.coverage.reportPaths`.
 - Rust: use SonarScanner for Cargo. It needs Clippy (`rustup component add clippy`), which the analyzer runs by default. `sonar.rust.cargo.manifestPaths` points at extra `Cargo.toml` files.
 

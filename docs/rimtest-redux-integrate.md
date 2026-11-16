@@ -35,6 +35,7 @@ The skill also includes [`references/rimtest-redux-api.md`](../rimtest-redux-int
 ## Prerequisites
 
 Running in-game tests requires RimWorld 1.6 with the following mods installed in the load order:
+
 - `brrainz.harmony` (Harmony library)
 - `ilyvion.Laboratory` (Test framework prerequisite)
 - `ilyvion.rimtestredux` (RimTest Redux test runner)

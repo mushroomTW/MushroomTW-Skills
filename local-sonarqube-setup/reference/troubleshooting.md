@@ -1,158 +1,50 @@
 # Troubleshooting
 
-Read this only when the matching failure occurs. Format: symptom → diagnosis → handling.
+Read only when a step fails. Never print the token while diagnosing, and never get past a failure by faking success, excluding source, or moving the token into arguments.
 
-## `Unable to establish loopback connection`
+## `SONAR_TOKEN` not visible in this process
 
-Diagnosis: a local network or process restriction in the execution environment, not a project configuration problem.
-
-Handling: re-run the same commands in an environment that allows local loopback connections (an ordinary user terminal, not a restricted sandbox). **Never** work around it by editing `sonar-project.properties`, switching to another host URL, or disabling functionality to hide it.
-
-## `SONAR_TOKEN` is not visible in the current process
-
-Diagnosis: the variable is set at Machine or User scope, but the current shell started before it was set and therefore did not inherit it.
-
-Handling: first confirm which scope holds the variable (print booleans only, never the value):
+The variable was set after the shell started. Check which scope holds it, printing booleans only:
 
 ```powershell
-"machine=$(-not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable('SONAR_TOKEN','Machine')))"
 "user=$(-not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable('SONAR_TOKEN','User')))"
-```
-
-If either is `True`, reopen the shell so the process inherits it, or load it inside the current process:
-
-```powershell
-# User scope takes precedence over Machine scope, matching how a new shell resolves it
+"machine=$(-not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable('SONAR_TOKEN','Machine')))"
 $env:SONAR_TOKEN = [Environment]::GetEnvironmentVariable('SONAR_TOKEN','User')
-if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) {
-    $env:SONAR_TOKEN = [Environment]::GetEnvironmentVariable('SONAR_TOKEN','Machine')
-}
+if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) { $env:SONAR_TOKEN = [Environment]::GetEnvironmentVariable('SONAR_TOKEN','Machine') }
 ```
 
-Only when both are `False` is it genuinely unset — ask the user to generate a token and set the system environment variable.
+Both `False` → ask the user to generate a token in SonarQube and set the system environment variable.
 
-## HTTP 401
+## HTTP 401 / `Not authorized`
 
-Diagnosis: the scanner or API never received the token, or the token is invalid, of the wrong type, or aimed at a different server.
+Check in order, reporting only each conclusion:
 
-First fix: confirm `SONAR_TOKEN` is readable inside the same process (see section 2 of commands.md) and that the cleanup step has not run yet.
+1. The token is still in this process and cleanup has not run yet.
+2. `(Invoke-RestMethod -Headers $headers "$env:SONAR_HOST_URL/api/authentication/validate").valid` is `True`; `False` means expired or revoked.
+3. Token type: a Project Analysis Token works only for its own project. Use a Global Analysis Token or a user token for setup.
+4. Host: the URL in the scanner log is the expected server (`localhost` vs `host.docker.internal` inside Docker).
+5. .NET: `SONARQUBE_SCANNER_PARAMS` was built in this same process (`commands.md §4.3`).
+6. Stray whitespace: `$env:SONAR_TOKEN -ne $env:SONAR_TOKEN.Trim()` is `False`.
 
-Still 401 — work through these in order, reporting only the conclusion of each and never printing the token:
+Still failing → ask the user to regenerate the token.
 
-1. **Is the token still valid**: `(Invoke-RestMethod -Headers $headers -Uri "$env:SONAR_HOST_URL/api/authentication/validate").valid`. `False` means it has expired or been revoked.
-2. **Token type**: a Project Analysis Token can only scan the project it is bound to; using it for another project or a general API call returns 401. Cross-project work needs a Global Analysis Token or a user token.
-3. **Scanner version**: scanners older than SonarQube 10 read `sonar.login` and do not recognize `sonar.token` / `SONAR_TOKEN`; a mismatched version is equivalent to sending no credentials. Compare against the scanner version recorded in step 2.
-4. **Host address**: addresses differ inside and outside a container (`localhost` versus the service name or `host.docker.internal`), and hitting a different SonarQube also returns 401. Cross-check `$env:SONAR_HOST_URL` against the server URL in the scanner log.
-5. **Whitespace or newlines in the value itself**: pasting a newline in when setting the environment variable is common. Print only the boolean result of `$env:SONAR_TOKEN -ne $env:SONAR_TOKEN.Trim()`.
+## Other failures
 
-Only once all of these are ruled out, ask the user to regenerate the token in the SonarQube UI and update the system environment variable. Never retry by moving the token into a command-line argument.
-
-## HTTP 403
-
-Diagnosis: the token is valid but lacks permissions — most often `Create Projects`, or `Execute Analysis` on that project.
-
-Handling: report the name of the permission that is actually missing, or ask the user to create the project or grant access in the SonarQube UI before re-running. Never fake success, and never substitute some other existing project key.
-
-## Project key format rejected
-
-Diagnosis: SonarQube restricts project key characters — alphanumerics, `-`, `_`, `.`, `:` are allowed, and the key cannot be all digits.
-
-Handling: derive it from the repository name (whitespace and other symbols become `-`) and confirm the converted key matches the user's intent before creating it. Check any non-obvious naming with the user first.
-
-## Coverage report path missing or empty
-
-Diagnosis: coverage was never produced, went to a different path, or the tests did not run at all.
-
-Handling: find the project's native test/coverage command and its actual output path, regenerate the report, then scan again. **Never** create an empty placeholder report or point at a path that does not exist; when the project has no coverage tooling, state plainly that no coverage is provided and run the analysis without it. See `reference/coverage.md` for the language-specific property table.
-
-## Analyzer or report format error
-
-Diagnosis: the property name does not match that language's analyzer, the report format version does not match, or the paths inside the report do not line up with the scan root.
-
-Handling: check the documentation for that SonarQube version and analyzer to confirm the correct property and the supported formats, then fix the cause. Keep a non-sensitive summary of the original error (rule key, file path, format name) rather than pasting the full log. Never fake completion with `Accepted`, `False positive`, or by disabling rules.
-
-## Encoding or binary-file warnings
-
-Diagnosis: source file encoding does not match `sonar.sourceEncoding`, or binary files were pulled into the scan scope.
-
-Handling: do not treat this as a blocker while the analysis still succeeds, but explain it in the delivery summary. Only when these warnings make the analysis **fail** should you adjust the scan scope (excluding binary assets) or fix the file encoding.
-
-## Quality Gate shows `NONE`
-
-Diagnosis: the project exists but has no completed analysis yet — a normal state, not an error.
-
-Handling: confirm the CE task reached `SUCCESS`, then query again. If the CE task succeeded and it is still `NONE`, query measures to confirm whether the data was actually uploaded.
-
-## CE task stuck in `PENDING` or timing out
-
-Diagnosis: the SonarQube Compute Engine is busy, short on memory, or the background task is queued.
-
-Handling: extend the polling limit and re-check; if it stays `PENDING`, inspect the SonarQube container's resources and `api/ce/activity`. When the task is `FAILED`, take a non-sensitive summary of its `errorMessage` and address the cause rather than re-running to paper over it.
-
-## `PKIX path building failed` (HTTPS + self-signed cert)
-
-Diagnosis: SonarQube is behind HTTPS with a self-signed certificate not trusted by the scanner JVM.
-
-Handling: import the server certificate into the scanner JVM truststore, following the official `scanners/scanner-environment/manage-tls-certificates.md`. Do not disable TLS verification.
-
-## `Malformed input or input contains unmappable characters` (non-ASCII filenames)
-
-Diagnosis: `LC_ALL` / `LANG` not UTF-8.
-
-Handling:
-
-```powershell
-$env:LC_ALL = "en_US.UTF-8"
-$env:LANG = "en_US.UTF-8"
-```
-
-Re-run analysis.
-
-## `The maximum number of open files was reached`
-
-Diagnosis: OS limit on file descriptors.
-
-Handling: Linux — raise `ulimit -n` and check `server-installation/pre-installation/linux.md#configuring-the-maximum-number-of-open-files`; macOS — see `pre-installation/macos.md` equivalent. Do not exclude files to hide the limit.
-
-## `Report for commit can't be processed: a newer report has already been processed`
-
-Diagnosis: two scans of the same project overlapped, or an older commit was scanned after a newer one had already been processed.
-
-Handling: run one scan at a time, and scan the commit that is currently checked out.
-
-## Analysis stops on Windows — username ends with `!` or special character
-
-Diagnosis: Windows user path `C:\Users\myUser!\` breaks scanner temp/user home.
-
-Handling: set `sonar.userHome` to a path without special characters:
-
-```powershell
-sonar-scanner -Dsonar.userHome=C:\sonar-cache
-```
-
-## `OutOfMemoryError: GC overhead limit exceeded` / heap space
-
-Diagnosis: project too large for default heap.
-
-Handling: increase heap (see `reference/commands.md §6`):
-
-```powershell
-$env:SONAR_SCANNER_JAVA_OPTS = "-Xmx1024m"  # CLI 6.0+, older uses SONAR_SCANNER_OPTS
-```
-
-Also consider excluding unneeded files via `setting-analysis-scope` and using SSD.
-
-## `Self-signed certificate` / mutual TLS behind proxy
-
-Diagnosis: proxy + self-signed cert or mTLS required.
-
-Handling: add cert to scanner truststore and configure client cert per `server-installation/network-security/securing-behind-proxy.md` and `manage-tls-certificates.md`.
-
-## Debug: dump resolved properties
-
-```powershell
-sonar-scanner -Dsonar.scanner.internal.dumpToFile=dump.properties
-# also: Project Settings > Background Tasks > 3-dots > Show SonarScanner Context
-```
-
-Deprecated alias: `sonar.scanner.dumpToFile`.
+| Symptom | Cause | Handling |
+| --- | --- | --- |
+| `status` is not `UP` / connection refused | Server down | `docker ps`, restart the container; still down → stop and report |
+| `Unable to establish loopback connection` | Sandbox blocks local network | Re-run in a normal user terminal; do not change the host URL or config |
+| HTTP 403 | Missing `Create Projects` or `Execute Analysis` | Name the missing permission; ask the user to grant it or create the project in the UI |
+| Project key rejected | Invalid characters or all digits | Replace invalid characters with `-`, confirm with the user |
+| `please provide compiled classes with sonar.java.binaries` | Java scanned by the CLI without a build | Build first and set `sonar.java.binaries` (`languages.md` Java) |
+| Other analyzer or property error | Wrong key or format for that language | Check the key in `languages.md` and the docs, fix, rescan |
+| Coverage report missing, empty, or `coverage=0.0` | Tests not run, wrong path, or no symbols (.NET) | Re-run the repo's own coverage command, check content (`languages.md` Coverage checks); no tool → scan without it |
+| `ncloc` is 0 after success | Only unsupported languages, or sources excluded | Recheck the support check and `sonar.sources` / exclusions |
+| .NET build fails between `begin` and `end` | Missing local paths or SDK | Set the repo's documented environment variables; do not edit project files |
+| CE stays `PENDING` past 5 minutes | Server busy or low memory | Poll longer, check `api/ce/activity`; report the task id and status |
+| CE `FAILED` | Server-side processing error | Summarize the task's `errorMessage`, fix the cause, rescan |
+| `PKIX path building failed` | HTTPS with a self-signed certificate | Import the certificate into the scanner's truststore (`scanners/scanner-environment/manage-tls-certificates.md`); never disable TLS checks |
+| `Malformed input` on non-ASCII paths | Locale not UTF-8 | `$env:LC_ALL = 'en_US.UTF-8'; $env:LANG = 'en_US.UTF-8'`, rescan |
+| Scanner fails when the Windows user name has `!` or similar | User home path breaks the scanner | `sonar-scanner '-Dsonar.userHome=C:\sonar-cache'` |
+| `OutOfMemoryError` | Scanner heap too small | `$env:SONAR_SCANNER_JAVA_OPTS = '-Xmx1024m'` (CLI before 6.0: `SONAR_SCANNER_OPTS`) |
+| Gate shows `NONE` | No completed analysis yet | Normal before the first scan; confirm CE `SUCCESS`, then query again |

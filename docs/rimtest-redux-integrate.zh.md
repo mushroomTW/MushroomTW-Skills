@@ -35,6 +35,7 @@ Skill 在介入前會先**主動詢問**開發者是否採用 RimTest Redux 作�
 ## 環境需求與先決條件
 
 執行遊戲內測試需要 RimWorld 1.6，並於模組載入清單中依序啟用下列模組：
+
 - `brrainz.harmony`（Harmony 函式庫）
 - `ilyvion.Laboratory`（測試前置框架）
 - `ilyvion.rimtestredux`（RimTest Redux 測試執行器）
