@@ -15,7 +15,6 @@ MushroomTW-Skills 是一組專為現代 AI Agent（Claude Code、Codex、Cursor�
 | `ponytail-audit-lite` | 通用稽核 | 手動叫用 (`/ponytail-audit-lite`) | 全專案過度設計掃描，列出可刪除、簡化或原生替代的程式碼清單，堅持「只回報、不修改」 | [繁中](docs/ponytail-audit-lite.zh.md) ・ [EN](docs/ponytail-audit-lite.md) | `ponytail-audit-lite/` |
 | `local-sonarqube-setup` | 品質流程 | 自然語言描述自動觸發 | 對接本機 Docker SonarQube，自動產出測試涵蓋率、執行掃描並查驗 Quality Gate，嚴格防範 Token 外洩 | [繁中](docs/local-sonarqube-setup.zh.md) ・ [EN](docs/local-sonarqube-setup.md) | `local-sonarqube-setup/` |
 | `rimtest-redux-integrate` | RimWorld 開發 | 自然語言描述自動觸發 | 建立 RimTest Redux 遊戲內整合測試，利用 Harmony Reverse Patch 作為基準對照並消除啟動時序競爭 | [繁中](docs/rimtest-redux-integrate.zh.md) ・ [EN](docs/rimtest-redux-integrate.md) | `rimtest-redux-integrate/` |
-| `rimworld-devtools` | RimWorld 開發 | 自然語言描述自動觸發 | 整合 SmashPhil DevTools 進行遊戲內即時測試、Test Plan 規劃、日誌結果判讀與效能基準測試（Benchmark） | [繁中](docs/rimworld-devtools.zh.md) ・ [EN](docs/rimworld-devtools.md) | `rimworld-devtools/` |
 | `rimworld-smashtools` | RimWorld 開發 | 自然語言描述自動觸發 | SmashTools 高效工具庫整合指引，涵蓋大型尋路、物件池、事件、UI/渲染、生命週期與發布打包 | [繁中](docs/rimworld-smashtools.zh.md) ・ [EN](docs/rimworld-smashtools.md) | `rimworld-smashtools/` |
 
 ---
@@ -65,15 +64,6 @@ MushroomTW-Skills 是一組專為現代 AI Agent（Claude Code、Codex、Cursor�
   - **規避引擎地雷**：內建針對 Mono 執行期環境與 Harmony 的常見陷阱防護（如處理 `catch ... when` 導致的異常程式碼產生錯誤、`PatchCategory` 的崩潰防範等）。
 - **環境先決條件**：RimWorld 1.6，需安裝 `brrainz.harmony`、`ilyvion.Laboratory` 與 `ilyvion.rimtestredux` 三個前置模組；測試組件目標為 net481。
 
-#### `rimworld-devtools` — SmashPhil DevTools 遊戲內測試與診斷
-
-- **核心定位**：當模組已選用或接入 SmashPhil DevTools 時，提供遊戲內即時測試執行、測試結果解讀、測試計畫規劃與效能基準測試支援。
-- **主要特點**：
-  - **多維度測試支援**：涵蓋 Smoke Test（冒煙測試）、測試計畫（Test Plan）制定、測試夾具（Fixture）組件與遊戲內非拋出式斷言。
-  - **智慧結果判讀**：即時解析遊戲日誌與測試結果，自動過濾無關雜訊，將失敗項目精準歸類為 Mod 本身問題、原版行為或環境相容性問題。
-  - **效能分析**：支援遊戲內效能基準測試（Benchmark），診斷執行瓶頸、統計耗時與記憶體狀況。
-- **環境先決條件**：需要 SmashPhil DevTools 建置組件、RimWorld 遊戲參考組件與 .NET SDK，實際執行測試需啟動遊戲。
-
 #### `rimworld-smashtools` — SmashTools 框架架構整合
 
 - **核心定位**：全面支援 RimWorld 知名高效能工具庫 SmashTools 的整合開發，提供完整 API 功能導引、相容性處理與模組發布流程。
@@ -95,13 +85,11 @@ MushroomTW-Skills/
 │   ├── ponytail-audit-lite.md / .zh.md
 │   ├── local-sonarqube-setup.md / .zh.md
 │   ├── rimtest-redux-integrate.md / .zh.md
-│   ├── rimworld-devtools.md / .zh.md
 │   └── rimworld-smashtools.md / .zh.md
 │
 ├── ponytail-audit-lite/          SKILL.md + agents/ LICENSE（上游 MIT）
 ├── local-sonarqube-setup/        SKILL.md + agents/ reference/
 ├── rimtest-redux-integrate/      SKILL.md + agents/ references/ LICENSE（上游 MIT）
-├── rimworld-devtools/            SKILL.md + agents/ references/
 └── rimworld-smashtools/          SKILL.md + agents/ references/ LICENSE（上游 MIT）
 ```
 

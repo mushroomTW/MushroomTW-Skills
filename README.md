@@ -15,7 +15,6 @@ Each skill is an independent directory containing its prompt specification, trig
 | `ponytail-audit-lite` | General Audit | Manual (`/ponytail-audit-lite`) | Repo-wide over-engineering audit; returns a ranked table of code to delete, simplify, or replace with stdlib/platform native. Strictly report-only. | [EN](docs/ponytail-audit-lite.md) ・ [繁中](docs/ponytail-audit-lite.zh.md) | `ponytail-audit-lite/` |
 | `local-sonarqube-setup` | Quality Workflow | Auto (Natural Language) | Connects a project to a local Docker SonarQube instance, generates coverage, runs scans, and verifies the Quality Gate. Strict token protection. | [EN](docs/local-sonarqube-setup.md) ・ [繁中](docs/local-sonarqube-setup.zh.md) | `local-sonarqube-setup/` |
 | `rimtest-redux-integrate` | RimWorld Modding | Auto (Natural Language) | Sets up RimTest Redux in-game integration tests with a companion test mod, Harmony reverse-patch vanilla baselines, and startup timing protection. | [EN](docs/rimtest-redux-integrate.md) ・ [繁中](docs/rimtest-redux-integrate.zh.md) | `rimtest-redux-integrate/` |
-| `rimworld-devtools` | RimWorld Modding | Auto (Natural Language) | Integrates SmashPhil DevTools for in-game testing, Test Plan management, result interpretation, and performance benchmarks. | [EN](docs/rimworld-devtools.md) ・ [繁中](docs/rimworld-devtools.zh.md) | `rimworld-devtools/` |
 | `rimworld-smashtools` | RimWorld Modding | Auto (Natural Language) | Architecture & feature integration guide for the SmashTools framework (pathfinding, object pooling, UI, rendering, lifecycle, packaging). | [EN](docs/rimworld-smashtools.md) ・ [繁中](docs/rimworld-smashtools.zh.md) | `rimworld-smashtools/` |
 
 ---
@@ -65,15 +64,6 @@ Each skill is an independent directory containing its prompt specification, trig
   - **Mono & Harmony Pitfall Defenses**: Built-in safeguards against Mono and Harmony runtime pitfalls (e.g., Mono compiler issues with `catch ... when`, and `PatchCategory` crashes).
 - **Prerequisites**: RimWorld 1.6 with `brrainz.harmony`, `ilyvion.Laboratory`, and `ilyvion.rimtestredux` installed; test assembly targets `net481`.
 
-#### `rimworld-devtools` — SmashPhil DevTools In-Game Testing & Profiling
-
-- **Purpose**: Leverage the SmashPhil DevTools suite for in-game test execution, test plan management, result analysis, and performance benchmarking.
-- **Key Features**:
-  - **Comprehensive Test Support**: Covers smoke tests, test plans, fixture assemblies, and non-throwing in-game assertions.
-  - **Intelligent Log Interpretation**: Analyzes game test logs, filters irrelevant background messages, and categorizes failures (mod bug, vanilla behavior, or test environment issue).
-  - **Performance Benchmarking**: Runs in-game performance benchmarks to detect execution bottlenecks and track frame times.
-- **Prerequisites**: Requires compatible SmashPhil DevTools assemblies, RimWorld game assemblies, .NET SDK, and an active running game instance for execution.
-
 #### `rimworld-smashtools` — SmashTools Architecture & Feature Integration
 
 - **Purpose**: Comprehensive integration and feature reference guide for the high-performance SmashTools library in RimWorld mod development.
@@ -95,13 +85,11 @@ MushroomTW-Skills/
 │   ├── ponytail-audit-lite.md / .zh.md
 │   ├── local-sonarqube-setup.md / .zh.md
 │   ├── rimtest-redux-integrate.md / .zh.md
-│   ├── rimworld-devtools.md / .zh.md
 │   └── rimworld-smashtools.md / .zh.md
 │
 ├── ponytail-audit-lite/          SKILL.md + agents/ LICENSE (upstream MIT)
 ├── local-sonarqube-setup/        SKILL.md + agents/ reference/
 ├── rimtest-redux-integrate/      SKILL.md + agents/ references/ LICENSE (upstream MIT)
-├── rimworld-devtools/            SKILL.md + agents/ references/
 └── rimworld-smashtools/          SKILL.md + agents/ references/ LICENSE (upstream MIT)
 ```
 
